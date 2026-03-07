@@ -1,63 +1,76 @@
 # Obtaining the code
 
-The plugin is hosted [on Github](https://github.com/andysim/MPIDOpenMMPlugin) and can be checked out with
-``` bash
-git clone git@github.com:andysim/MPIDOpenMMPlugin
+```bash
+git clone https://github.com/junminchen/MPIDOpenmmPlugin-8.4.git
+cd MPIDOpenmmPlugin-8.4
 ```
 
 # Dependencies
 
-The code needs OpenMM version 7.6 or later (tested with 7.7), which can be
-installed as follows.
+OpenMM 8.4 is the recommended target for this branch.
 
-## Installation of Dependencies via Conda
+## Installation of dependencies via Conda
 
-Conda is *strongly* recommended for managing the environment and dependencies;
-after [downloading](https://conda.io/docs/download.html) anaconda (make sure
-you use `bash` or `zsh`).
-
-To install the 7.7 verion of OpenMM into its own Conda environment called `mpid`, run
-``` bash
-conda create -n mpid openmm=7.7 cudatoolkit=10.2 swig mdtraj -c conda-forge
+```bash
+conda create -n mpid84 -c conda-forge python=3.11 openmm=8.4 swig cmake make cxx-compiler
+conda activate mpid84
 ```
-Make sure you request the version of the CUDA toolkit supported on your
-cluster.  This example uses GCC to build; the speed of the C++ compiler is
-irrelevant, because the CUDA code is the only fast code available in this
-plugin.  Although the reference platform will run, it is very slow and
-designed for correctness.
 
-## Building the plugin
+If building CUDA kernels, install a CUDA toolkit version compatible with your
+GPU driver and compiler toolchain.
 
-The plugin uses CMake for building, so that should be install locally; it can
-be obtained from Conda if you do not have it available.  Once CMake is
-installed, you can build the code using commands similar to the following (the
-exact type of modules and mechanisms to load them will vary from system to
-system)::
+# Building the plugin
 
-``` bash
-conda activate mpid
+## CPU-only build
 
-export OPENMM_INSTALL_DIR=~/anaconda3/envs/mpid
+```bash
+cmake -S . -B build-openmm840 \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX \
+  -DOPENMM_DIR=$CONDA_PREFIX \
+  -DPYTHON_EXECUTABLE=$(which python) \
+  -DMPID_BUILD_CUDA_LIB=OFF \
+  -DMPID_BUILD_PYTHON_WRAPPERS=ON
 
-module load cuda/10.2
-module load cmake
-module load gcc/8.2
-
-# From the MPIDOpenMMPlugin top level directory
-mkdir build
-cd build
-CXX=g++ cmake .. -DCMAKE_INSTALL_PREFIX=$OPENMM_INSTALL_DIR -DPYTHON_EXECUTABLE=`which python` -DOPENMM_DIR=$OPENMM_INSTALL_DIR -DCMAKE_CXX_FLAGS='-std=c++11'
-make -j 4
-make test
-make install
-make PythonInstall
+cmake --build build-openmm840 -j8
+ctest --test-dir build-openmm840 --output-on-failure
+cmake --install build-openmm840
+cmake --build build-openmm840 --target PythonInstall
 ```
-Note that we use GCC in this example, but the nature of the C++ compiler is not
-important, as the faster kernels are implemented in CUDA and only the slow
-reference implementation is available on regular CPUs.
 
-Before running the code, make sure you load the conda environment and all
-modules used for building when using the plugin.
-``` bash
-conda activate mpid
+## CUDA build
+
+Use the same command but set:
+
+```bash
+-DMPID_BUILD_CUDA_LIB=ON
+```
+
+Example:
+
+```bash
+cmake -S . -B build-openmm840-cuda \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX \
+  -DOPENMM_DIR=$CONDA_PREFIX \
+  -DPYTHON_EXECUTABLE=$(which python) \
+  -DMPID_BUILD_CUDA_LIB=ON \
+  -DMPID_BUILD_PYTHON_WRAPPERS=ON
+
+cmake --build build-openmm840-cuda -j8
+ctest --test-dir build-openmm840-cuda --output-on-failure
+cmake --install build-openmm840-cuda
+cmake --build build-openmm840-cuda --target PythonInstall
+```
+
+# Runtime checks
+
+```bash
+python -c "import openmm, mpidplugin; print(openmm.version.full_version)"
+```
+
+If plugin libraries are not discovered:
+
+```bash
+export OPENMM_PLUGIN_DIR=$CONDA_PREFIX/lib/plugins
 ```
