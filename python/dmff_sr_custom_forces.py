@@ -330,6 +330,89 @@ def add_dmff_short_range_forces_from_xml(system, topology, xml_path, start_group
     return add_dmff_short_range_forces(system, atom_types, bonds, force_data, start_group=start_group)
 
 
+def add_undamped_dispersion_force(system, topology, xml_path, cutoff_nm=0.6, force_group=None):
+    """Add undamped C6/C8/C10 dispersion as a CustomNonbondedForce with long-range correction.
+
+    This replaces the native dispersion PME (which has unit convention issues)
+    with a simpler cutoff-based approach plus analytical tail correction.
+    Combined with SlaterDamping, this gives the correct total damped dispersion.
+    """
+    root = ET.parse(xml_path).getroot()
+    disp_node = root.find("ADMPDispPmeForce")
+    if disp_node is None:
+        return None
+
+    # Parse per-type dispersion parameters
+    disp_params = {}
+    for atom in disp_node.findall("Atom"):
+        t = atom.attrib["type"]
+        disp_params[t] = {
+            "C6": float(atom.get("C6", 0.0)),
+            "C8": float(atom.get("C8", 0.0)),
+            "C10": float(atom.get("C10", 0.0)),
+        }
+
+    # Parse mScales for exclusions
+    mscales = [
+        float(disp_node.attrib.get(f"mScale1{i}", "0.0"))
+        for i in range(2, 7)
+    ]
+
+    atom_types, bonds = infer_atom_types_and_bonds_from_topology(topology, xml_path)
+    bonded_pairs = shortest_bond_separations(len(atom_types), bonds, max_sep=5)
+
+    # Create the undamped dispersion force: -C6/r^6 - C8/r^8 - C10/r^10
+    force = mm.CustomNonbondedForce(
+        "-(c61*c62)/r^6 - (c81*c82)/r^8 - (c101*c102)/r^10"
+    )
+    force.addPerParticleParameter("c6")
+    force.addPerParticleParameter("c8")
+    force.addPerParticleParameter("c10")
+    force.setNonbondedMethod(mm.CustomNonbondedForce.CutoffPeriodic)
+    force.setCutoffDistance(cutoff_nm)
+    force.setUseLongRangeCorrection(True)
+
+    # Add particles with sqrt(C_n) values
+    for atom_type in atom_types:
+        p = disp_params.get(atom_type, {"C6": 0.0, "C8": 0.0, "C10": 0.0})
+        force.addParticle([
+            math.sqrt(abs(p["C6"])),
+            math.sqrt(abs(p["C8"])),
+            math.sqrt(abs(p["C10"])),
+        ])
+
+    # Handle exclusions based on mScales
+    # Create bond force for excluded pairs that need non-zero scaling
+    bond_force = mm.CustomBondForce(
+        "scale*(-(c6ij)/r^6 - (c8ij)/r^8 - (c10ij)/r^10)"
+    )
+    bond_force.addPerBondParameter("scale")
+    bond_force.addPerBondParameter("c6ij")
+    bond_force.addPerBondParameter("c8ij")
+    bond_force.addPerBondParameter("c10ij")
+
+    for (i, j), separation in bonded_pairs.items():
+        force.addExclusion(i, j)
+        scale = scale_for_bond_separation(mscales, separation)
+        if abs(scale) > 1e-15:
+            pi = disp_params.get(atom_types[i], {"C6": 0.0, "C8": 0.0, "C10": 0.0})
+            pj = disp_params.get(atom_types[j], {"C6": 0.0, "C8": 0.0, "C10": 0.0})
+            bond_force.addBond(i, j, [
+                scale,
+                math.sqrt(abs(pi["C6"] * pj["C6"])),
+                math.sqrt(abs(pi["C8"] * pj["C8"])),
+                math.sqrt(abs(pi["C10"] * pj["C10"])),
+            ])
+
+    if force_group is not None:
+        force.setForceGroup(force_group)
+        bond_force.setForceGroup(force_group)
+
+    system.addForce(force)
+    system.addForce(bond_force)
+    return force
+
+
 def build_system(atom_types, bonds, force_data, particle_mass=39.9):
     system = mm.System()
     for _ in atom_types:

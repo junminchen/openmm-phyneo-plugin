@@ -1,7 +1,36 @@
-build
+# Build directories
+build*/
+build-*/
+
+# Qt Creator project files
 MPID.config
 MPID.creator
 MPID.creator.user
 MPID.files
 MPID.includes
+
+# Generated docs
 docs/site
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+
+# Trajectory and large binary output
+*.dcd
+*.xtc
+*.trr
+*.nc
+
+# Generated XML
+unified_mpid.xml
+
+# Editor / IDE
+*.swp
+*.swo
+*~
+.vscode/
+.idea/

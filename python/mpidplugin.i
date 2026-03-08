@@ -1385,8 +1385,9 @@ def _parseADMPDispPmeForce(element, forceField):
     else:
         generator = existing[0]
 
-    # Enable dispersion PME automatically when this tag is present
-    generator.useDispersionPME = True
+    # Store dispersion parameters but do NOT auto-enable native dispersion PME
+    # (native CUDA dispersion PME has unit convention issues; use CustomNonbondedForce instead)
+    generator.useDispersionPME = False
 
     # Parse mScale attributes for dispersion
     keys = ['mScale12', 'mScale13', 'mScale14', 'mScale15', 'mScale16']
