@@ -60,10 +60,15 @@ The OpenMM 8.4 build now installs both:
 
 - `mpidplugin`
 - `dispersion_pme_bridge`
+- `dmff_sr_custom_forces`
 
 The second module provides a Python-side bridge to DMFF's
 `ADMPDispPmeForce`, which is useful for term-by-term dispersion PME
 validation against DMFF reference energies.
+
+The third module provides reusable builders for DMFF short-range custom
+terms (`QqTtDampingForce` and the Slater short-range terms) using OpenMM
+`CustomNonbondedForce` plus `CustomBondForce` scaling corrections.
 
 # Dispersion PME Status
 
