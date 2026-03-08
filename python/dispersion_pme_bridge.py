@@ -28,21 +28,15 @@ class DispersionPMEBridgeModel:
         pmax: int = 10,
         lpme: bool = True,
     ):
-        # Current DMFF generator wiring only exposes ``ethresh`` through
-        # ``createPotential``. ``pmax`` remains controlled by the DMFF XML side.
-        del pmax
+        del ethresh, pmax  # Controlled by the DMFF forcefield/generator defaults.
 
         self.box_nm = np.asarray(box_nm, dtype=np.float64)
         self.cutoff_nm = float(cutoff_nm)
 
-        method = app.PME if lpme else app.CutoffPeriodic
+        method = app.NoCutoff if lpme else app.CutoffPeriodic
         self.h = Hamiltonian(str(dmff_xml))
-        self.pot = self.h.createPotential(
-            topology,
-            nonbondedMethod=method,
-            nonbondedCutoff=self.cutoff_nm,
-            ethresh=ethresh,
-        )
+        # Keep createPotential defaults consistent with DMFFEnergyModel.
+        self.pot = self.h.createPotential(topology, nonbondedMethod=method)
         self.params = self.h.getParameters()
         self.fn = self.pot.getPotentialFunc(["ADMPDispPmeForce"])
 

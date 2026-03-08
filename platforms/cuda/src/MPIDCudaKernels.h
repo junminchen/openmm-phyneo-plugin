@@ -140,7 +140,9 @@ private:
     int fixedFieldThreads, inducedFieldThreads, electrostaticsThreads;
     int gridSizeX, gridSizeY, gridSizeZ;
     double alpha, inducedEpsilon;
-    bool usePME, hasQuadrupoles, hasOctopoles, hasInitializedScaleFactors, hasInitializedFFT, multipolesAreValid, hasCreatedEvent;
+    double alphaDispersionEwald, dispersionSelfEnergy;
+    int dispersionPmax;
+    bool usePME, useDispersionPme, hasQuadrupoles, hasOctopoles, hasInitializedScaleFactors, hasInitializedFFT, multipolesAreValid, hasCreatedEvent;
     MPIDForce::PolarizationType polarizationType;
     CudaContext& cu;
     const System& system;
@@ -177,7 +179,9 @@ private:
     CudaArray* extrapolatedDipoleFieldGradient;
     CudaArray* polarizability;
     CudaArray* covalentFlags;
+    CudaArray* dispersionParams;
     CudaArray* pmeGrid;
+    CudaArray* pmeDispPhi;
     CudaArray* pmeBsplineModuliX;
     CudaArray* pmeBsplineModuliY;
     CudaArray* pmeBsplineModuliZ;
@@ -193,6 +197,7 @@ private:
     cufftHandle fft;
     CUfunction computeMomentsKernel, recordInducedDipolesKernel, computeFixedFieldKernel, computeInducedFieldKernel, updateInducedFieldKernel, electrostaticsKernel, mapTorqueKernel;
     CUfunction pmeSpreadFixedMultipolesKernel, pmeSpreadInducedDipolesKernel, pmeFinishSpreadChargeKernel, pmeConvolutionKernel;
+    CUfunction pmeSpreadDispersionKernel, pmeDispersionConvolutionKernel, pmeDispersionPotentialKernel, pmeDispersionForceKernel;
     CUfunction pmeFixedPotentialKernel, pmeInducedPotentialKernel, pmeFixedForceKernel, pmeInducedForceKernel, pmeRecordInducedFieldDipolesKernel, computePotentialKernel;
     CUfunction recordDIISDipolesKernel, buildMatrixKernel, solveMatrixKernel;
     CUfunction initExtrapolatedKernel, iterateExtrapolatedKernel, computeExtrapolatedKernel, addExtrapolatedGradientKernel;

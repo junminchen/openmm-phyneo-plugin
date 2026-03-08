@@ -124,7 +124,7 @@ def term_energy_expression(force_name):
     if force_name == "QqTtDampingForce":
         return "-0.1*dielectric*q1*q2*exp(-br)*(1+br)/r; br=sqrt(b1*b2)*r"
     if force_name == "SlaterExForce":
-        return "a1*a2*(1+br+br^2/3)*exp(-br) + a1*a2*(4.3/br)^12; br=sqrt(b1*b2)*r"
+        return "a1*a2*(1+br+br^2/3)*exp(-br) + a1*a2/(0.24*br)^14; br=sqrt(b1*b2)*r"
     if force_name in {"SlaterSrEsForce", "SlaterSrPolForce", "SlaterSrDispForce", "SlaterDhfForce"}:
         return "-a1*a2*(1+br+br^2/3)*exp(-br); br=sqrt(b1*b2)*r"
     if force_name == "SlaterDampingForce":
@@ -174,13 +174,27 @@ def configure_short_range_nonbonded_method(force, system):
             else:
                 force.setNonbondedMethod(mm.CustomNonbondedForce.NoCutoff)
             return
+        try:
+            import mpidplugin  # type: ignore
+
+            if mpidplugin.MPIDForce.isinstance(parent_force):
+                mpid_force = mpidplugin.MPIDForce.cast(parent_force)
+                method = mpid_force.getNonbondedMethod()
+                if method == mpidplugin.MPIDForce.PME:
+                    force.setNonbondedMethod(mm.CustomNonbondedForce.CutoffPeriodic)
+                    force.setCutoffDistance(mpid_force.getCutoffDistance())
+                else:
+                    force.setNonbondedMethod(mm.CustomNonbondedForce.NoCutoff)
+                return
+        except Exception:
+            pass
 
 
 def bond_energy_expression(force_name):
     if force_name == "QqTtDampingForce":
         return "scale*(-0.1*dielectric*qij*exp(-bij*r)*(1+bij*r)/r)"
     if force_name == "SlaterExForce":
-        return "scale*(aij*(1+bij*r+(bij*r)^2/3)*exp(-bij*r) + aij*(4.3/(bij*r))^12)"
+        return "scale*(aij*(1+bij*r+(bij*r)^2/3)*exp(-bij*r) + aij/(0.24*bij*r)^14)"
     if force_name in {"SlaterSrEsForce", "SlaterSrPolForce", "SlaterSrDispForce", "SlaterDhfForce"}:
         return "scale*(-aij*(1+bij*r+(bij*r)^2/3)*exp(-bij*r))"
     if force_name == "SlaterDampingForce":

@@ -110,9 +110,13 @@ CudaCalcMPIDForceKernel::CudaCalcMPIDForceKernel(std::string name, const Platfor
         diisCoefficients(NULL), inducedDipoleErrors(NULL), prevDipoles(NULL),
         prevErrors(NULL), diisMatrix(NULL), polarizability(NULL), extrapolatedDipole(NULL),
         inducedDipoleFieldGradient(NULL), extrapolatedDipoleField(NULL), extrapolatedDipoleFieldGradient(NULL),
-        covalentFlags(NULL),
+        covalentFlags(NULL), dispersionParams(NULL),
         pmeGrid(NULL), pmeBsplineModuliX(NULL), pmeBsplineModuliY(NULL), pmeBsplineModuliZ(NULL), pmeIgrid(NULL), pmePhi(NULL),
-        pmePhid(NULL), pmePhip(NULL), pmePhidp(NULL), pmeCphi(NULL), lastPositions(NULL), sort(NULL) {
+        pmePhid(NULL), pmePhip(NULL), pmePhidp(NULL), pmeCphi(NULL), pmeDispPhi(NULL), lastPositions(NULL), sort(NULL) {
+    useDispersionPme = false;
+    alphaDispersionEwald = 0.0;
+    dispersionPmax = 10;
+    dispersionSelfEnergy = 0.0;
 }
 
 CudaCalcMPIDForceKernel::~CudaCalcMPIDForceKernel() {
@@ -177,6 +181,8 @@ CudaCalcMPIDForceKernel::~CudaCalcMPIDForceKernel() {
         delete polarizability;
     if (covalentFlags != NULL)
         delete covalentFlags;
+    if (dispersionParams != NULL)
+        delete dispersionParams;
     if (pmeGrid != NULL)
         delete pmeGrid;
     if (pmeBsplineModuliX != NULL)
@@ -197,6 +203,8 @@ CudaCalcMPIDForceKernel::~CudaCalcMPIDForceKernel() {
         delete pmePhidp;
     if (pmeCphi != NULL)
         delete pmeCphi;
+    if (pmeDispPhi != NULL)
+        delete pmeDispPhi;
     if (lastPositions != NULL)
         delete lastPositions;
     if (sort != NULL)
@@ -222,12 +230,16 @@ void CudaCalcMPIDForceKernel::initialize(const System& system, const MPIDForce& 
     vector<float> molecularDipolesVec;
     vector<float> molecularQuadrupolesVec;
     vector<float> molecularOctopolesVec;
+    vector<float4> dispersionParamsVecFloat;
+    vector<double4> dispersionParamsVecDouble;
     vector<int4> multipoleParticlesVec;
     for (int i = 0; i < numMultipoles; i++) {
         double charge, thole, damping;
+        double c6, c8, c10;
         int axisType, atomX, atomY, atomZ;
         vector<double> dipole, quadrupole, octopole, polarity;
         force.getMultipoleParameters(i, charge, dipole, quadrupole, octopole, axisType, atomZ, atomX, atomY, thole, polarity);
+        force.getDispersionParameters(i, c6, c8, c10);
         if (cu.getUseDoublePrecision())
             posqd[i] = make_double4(0, 0, 0, charge);
         else
@@ -255,6 +267,10 @@ void CudaCalcMPIDForceKernel::initialize(const System& system, const MPIDForce& 
         molecularOctopolesVec.push_back((float) octopole[5]); // XYZ
         molecularOctopolesVec.push_back((float) octopole[3]); // YYY
         molecularOctopolesVec.push_back((float) octopole[6]); // YYZ
+        if (cu.getUseDoublePrecision())
+            dispersionParamsVecDouble.push_back(make_double4(c6, c8, c10, 0.0));
+        else
+            dispersionParamsVecFloat.push_back(make_float4((float) c6, (float) c8, (float) c10, 0.0f));
     }
     hasQuadrupoles = false;
     for (auto q : molecularQuadrupolesVec)
@@ -267,6 +283,7 @@ void CudaCalcMPIDForceKernel::initialize(const System& system, const MPIDForce& 
             hasOctopoles = true;
         }
     int paddedNumAtoms = cu.getPaddedNumAtoms();
+    int elementSize = (cu.getUseDoublePrecision() ? sizeof(double) : sizeof(float));
     for (int i = numMultipoles; i < paddedNumAtoms; i++) {
         dampingAndTholeVec.push_back(make_float2(0, 0));
         for (int j = 0; j < 3; j++)
@@ -278,6 +295,10 @@ void CudaCalcMPIDForceKernel::initialize(const System& system, const MPIDForce& 
             molecularQuadrupolesVec.push_back(0);
         for (int j = 0; j < 7; j++)
             molecularOctopolesVec.push_back(0);
+        if (cu.getUseDoublePrecision())
+            dispersionParamsVecDouble.push_back(make_double4(0, 0, 0, 0));
+        else
+            dispersionParamsVecFloat.push_back(make_float4(0, 0, 0, 0));
     }
     dampingAndThole = CudaArray::create<float2>(cu, paddedNumAtoms, "dampingAndThole");
     polarizability = CudaArray::create<float>(cu, 3*paddedNumAtoms, "polarizability");
@@ -285,6 +306,7 @@ void CudaCalcMPIDForceKernel::initialize(const System& system, const MPIDForce& 
     molecularDipoles = CudaArray::create<float>(cu, 3*paddedNumAtoms, "molecularDipoles");
     molecularQuadrupoles = CudaArray::create<float>(cu, 5*paddedNumAtoms, "molecularQuadrupoles");
     molecularOctopoles = CudaArray::create<float>(cu, 7*paddedNumAtoms, "molecularOctopoles");
+    dispersionParams = new CudaArray(cu, paddedNumAtoms, 4*elementSize, "dispersionParams");
     lastPositions = new CudaArray(cu, cu.getPosq().getSize(), cu.getPosq().getElementSize(), "lastPositions");
     dampingAndThole->upload(dampingAndTholeVec);
     polarizability->upload(polarizabilityVec);
@@ -292,12 +314,15 @@ void CudaCalcMPIDForceKernel::initialize(const System& system, const MPIDForce& 
     molecularDipoles->upload(molecularDipolesVec);
     molecularQuadrupoles->upload(molecularQuadrupolesVec);
     molecularOctopoles->upload(molecularOctopolesVec);
+    if (cu.getUseDoublePrecision())
+        dispersionParams->upload(dispersionParamsVecDouble);
+    else
+        dispersionParams->upload(dispersionParamsVecFloat);
     posq.upload(&temp[0]);
 
     // Create workspace arrays.
 
     polarizationType = force.getPolarizationType();
-    int elementSize = (cu.getUseDoublePrecision() ? sizeof(double) : sizeof(float));
     labFramePolarizabilities = new CudaArray(cu, 6*paddedNumAtoms, elementSize, "labFramePolarizabilities");
     labFrameDipoles = new CudaArray(cu, 3*paddedNumAtoms, elementSize, "labFrameDipoles");
     labFrameQuadrupoles = new CudaArray(cu, 5*paddedNumAtoms, elementSize, "labFrameQuadrupoles");
@@ -386,6 +411,10 @@ void CudaCalcMPIDForceKernel::initialize(const System& system, const MPIDForce& 
         inducedField = new CudaArray(cu, 3*paddedNumAtoms, sizeof(long long), "inducedField");
     }
     usePME = (force.getNonbondedMethod() == MPIDForce::PME);
+    useDispersionPme = false;
+    dispersionSelfEnergy = 0.0;
+    dispersionPmax = 10;
+    alphaDispersionEwald = 0.0;
 
     // Create the kernels.
 
@@ -472,6 +501,51 @@ void CudaCalcMPIDForceKernel::initialize(const System& system, const MPIDForce& 
         defines["USE_CUTOFF"] = "";
         defines["USE_PERIODIC"] = "";
         defines["CUTOFF_SQUARED"] = cu.doubleToString(force.getCutoffDistance()*force.getCutoffDistance());
+
+        if (force.getUseDispersionPME()) {
+            int dnx, dny, dnz;
+            force.getDPMEParameters(alphaDispersionEwald, dnx, dny, dnz);
+            if (alphaDispersionEwald == 0.0)
+                alphaDispersionEwald = sqrt(-log(2.0*force.getEwaldErrorTolerance()))/force.getCutoffDistance();
+            int dispGridX = (dnx == 0 ? gridSizeX : cu.findLegalFFTDimension(dnx));
+            int dispGridY = (dny == 0 ? gridSizeY : cu.findLegalFFTDimension(dny));
+            int dispGridZ = (dnz == 0 ? gridSizeZ : cu.findLegalFFTDimension(dnz));
+            if (dispGridX != gridSizeX || dispGridY != gridSizeY || dispGridZ != gridSizeZ) {
+                throw OpenMMException("MPID CUDA kernel currently requires dispersion PME grid to match electrostatic PME grid.");
+            }
+            dispersionPmax = force.getDispersionPmax();
+            if (dispersionPmax != 6 && dispersionPmax != 8 && dispersionPmax != 10) {
+                throw OpenMMException("MPID CUDA kernel currently supports dispersionPmax = 6, 8, or 10.");
+            }
+            useDispersionPme = true;
+            defines["USE_DISPERSION_PME"] = "";
+            defines["DISPERSION_ALPHA"] = cu.doubleToString(alphaDispersionEwald);
+            defines["DISPERSION_PMAX"] = cu.intToString(dispersionPmax);
+
+            const double alpha2 = alphaDispersionEwald*alphaDispersionEwald;
+            const double alpha4 = alpha2*alpha2;
+            const double alpha6 = alpha4*alpha2;
+            const double alpha8 = alpha4*alpha4;
+            const double alpha10 = alpha8*alpha2;
+            double sumC6 = 0.0, sumC8 = 0.0, sumC10 = 0.0;
+            for (int i = 0; i < numMultipoles; i++) {
+                if (cu.getUseDoublePrecision()) {
+                    sumC6 += (double) dispersionParamsVecDouble[i].x*(double) dispersionParamsVecDouble[i].x;
+                    sumC8 += (double) dispersionParamsVecDouble[i].y*(double) dispersionParamsVecDouble[i].y;
+                    sumC10 += (double) dispersionParamsVecDouble[i].z*(double) dispersionParamsVecDouble[i].z;
+                }
+                else {
+                    sumC6 += (double) dispersionParamsVecFloat[i].x*(double) dispersionParamsVecFloat[i].x;
+                    sumC8 += (double) dispersionParamsVecFloat[i].y*(double) dispersionParamsVecFloat[i].y;
+                    sumC10 += (double) dispersionParamsVecFloat[i].z*(double) dispersionParamsVecFloat[i].z;
+                }
+            }
+            dispersionSelfEnergy = (alpha6/12.0)*sumC6;
+            if (dispersionPmax >= 8)
+                dispersionSelfEnergy += (alpha8/48.0)*sumC8;
+            if (dispersionPmax >= 10)
+                dispersionSelfEnergy += (alpha10/240.0)*sumC10;
+        }
     }
     defines["MSCALE12_13"] = cu.doubleToString(mScales[0]);
     defines["MSCALE14"] = cu.doubleToString(mScales[2]);
@@ -553,10 +627,16 @@ void CudaCalcMPIDForceKernel::initialize(const System& system, const MPIDForce& 
         pmeFixedForceKernel = cu.getKernel(module, "computeFixedMultipoleForceAndEnergy");
         pmeInducedForceKernel = cu.getKernel(module, "computeInducedDipoleForceAndEnergy");
         pmeRecordInducedFieldDipolesKernel = cu.getKernel(module, "recordInducedFieldDipoles");
+        pmeSpreadDispersionKernel = cu.getKernel(module, "gridSpreadDispersion");
+        pmeDispersionConvolutionKernel = cu.getKernel(module, "reciprocalConvolutionDispersion");
+        pmeDispersionPotentialKernel = cu.getKernel(module, "computeDispersionPotentialFromGrid");
+        pmeDispersionForceKernel = cu.getKernel(module, "computeDispersionForceAndEnergy");
         cuFuncSetCacheConfig(pmeSpreadFixedMultipolesKernel, CU_FUNC_CACHE_PREFER_L1);
         cuFuncSetCacheConfig(pmeSpreadInducedDipolesKernel, CU_FUNC_CACHE_PREFER_L1);
         cuFuncSetCacheConfig(pmeFixedPotentialKernel, CU_FUNC_CACHE_PREFER_L1);
         cuFuncSetCacheConfig(pmeInducedPotentialKernel, CU_FUNC_CACHE_PREFER_L1);
+        cuFuncSetCacheConfig(pmeSpreadDispersionKernel, CU_FUNC_CACHE_PREFER_L1);
+        cuFuncSetCacheConfig(pmeDispersionPotentialKernel, CU_FUNC_CACHE_PREFER_L1);
 
         // Create required data structures.
 
@@ -572,6 +652,7 @@ void CudaCalcMPIDForceKernel::initialize(const System& system, const MPIDForce& 
         pmePhip = new CudaArray(cu, 10*numMultipoles, elementSize, "pmePhip");
         pmePhidp = new CudaArray(cu, 35*numMultipoles, elementSize, "pmePhidp");
         pmeCphi = new CudaArray(cu, 20*numMultipoles, elementSize, "pmeCphi");
+        pmeDispPhi = new CudaArray(cu, 4*numMultipoles, elementSize, "pmeDispPhi");
         pmeAtomRange = CudaArray::create<int>(cu, gridSizeX*gridSizeY*gridSizeZ+1, "pmeAtomRange");
         sort = new CudaSort(cu, new SortTrait(), cu.getNumAtoms());
         cufftResult result = cufftPlan3d(&fft, gridSizeX, gridSizeY, gridSizeZ, cu.getUseDoublePrecision() ? CUFFT_Z2Z : CUFFT_C2C);
@@ -684,6 +765,7 @@ void CudaCalcMPIDForceKernel::initialize(const System& system, const MPIDForce& 
 }
 
 void CudaCalcMPIDForceKernel::initializeScaleFactors() {
+    cu.setAsCurrent();
     hasInitializedScaleFactors = true;
     CudaNonbondedUtilities& nb = cu.getNonbondedUtilities();
 
@@ -731,6 +813,8 @@ void CudaCalcMPIDForceKernel::initializeScaleFactors() {
 }
 
 double CudaCalcMPIDForceKernel::execute(ContextImpl& context, bool includeForces, bool includeEnergy) {
+    cu.setAsCurrent();
+    double extraEnergy = 0.0;
     if (!hasInitializedScaleFactors) {
         initializeScaleFactors();
     }
@@ -894,7 +978,7 @@ double CudaCalcMPIDForceKernel::execute(ContextImpl& context, bool includeForces
             cu.getPeriodicBoxSizePointer(), cu.getInvPeriodicBoxSizePointer(), cu.getPeriodicBoxVecXPointer(), cu.getPeriodicBoxVecYPointer(), cu.getPeriodicBoxVecZPointer(),
             &maxTiles, &nb.getBlockCenters().getDevicePointer(), &nb.getInteractingAtoms().getDevicePointer(),
             &sphericalDipoles->getDevicePointer(), &sphericalQuadrupoles->getDevicePointer(), &sphericalOctopoles->getDevicePointer(),
-            &inducedDipole->getDevicePointer(), &dampingAndThole->getDevicePointer(), &pmeCphi->getDevicePointer()};
+            &inducedDipole->getDevicePointer(), &dampingAndThole->getDevicePointer(), &dispersionParams->getDevicePointer(), &pmeCphi->getDevicePointer()};
         cu.executeKernel(electrostaticsKernel, electrostaticsArgs, numForceThreadBlocks*electrostaticsThreads, electrostaticsThreads);
         void* pmeTransformInducedPotentialArgs[] = {&pmePhidp->getDevicePointer(), &pmeCphi->getDevicePointer(), recipBoxVectorPointer[0], recipBoxVectorPointer[1], recipBoxVectorPointer[2]};
         cu.executeKernel(pmeTransformPotentialKernel, pmeTransformInducedPotentialArgs, cu.getNumAtoms());
@@ -904,6 +988,50 @@ double CudaCalcMPIDForceKernel::execute(ContextImpl& context, bool includeForces
             &inducedDipole->getDevicePointer(), &pmePhi->getDevicePointer(), &pmePhidp->getDevicePointer(), &pmeCphi->getDevicePointer(),
             recipBoxVectorPointer[0], recipBoxVectorPointer[1], recipBoxVectorPointer[2], &dampingAndThole->getDevicePointer()};
         cu.executeKernel(pmeInducedForceKernel, pmeInducedForceArgs, cu.getNumAtoms());
+
+        // Reciprocal-space dispersion PME contribution (p = 6, 8, 10).
+        if (useDispersionPme) {
+            void* finishSpreadArgs[] = {&pmeGrid->getDevicePointer()};
+            vector<int> dispersionComponents;
+            dispersionComponents.push_back(0);
+            if (dispersionPmax >= 8)
+                dispersionComponents.push_back(1);
+            if (dispersionPmax >= 10)
+                dispersionComponents.push_back(2);
+            for (int comp : dispersionComponents) {
+                cu.clearBuffer(*pmeGrid);
+                void* spreadDispersionArgs[] = {&cu.getPosq().getDevicePointer(), &dispersionParams->getDevicePointer(), &comp,
+                    &pmeGrid->getDevicePointer(), cu.getPeriodicBoxVecXPointer(), cu.getPeriodicBoxVecYPointer(), cu.getPeriodicBoxVecZPointer(),
+                    recipBoxVectorPointer[0], recipBoxVectorPointer[1], recipBoxVectorPointer[2]};
+                cu.executeKernel(pmeSpreadDispersionKernel, spreadDispersionArgs, cu.getNumAtoms());
+                if (cu.getUseDoublePrecision())
+                    cu.executeKernel(pmeFinishSpreadChargeKernel, finishSpreadArgs, pmeGrid->getSize());
+                if (cu.getUseDoublePrecision())
+                    cufftExecZ2Z(fft, (double2*) pmeGrid->getDevicePointer(), (double2*) pmeGrid->getDevicePointer(), CUFFT_FORWARD);
+                else
+                    cufftExecC2C(fft, (float2*) pmeGrid->getDevicePointer(), (float2*) pmeGrid->getDevicePointer(), CUFFT_FORWARD);
+                double alphaDispersionD = alphaDispersionEwald;
+                float alphaDispersionF = (float) alphaDispersionEwald;
+                void* alphaDispersionPtr = (cu.getUseDoublePrecision() ? (void*) &alphaDispersionD : (void*) &alphaDispersionF);
+                void* pmeDispConvolutionArgs[] = {&pmeGrid->getDevicePointer(), &pmeBsplineModuliX->getDevicePointer(), &pmeBsplineModuliY->getDevicePointer(),
+                    &pmeBsplineModuliZ->getDevicePointer(), cu.getPeriodicBoxSizePointer(), recipBoxVectorPointer[0], recipBoxVectorPointer[1], recipBoxVectorPointer[2],
+                    &comp, alphaDispersionPtr};
+                cu.executeKernel(pmeDispersionConvolutionKernel, pmeDispConvolutionArgs, gridSizeX*gridSizeY*gridSizeZ, 256);
+                if (cu.getUseDoublePrecision())
+                    cufftExecZ2Z(fft, (double2*) pmeGrid->getDevicePointer(), (double2*) pmeGrid->getDevicePointer(), CUFFT_INVERSE);
+                else
+                    cufftExecC2C(fft, (float2*) pmeGrid->getDevicePointer(), (float2*) pmeGrid->getDevicePointer(), CUFFT_INVERSE);
+                void* pmeDispPotentialArgs[] = {&pmeGrid->getDevicePointer(), &pmeDispPhi->getDevicePointer(), &cu.getPosq().getDevicePointer(),
+                    cu.getPeriodicBoxVecXPointer(), cu.getPeriodicBoxVecYPointer(), cu.getPeriodicBoxVecZPointer(),
+                    recipBoxVectorPointer[0], recipBoxVectorPointer[1], recipBoxVectorPointer[2]};
+                cu.executeKernel(pmeDispersionPotentialKernel, pmeDispPotentialArgs, cu.getNumAtoms());
+                void* pmeDispForceArgs[] = {&cu.getForce().getDevicePointer(), &cu.getEnergyBuffer().getDevicePointer(), &pmeDispPhi->getDevicePointer(),
+                    &dispersionParams->getDevicePointer(), &comp, recipBoxVectorPointer[0], recipBoxVectorPointer[1], recipBoxVectorPointer[2]};
+                cu.executeKernel(pmeDispersionForceKernel, pmeDispForceArgs, cu.getNumAtoms());
+            }
+            if (includeEnergy)
+                extraEnergy += dispersionSelfEnergy;
+        }
     }
 
     // If using extrapolated polarization, add in force contributions from µ(m) T µ(n).
@@ -924,10 +1052,11 @@ double CudaCalcMPIDForceKernel::execute(ContextImpl& context, bool includeForces
 
     cu.getPosq().copyTo(*lastPositions);
     multipolesAreValid = true;
-    return 0.0;
+    return extraEnergy;
 }
 
 void CudaCalcMPIDForceKernel::computeInducedField(void** recipBoxVectorPointer) {
+    cu.setAsCurrent();
     CudaNonbondedUtilities& nb = cu.getNonbondedUtilities();
     int startTileIndex = nb.getStartTileIndex();
     int numTileIndices = nb.getNumTiles();
@@ -1007,6 +1136,7 @@ void CudaCalcMPIDForceKernel::computeInducedField(void** recipBoxVectorPointer) 
 }
 
 bool CudaCalcMPIDForceKernel::iterateDipolesByDIIS(int iteration) {
+    cu.setAsCurrent();
     bool trueValue = true, falseValue = false;
     int elementSize = (cu.getUseDoublePrecision() ? sizeof(double) : sizeof(float));
 
@@ -1052,6 +1182,7 @@ bool CudaCalcMPIDForceKernel::iterateDipolesByDIIS(int iteration) {
 }
 
 void CudaCalcMPIDForceKernel::computeExtrapolatedDipoles(void** recipBoxVectorPointer) {
+    cu.setAsCurrent();
     // Start by storing the direct dipoles as PT0
 
     void* initArgs[] = {&inducedDipole->getDevicePointer(), &extrapolatedDipole->getDevicePointer(), &inducedDipoleFieldGradient->getDevicePointer()};
@@ -1076,6 +1207,7 @@ void CudaCalcMPIDForceKernel::computeExtrapolatedDipoles(void** recipBoxVectorPo
 }
 
 void CudaCalcMPIDForceKernel::ensureMultipolesValid(ContextImpl& context) {
+    cu.setAsCurrent();
     if (multipolesAreValid) {
         int numParticles = cu.getNumAtoms();
         if (cu.getUseDoublePrecision()) {
@@ -1366,13 +1498,17 @@ void CudaCalcMPIDForceKernel::copyParametersToContext(ContextImpl& context, cons
     vector<float> molecularDipolesVec;
     vector<float> molecularQuadrupolesVec;
     vector<float> molecularOctopolesVec;
+    vector<float4> dispersionParamsVecFloat;
+    vector<double4> dispersionParamsVecDouble;
     vector<int4> multipoleParticlesVec;
    
     for (int i = 0; i < force.getNumMultipoles(); i++) {
         double charge, thole, damping;
+        double c6, c8, c10;
         int axisType, atomX, atomY, atomZ;
         vector<double> dipole, quadrupole, octopole, polarity;
         force.getMultipoleParameters(i, charge, dipole, quadrupole, octopole, axisType, atomZ, atomX, atomY, thole, polarity);
+        force.getDispersionParameters(i, c6, c8, c10);
         if (cu.getUseDoublePrecision())
             posqd[i].w = charge;
         else
@@ -1401,6 +1537,10 @@ void CudaCalcMPIDForceKernel::copyParametersToContext(ContextImpl& context, cons
         molecularOctopolesVec.push_back((float) octopole[5]); // XYZ
         molecularOctopolesVec.push_back((float) octopole[3]); // YYY
         molecularOctopolesVec.push_back((float) octopole[6]); // YYZ
+        if (cu.getUseDoublePrecision())
+            dispersionParamsVecDouble.push_back(make_double4(c6, c8, c10, 0.0));
+        else
+            dispersionParamsVecFloat.push_back(make_float4((float) c6, (float) c8, (float) c10, 0.0f));
     }
     if (!hasQuadrupoles) {
         for (auto q : molecularQuadrupolesVec)
@@ -1419,6 +1559,10 @@ void CudaCalcMPIDForceKernel::copyParametersToContext(ContextImpl& context, cons
             molecularQuadrupolesVec.push_back(0);
         for (int j = 0; j < 7; j++)
             molecularOctopolesVec.push_back(0);
+        if (cu.getUseDoublePrecision())
+            dispersionParamsVecDouble.push_back(make_double4(0, 0, 0, 0));
+        else
+            dispersionParamsVecFloat.push_back(make_float4(0, 0, 0, 0));
     }
     dampingAndThole->upload(dampingAndTholeVec);
     polarizability->upload(polarizabilityVec);
@@ -1426,6 +1570,45 @@ void CudaCalcMPIDForceKernel::copyParametersToContext(ContextImpl& context, cons
     molecularDipoles->upload(molecularDipolesVec);
     molecularQuadrupoles->upload(molecularQuadrupolesVec);
     molecularOctopoles->upload(molecularOctopolesVec);
+    if (cu.getUseDoublePrecision())
+        dispersionParams->upload(dispersionParamsVecDouble);
+    else
+        dispersionParams->upload(dispersionParamsVecFloat);
+
+    if (useDispersionPme) {
+        if (!force.getUseDispersionPME())
+            throw OpenMMException("updateParametersInContext: Cannot disable dispersion PME after the Context has been created");
+        if (force.getDispersionPmax() != dispersionPmax)
+            throw OpenMMException("updateParametersInContext: Cannot change dispersionPmax after the Context has been created");
+        double dAlpha;
+        int dnx, dny, dnz;
+        force.getDPMEParameters(dAlpha, dnx, dny, dnz);
+        if (dAlpha != 0.0 && fabs(dAlpha-alphaDispersionEwald) > 1e-12)
+            throw OpenMMException("updateParametersInContext: Cannot change dispersion PME alpha after the Context has been created");
+        const double alpha2 = alphaDispersionEwald*alphaDispersionEwald;
+        const double alpha4 = alpha2*alpha2;
+        const double alpha6 = alpha4*alpha2;
+        const double alpha8 = alpha4*alpha4;
+        const double alpha10 = alpha8*alpha2;
+        double sumC6 = 0.0, sumC8 = 0.0, sumC10 = 0.0;
+        for (int i = 0; i < force.getNumMultipoles(); i++) {
+            if (cu.getUseDoublePrecision()) {
+                sumC6 += (double) dispersionParamsVecDouble[i].x*(double) dispersionParamsVecDouble[i].x;
+                sumC8 += (double) dispersionParamsVecDouble[i].y*(double) dispersionParamsVecDouble[i].y;
+                sumC10 += (double) dispersionParamsVecDouble[i].z*(double) dispersionParamsVecDouble[i].z;
+            }
+            else {
+                sumC6 += (double) dispersionParamsVecFloat[i].x*(double) dispersionParamsVecFloat[i].x;
+                sumC8 += (double) dispersionParamsVecFloat[i].y*(double) dispersionParamsVecFloat[i].y;
+                sumC10 += (double) dispersionParamsVecFloat[i].z*(double) dispersionParamsVecFloat[i].z;
+            }
+        }
+        dispersionSelfEnergy = (alpha6/12.0)*sumC6;
+        if (dispersionPmax >= 8)
+            dispersionSelfEnergy += (alpha8/48.0)*sumC8;
+        if (dispersionPmax >= 10)
+            dispersionSelfEnergy += (alpha10/240.0)*sumC10;
+    }
     cu.getPosq().upload(cu.getPinnedBuffer());
     cu.invalidateMolecules();
     multipolesAreValid = false;

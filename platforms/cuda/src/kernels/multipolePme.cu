@@ -1444,3 +1444,258 @@ extern "C" __global__ void recordInducedFieldDipoles(const real* __restrict__ ph
 #endif
     }
 }
+
+extern "C" __global__ void gridSpreadDispersion(const real4* __restrict__ posq, const real4* __restrict__ dispersionParams, int component,
+        real2* __restrict__ pmeGrid, real4 periodicBoxVecX, real4 periodicBoxVecY, real4 periodicBoxVecZ,
+        real3 recipBoxVecX, real3 recipBoxVecY, real3 recipBoxVecZ) {
+#if __CUDA_ARCH__ < 500
+    real array[PME_ORDER*PME_ORDER];
+#else
+    __shared__ real sharedArray[PME_ORDER*PME_ORDER*64];
+    real* array = &sharedArray[PME_ORDER*PME_ORDER*threadIdx.x];
+#endif
+    real4 theta1[PME_ORDER];
+    real4 theta2[PME_ORDER];
+    real4 theta3[PME_ORDER];
+    for (int m = blockIdx.x*blockDim.x+threadIdx.x; m < NUM_ATOMS; m += blockDim.x*gridDim.x) {
+        real4 pos = posq[m];
+        pos -= periodicBoxVecZ*floor(pos.z*recipBoxVecZ.z+0.5f);
+        pos -= periodicBoxVecY*floor(pos.y*recipBoxVecY.z+0.5f);
+        pos -= periodicBoxVecX*floor(pos.x*recipBoxVecX.z+0.5f);
+        real4 disp = dispersionParams[m];
+        real coeff = (component == 0 ? disp.x : (component == 1 ? disp.y : disp.z));
+        if (coeff == 0)
+            continue;
+
+        real w = pos.x*recipBoxVecX.x+pos.y*recipBoxVecY.x+pos.z*recipBoxVecZ.x;
+        real fr = GRID_SIZE_X*(w-(int)(w+0.5f)+0.5f);
+        int ifr = (int) floor(fr);
+        w = fr - ifr;
+        int igrid1 = ifr-PME_ORDER+1;
+        computeBSplinePoint(theta1, w, array);
+        w = pos.y*recipBoxVecY.y+pos.z*recipBoxVecZ.y;
+        fr = GRID_SIZE_Y*(w-(int)(w+0.5f)+0.5f);
+        ifr = (int) floor(fr);
+        w = fr - ifr;
+        int igrid2 = ifr-PME_ORDER+1;
+        computeBSplinePoint(theta2, w, array);
+        w = pos.z*recipBoxVecZ.z;
+        fr = GRID_SIZE_Z*(w-(int)(w+0.5f)+0.5f);
+        ifr = (int) floor(fr);
+        w = fr - ifr;
+        int igrid3 = ifr-PME_ORDER+1;
+        computeBSplinePoint(theta3, w, array);
+        igrid1 += (igrid1 < 0 ? GRID_SIZE_X : 0);
+        igrid2 += (igrid2 < 0 ? GRID_SIZE_Y : 0);
+        igrid3 += (igrid3 < 0 ? GRID_SIZE_Z : 0);
+
+        for (int ix = 0; ix < PME_ORDER; ix++) {
+            int xbase = igrid1+ix;
+            xbase -= (xbase >= GRID_SIZE_X ? GRID_SIZE_X : 0);
+            xbase = xbase*GRID_SIZE_Y*GRID_SIZE_Z;
+            real4 t = theta1[ix];
+            for (int iy = 0; iy < PME_ORDER; iy++) {
+                int ybase = igrid2+iy;
+                ybase -= (ybase >= GRID_SIZE_Y ? GRID_SIZE_Y : 0);
+                ybase = xbase + ybase*GRID_SIZE_Z;
+                real4 u = theta2[iy];
+                for (int iz = 0; iz < PME_ORDER; iz++) {
+                    int zindex = igrid3+iz;
+                    zindex -= (zindex >= GRID_SIZE_Z ? GRID_SIZE_Z : 0);
+                    int index = ybase + zindex;
+                    real4 v = theta3[iz];
+                    real add = coeff*t.x*u.x*v.x;
+#ifdef USE_DOUBLE_PRECISION
+                    unsigned long long* ulonglong_p = (unsigned long long*) pmeGrid;
+                    atomicAdd(&ulonglong_p[2*index], static_cast<unsigned long long>((long long) (add*0x100000000)));
+#else
+                    atomicAdd(&pmeGrid[index].x, add);
+#endif
+                }
+            }
+        }
+   }
+}
+
+extern "C" __global__ void reciprocalConvolutionDispersion(real2* __restrict__ pmeGrid, const real* __restrict__ pmeBsplineModuliX,
+        const real* __restrict__ pmeBsplineModuliY, const real* __restrict__ pmeBsplineModuliZ, real4 periodicBoxSize,
+        real3 recipBoxVecX, real3 recipBoxVecY, real3 recipBoxVecZ, int component, real alphaDispersion) {
+    const unsigned int gridSize = GRID_SIZE_X*GRID_SIZE_Y*GRID_SIZE_Z;
+    real alpha2 = alphaDispersion*alphaDispersion;
+    real volume = periodicBoxSize.x*periodicBoxSize.y*periodicBoxSize.z;
+    real sqrtPi = SQRT((real) M_PI);
+    for (int index = blockIdx.x*blockDim.x+threadIdx.x; index < gridSize; index += blockDim.x*gridDim.x) {
+        int kx = index/(GRID_SIZE_Y*GRID_SIZE_Z);
+        int remainder = index-kx*GRID_SIZE_Y*GRID_SIZE_Z;
+        int ky = remainder/GRID_SIZE_Z;
+        int kz = remainder-ky*GRID_SIZE_Z;
+        if (kx == 0 && ky == 0 && kz == 0) {
+            pmeGrid[index] = make_real2(0, 0);
+            continue;
+        }
+        int mx = (kx < (GRID_SIZE_X+1)/2) ? kx : (kx-GRID_SIZE_X);
+        int my = (ky < (GRID_SIZE_Y+1)/2) ? ky : (ky-GRID_SIZE_Y);
+        int mz = (kz < (GRID_SIZE_Z+1)/2) ? kz : (kz-GRID_SIZE_Z);
+        real mhx = mx*recipBoxVecX.x;
+        real mhy = mx*recipBoxVecY.x+my*recipBoxVecY.y;
+        real mhz = mx*recipBoxVecZ.x+my*recipBoxVecZ.y+mz*recipBoxVecZ.z;
+        real bx = pmeBsplineModuliX[kx];
+        real by = pmeBsplineModuliY[ky];
+        real bz = pmeBsplineModuliZ[kz];
+        real denom = bx*by*bz;
+        if (denom == 0 || volume == 0) {
+            pmeGrid[index] = make_real2(0, 0);
+            continue;
+        }
+        real m2 = mhx*mhx+mhy*mhy+mhz*mhz;
+        if (m2 == 0) {
+            pmeGrid[index] = make_real2(0, 0);
+            continue;
+        }
+        real x2 = ((real) M_PI*(real) M_PI*m2)/alpha2;
+        real x = SQRT(x2);
+        real expx = EXP(-x2);
+        real ck = 0;
+        if (component == 0) {
+            real x3 = x2*x;
+            real f = ((real) 1-2*x2)*expx + 2*x3*sqrtPi*erfc(x);
+            ck = sqrtPi*(real) M_PI*alphaDispersion*alphaDispersion*alphaDispersion*f/((real) 6*volume);
+        }
+        else if (component == 1) {
+            real x4 = x2*x2;
+            real x5 = x4*x;
+            real alpha5 = alphaDispersion*alphaDispersion*alphaDispersion*alphaDispersion*alphaDispersion;
+            real f = ((real) 3-2*x2+4*x4)*expx - 4*x5*sqrtPi*erfc(x);
+            ck = sqrtPi*(real) M_PI*alpha5*f/((real) 90*volume);
+        }
+        else {
+            real x4 = x2*x2;
+            real x6 = x4*x2;
+            real x7 = x6*x;
+            real alpha7 = alphaDispersion*alphaDispersion*alphaDispersion*alphaDispersion*alphaDispersion*alphaDispersion*alphaDispersion;
+            real f = ((real) 15-6*x2+4*x4-8*x6)*expx + 8*x7*sqrtPi*erfc(x);
+            ck = sqrtPi*(real) M_PI*alpha7*f/((real) 2520*volume);
+        }
+        real2 grid = pmeGrid[index];
+        real eterm = ck/denom;
+        pmeGrid[index] = make_real2(grid.x*eterm, grid.y*eterm);
+    }
+}
+
+extern "C" __global__ void computeDispersionPotentialFromGrid(const real2* __restrict__ pmeGrid, real* __restrict__ dispPhi,
+        const real4* __restrict__ posq, real4 periodicBoxVecX, real4 periodicBoxVecY, real4 periodicBoxVecZ,
+        real3 recipBoxVecX, real3 recipBoxVecY, real3 recipBoxVecZ) {
+#if __CUDA_ARCH__ < 500
+    real array[PME_ORDER*PME_ORDER];
+#else
+    __shared__ real sharedArray[PME_ORDER*PME_ORDER*64];
+    real* array = &sharedArray[PME_ORDER*PME_ORDER*threadIdx.x];
+#endif
+    real4 theta1[PME_ORDER];
+    real4 theta2[PME_ORDER];
+    real4 theta3[PME_ORDER];
+
+    for (int m = blockIdx.x*blockDim.x+threadIdx.x; m < NUM_ATOMS; m += blockDim.x*gridDim.x) {
+        real4 pos = posq[m];
+        pos -= periodicBoxVecZ*floor(pos.z*recipBoxVecZ.z+0.5f);
+        pos -= periodicBoxVecY*floor(pos.y*recipBoxVecY.z+0.5f);
+        pos -= periodicBoxVecX*floor(pos.x*recipBoxVecX.z+0.5f);
+
+        real w = pos.x*recipBoxVecX.x+pos.y*recipBoxVecY.x+pos.z*recipBoxVecZ.x;
+        real fr = GRID_SIZE_X*(w-(int)(w+0.5f)+0.5f);
+        int ifr = (int) floor(fr);
+        w = fr - ifr;
+        int igrid1 = ifr-PME_ORDER+1;
+        computeBSplinePoint(theta1, w, array);
+        w = pos.y*recipBoxVecY.y+pos.z*recipBoxVecZ.y;
+        fr = GRID_SIZE_Y*(w-(int)(w+0.5f)+0.5f);
+        ifr = (int) floor(fr);
+        w = fr - ifr;
+        int igrid2 = ifr-PME_ORDER+1;
+        computeBSplinePoint(theta2, w, array);
+        w = pos.z*recipBoxVecZ.z;
+        fr = GRID_SIZE_Z*(w-(int)(w+0.5f)+0.5f);
+        ifr = (int) floor(fr);
+        w = fr - ifr;
+        int igrid3 = ifr-PME_ORDER+1;
+        computeBSplinePoint(theta3, w, array);
+        igrid1 += (igrid1 < 0 ? GRID_SIZE_X : 0);
+        igrid2 += (igrid2 < 0 ? GRID_SIZE_Y : 0);
+        igrid3 += (igrid3 < 0 ? GRID_SIZE_Z : 0);
+
+        real tuv000 = 0;
+        real tuv100 = 0;
+        real tuv010 = 0;
+        real tuv001 = 0;
+        for (int ix = 0; ix < PME_ORDER; ix++) {
+            int i = igrid1+ix-(igrid1+ix >= GRID_SIZE_X ? GRID_SIZE_X : 0);
+            real4& t = theta1[ix];
+            real uv00 = 0;
+            real uv10 = 0;
+            real uv01 = 0;
+            for (int iy = 0; iy < PME_ORDER; iy++) {
+                int j = igrid2+iy-(igrid2+iy >= GRID_SIZE_Y ? GRID_SIZE_Y : 0);
+                real4& u = theta2[iy];
+                real v0 = 0;
+                real v1 = 0;
+                for (int iz = 0; iz < PME_ORDER; iz++) {
+                    int k = igrid3+iz-(igrid3+iz >= GRID_SIZE_Z ? GRID_SIZE_Z : 0);
+                    int gridIndex = i*GRID_SIZE_Y*GRID_SIZE_Z + j*GRID_SIZE_Z + k;
+                    real tq = pmeGrid[gridIndex].x;
+                    real4& v = theta3[iz];
+                    v0 += tq*v.x;
+                    v1 += tq*v.y;
+                }
+                uv00 += u.x*v0;
+                uv10 += u.y*v0;
+                uv01 += u.x*v1;
+            }
+            tuv000 += t.x*uv00;
+            tuv100 += t.y*uv00;
+            tuv010 += t.x*uv10;
+            tuv001 += t.x*uv01;
+        }
+        dispPhi[m] = tuv000;
+        dispPhi[m+NUM_ATOMS] = tuv100;
+        dispPhi[m+NUM_ATOMS*2] = tuv010;
+        dispPhi[m+NUM_ATOMS*3] = tuv001;
+    }
+}
+
+extern "C" __global__ void computeDispersionForceAndEnergy(unsigned long long* __restrict__ forceBuffers, mixed* __restrict__ energyBuffer,
+        const real* __restrict__ dispPhi, const real4* __restrict__ dispersionParams, int component,
+        real3 recipBoxVecX, real3 recipBoxVecY, real3 recipBoxVecZ) {
+    mixed energy = 0;
+    __shared__ real fracToCart[3][3];
+    if (threadIdx.x == 0) {
+        fracToCart[0][0] = GRID_SIZE_X*recipBoxVecX.x;
+        fracToCart[1][0] = GRID_SIZE_X*recipBoxVecY.x;
+        fracToCart[2][0] = GRID_SIZE_X*recipBoxVecZ.x;
+        fracToCart[0][1] = GRID_SIZE_Y*recipBoxVecX.y;
+        fracToCart[1][1] = GRID_SIZE_Y*recipBoxVecY.y;
+        fracToCart[2][1] = GRID_SIZE_Y*recipBoxVecZ.y;
+        fracToCart[0][2] = GRID_SIZE_Z*recipBoxVecX.z;
+        fracToCart[1][2] = GRID_SIZE_Z*recipBoxVecY.z;
+        fracToCart[2][2] = GRID_SIZE_Z*recipBoxVecZ.z;
+    }
+    __syncthreads();
+
+    for (int i = blockIdx.x*blockDim.x+threadIdx.x; i < NUM_ATOMS; i += blockDim.x*gridDim.x) {
+        real4 disp = dispersionParams[i];
+        real c = (component == 0 ? disp.x : (component == 1 ? disp.y : disp.z));
+        if (c == 0)
+            continue;
+        energy -= c*dispPhi[i];
+        real fx = -2*c*dispPhi[i+NUM_ATOMS];
+        real fy = -2*c*dispPhi[i+NUM_ATOMS*2];
+        real fz = -2*c*dispPhi[i+NUM_ATOMS*3];
+        real3 f = make_real3(
+            fx*fracToCart[0][0] + fy*fracToCart[0][1] + fz*fracToCart[0][2],
+            fx*fracToCart[1][0] + fy*fracToCart[1][1] + fz*fracToCart[1][2],
+            fx*fracToCart[2][0] + fy*fracToCart[2][1] + fz*fracToCart[2][2]);
+        forceBuffers[i] -= static_cast<unsigned long long>((long long) (f.x*0x100000000));
+        forceBuffers[i+PADDED_NUM_ATOMS] -= static_cast<unsigned long long>((long long) (f.y*0x100000000));
+        forceBuffers[i+PADDED_NUM_ATOMS*2] -= static_cast<unsigned long long>((long long) (f.z*0x100000000));
+    }
+    energyBuffer[blockIdx.x*blockDim.x+threadIdx.x] += energy;
+}

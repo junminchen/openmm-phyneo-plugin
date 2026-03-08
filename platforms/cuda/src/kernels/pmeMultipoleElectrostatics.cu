@@ -2,6 +2,7 @@
 
 typedef struct {
     real3 pos, force, torque, inducedDipole, sphericalDipole;
+    real3 dispersion;
     real q;
     float thole, damp;
 #ifdef INCLUDE_QUADRUPOLES
@@ -14,7 +15,7 @@ typedef struct {
 
 inline __device__ void loadAtomData(AtomData& data, int atom, const real4* __restrict__ posq, const real* __restrict__ sphericalDipole,
             const real* __restrict__ sphericalQuadrupole, const real* __restrict__ sphericalOctopole, const real* __restrict__ inducedDipole,
-            const float2* __restrict__ dampingAndThole) {
+            const float2* __restrict__ dampingAndThole, const real4* __restrict__ dispersionParams) {
     real4 atomPosq = posq[atom];
     data.pos = make_real3(atomPosq.x, atomPosq.y, atomPosq.z);
     data.q = atomPosq.w;
@@ -43,6 +44,8 @@ inline __device__ void loadAtomData(AtomData& data, int atom, const real4* __res
     float2 temp = dampingAndThole[atom];
     data.damp = temp.x;
     data.thole = temp.y;
+    real4 disp = dispersionParams[atom];
+    data.dispersion = make_real3(disp.x, disp.y, disp.z);
 }
 
 __device__ float computeMScaleFactor(uint2 covalent, int index) {
@@ -52,6 +55,47 @@ __device__ float computeMScaleFactor(uint2 covalent, int index) {
     if (x)
         return (y ? (float) MSCALE12_13 : (float) MSCALE14);
     return (y ? (float) MSCALE15 : (float) MSCALE16);
+}
+
+inline __device__ void addDispersionPairContribution(real cprod, int power, real mScale, real r, real r2, real rInv, real alphaDisp,
+        float forceFactor, mixed& energy, const real3& delta, real3& force1, real3& force2, bool updateSecond) {
+    if (cprod == 0)
+        return;
+    real invR2 = rInv*rInv;
+    real invR6 = invR2*invR2*invR2;
+    real invRp = (power == 6 ? invR6 : (power == 8 ? invR6*invR2 : invR6*invR2*invR2));
+    real alpha2 = alphaDisp*alphaDisp;
+    real x2 = alpha2*r2;
+    real x4 = x2*x2;
+    real expx = EXP(-x2);
+    real g = 1;
+    real dgdx2 = 0;
+    if (power == 6) {
+        g = (1+x2+0.5f*x4)*expx;
+        dgdx2 = -0.5f*x4*expx;
+    }
+    else if (power == 8) {
+        real x6 = x4*x2;
+        g = (1+x2+0.5f*x4+x6/(real) 6)*expx;
+        dgdx2 = -(x6/(real) 6)*expx;
+    }
+    else {
+        real x6 = x4*x2;
+        real x8 = x4*x4;
+        g = (1+x2+0.5f*x4+x6/(real) 6+x8/(real) 24)*expx;
+        dgdx2 = -(x8/(real) 24)*expx;
+    }
+    real a = mScale + g - 1;
+    real pairEnergy = -cprod*a*invRp;
+    real invEnergyScale = RECIP((real) ENERGY_SCALE_FACTOR);
+    energy += forceFactor*pairEnergy*invEnergyScale;
+    real dAdr = 2*alpha2*r*dgdx2;
+    real dEdr = -cprod*(dAdr*invRp - power*a*invRp*rInv);
+    real scale = dEdr*rInv*invEnergyScale;
+    real3 fij = delta*scale;
+    force1 += fij;
+    if (updateSecond)
+        force2 -= fij;
 }
 
 
@@ -69,6 +113,17 @@ __device__ void computeOneInteraction(AtomData& atom1, AtomData& atom2, bool has
 
     real rInv = RSQRT(r2);
     real r = r2*rInv;
+
+#ifdef USE_DISPERSION_PME
+    bool updateSecond = (forceFactor == 1);
+    addDispersionPairContribution(atom1.dispersion.x*atom2.dispersion.x, 6, mScale, r, r2, rInv, (real) DISPERSION_ALPHA, forceFactor, energy, delta, atom1.force, atom2.force, updateSecond);
+#if DISPERSION_PMAX >= 8
+    addDispersionPairContribution(atom1.dispersion.y*atom2.dispersion.y, 8, mScale, r, r2, rInv, (real) DISPERSION_ALPHA, forceFactor, energy, delta, atom1.force, atom2.force, updateSecond);
+#endif
+#if DISPERSION_PMAX >= 10
+    addDispersionPairContribution(atom1.dispersion.z*atom2.dispersion.z, 10, mScale, r, r2, rInv, (real) DISPERSION_ALPHA, forceFactor, energy, delta, atom1.force, atom2.force, updateSecond);
+#endif
+#endif
 
     // Rotate the various dipoles and quadrupoles.
 
@@ -734,7 +789,7 @@ extern "C" __global__ void computeElectrostatics(
         const unsigned int* __restrict__ interactingAtoms,
 #endif
         const real* __restrict__ sphericalDipole, const real* __restrict__ sphericalQuadrupole, const real* __restrict__ sphericalOctopole,
-        const real* __restrict__ inducedDipole, const float2* __restrict__ dampingAndThole, const real* __restrict__ cphi) {
+        const real* __restrict__ inducedDipole, const float2* __restrict__ dampingAndThole, const real4* __restrict__ dispersionParams, const real* __restrict__ cphi) {
     const unsigned int totalWarps = (blockDim.x*gridDim.x)/TILE_SIZE;
     const unsigned int warp = (blockIdx.x*blockDim.x+threadIdx.x)/TILE_SIZE;
     const unsigned int tgx = threadIdx.x & (TILE_SIZE-1);
@@ -752,7 +807,7 @@ extern "C" __global__ void computeElectrostatics(
         const unsigned int y = tileIndices.y;
         AtomData data;
         unsigned int atom1 = x*TILE_SIZE + tgx;
-        loadAtomData(data, atom1, posq, sphericalDipole, sphericalQuadrupole, sphericalOctopole, inducedDipole, dampingAndThole);
+        loadAtomData(data, atom1, posq, sphericalDipole, sphericalQuadrupole, sphericalOctopole, inducedDipole, dampingAndThole, dispersionParams);
         data.force = make_real3(0);
         data.torque = make_real3(0);
         uint2 covalent = covalentFlags[pos*TILE_SIZE+tgx];
@@ -781,6 +836,7 @@ extern "C" __global__ void computeElectrostatics(
             localData[threadIdx.x].inducedDipole = data.inducedDipole;
             localData[threadIdx.x].thole = data.thole;
             localData[threadIdx.x].damp = data.damp;
+            localData[threadIdx.x].dispersion = data.dispersion;
 
             // Compute forces.
 
@@ -807,7 +863,7 @@ extern "C" __global__ void computeElectrostatics(
             // This is an off-diagonal tile.
 
             unsigned int j = y*TILE_SIZE + tgx;
-            loadAtomData(localData[threadIdx.x], j, posq, sphericalDipole, sphericalQuadrupole, sphericalOctopole, inducedDipole, dampingAndThole);
+            loadAtomData(localData[threadIdx.x], j, posq, sphericalDipole, sphericalQuadrupole, sphericalOctopole, inducedDipole, dampingAndThole, dispersionParams);
             localData[threadIdx.x].force = make_real3(0);
             localData[threadIdx.x].torque = make_real3(0);
             unsigned int tj = tgx;
@@ -899,7 +955,7 @@ extern "C" __global__ void computeElectrostatics(
             // Load atom data for this tile.
 
             AtomData data;
-            loadAtomData(data, atom1, posq, sphericalDipole, sphericalQuadrupole, sphericalOctopole, inducedDipole, dampingAndThole);
+            loadAtomData(data, atom1, posq, sphericalDipole, sphericalQuadrupole, sphericalOctopole, inducedDipole, dampingAndThole, dispersionParams);
             data.force = make_real3(0);
             data.torque = make_real3(0);
 #ifdef USE_CUTOFF
@@ -908,7 +964,7 @@ extern "C" __global__ void computeElectrostatics(
             unsigned int j = y*TILE_SIZE + tgx;
 #endif
             atomIndices[threadIdx.x] = j;
-            loadAtomData(localData[threadIdx.x], j, posq, sphericalDipole, sphericalQuadrupole, sphericalOctopole, inducedDipole, dampingAndThole);
+            loadAtomData(localData[threadIdx.x], j, posq, sphericalDipole, sphericalQuadrupole, sphericalOctopole, inducedDipole, dampingAndThole, dispersionParams);
             localData[threadIdx.x].force = make_real3(0);
             localData[threadIdx.x].torque = make_real3(0);
 
