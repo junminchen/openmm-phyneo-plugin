@@ -41,7 +41,7 @@ def main():
     parser.add_argument("--steps", type=int, default=200000, help="Number of MD steps (default: 200000 = 200 ps)")
     parser.add_argument("--platform", default="CUDA", choices=["CUDA", "Reference", "CPU"],
                         help="OpenMM platform (default: CUDA)")
-    parser.add_argument("--dt", type=float, default=1.0, help="Timestep in fs (default: 1.0)")
+    parser.add_argument("--dt", type=float, default=0.5, help="Timestep in fs (default: 0.5)")
     parser.add_argument("--temperature", type=float, default=300.0, help="Temperature in K (default: 300)")
     parser.add_argument("--pressure", type=float, default=1.0, help="Pressure in atm (default: 1.0)")
     parser.add_argument("--output-dcd", default="traj.dcd", help="DCD trajectory file (default: traj.dcd)")
