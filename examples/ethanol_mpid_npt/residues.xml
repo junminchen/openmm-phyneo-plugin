@@ -1,0 +1,12 @@
+ <Residues>
+  <Residue name="EA">
+   <Bond from="C00" to="H01"/>
+   <Bond from="C00" to="H02"/>
+   <Bond from="C00" to="H03"/>
+   <Bond from="C00" to="C04"/>
+   <Bond from="C04" to="H05"/>
+   <Bond from="C04" to="H06"/>
+   <Bond from="C04" to="O07"/>
+   <Bond from="O07" to="H08"/>
+  </Residue>
+ </Residues>

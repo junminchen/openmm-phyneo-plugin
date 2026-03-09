@@ -307,7 +307,20 @@ def pair_params(force_name, force_section, type_i, type_j, scale):
 
 
 def add_dmff_short_range_forces(system, atom_types, bonds, force_data, start_group=0, s12=0.169):
-    bonded_pairs = shortest_bond_separations(len(atom_types), bonds, max_sep=5)
+    # MPIDForce only exposes Covalent12/13/14 (path length ≤ 3 = 1-2/1-3/1-4 pairs).
+    # CUDA requires all CustomNonbondedForce exclusion lists to exactly match
+    # MPIDForce's covalent-pair set, so exclusions are limited to max_sep=3.
+    nb_pairs = shortest_bond_separations(len(atom_types), bonds, max_sep=3)
+
+    # 1-5 pairs (path length 4) cannot be excluded from CustomNonbondedForce
+    # (CUDA constraint). Instead, we add a bond-force correction with
+    #   corr_scale = mScale15 - 1
+    # so that  nonbonded_contribution + bond_correction = mScale15 × full_interaction.
+    # When mScale15 = 0 (fully excluded in DMFF): corr_scale = -1, the bond force
+    # exactly cancels the nonbonded contribution, giving zero net interaction.
+    all_intra  = shortest_bond_separations(len(atom_types), bonds, max_sep=4)
+    sep4_pairs = {k: v for k, v in all_intra.items() if k not in nb_pairs}
+
     for group_offset, force_name in enumerate(TERM_ORDER):
         section = force_data[force_name]
         nb_force = make_nonbonded_force(force_name, s12=s12)
@@ -315,11 +328,18 @@ def add_dmff_short_range_forces(system, atom_types, bonds, force_data, start_gro
         bond_force = make_bond_force(force_name, s12=s12)
         for atom_type in atom_types:
             nb_force.addParticle(particle_params(force_name, section, atom_type))
-        for (i, j), separation in bonded_pairs.items():
+        # sep 1-3 (1-2, 1-3, 1-4): exclude + optional bond correction for mScale≠0
+        for (i, j), separation in nb_pairs.items():
             nb_force.addExclusion(i, j)
             scale = scale_for_bond_separation(section["mscales"], separation)
             if abs(scale) > 1e-15:
                 bond_force.addBond(i, j, pair_params(force_name, section, atom_types[i], atom_types[j], scale))
+        # sep 4 (1-5): not excluded; correction bond cancels nonbonded contribution
+        for (i, j), separation in sep4_pairs.items():
+            mscale = scale_for_bond_separation(section["mscales"], separation)
+            corr_scale = mscale - 1.0
+            if abs(corr_scale) > 1e-15:
+                bond_force.addBond(i, j, pair_params(force_name, section, atom_types[i], atom_types[j], corr_scale))
         nb_force.setForceGroup(start_group + group_offset)
         bond_force.setForceGroup(start_group + group_offset)
         system.addForce(nb_force)
@@ -387,7 +407,13 @@ def add_damped_dispersion_force(system, topology, xml_path, cutoff_nm=0.6, force
         ]
 
     atom_types, bonds = infer_atom_types_and_bonds_from_topology(topology, xml_path)
-    bonded_pairs = shortest_bond_separations(len(atom_types), bonds, max_sep=5)
+    # Use max_sep=3 (1-2, 1-3, 1-4 pairs) to match MPIDForce's Covalent12/13/14
+    # exclusion set — required by the CUDA platform for neighbor-list sharing.
+    nb_pairs   = shortest_bond_separations(len(atom_types), bonds, max_sep=3)
+    # sep=4 (1-5) pairs: not excluded (CUDA constraint); corrected via bond force
+    # with corr_scale = mScale15 - 1 so net interaction = mScale15 × full.
+    all_intra  = shortest_bond_separations(len(atom_types), bonds, max_sep=4)
+    sep4_pairs = {k: v for k, v in all_intra.items() if k not in nb_pairs}
 
     # Build the merged expression: -(f_n(x) * C_n / r^n)
     # f_n = 1 - exp(-x) * P_n(x)
@@ -445,7 +471,7 @@ def add_damped_dispersion_force(system, topology, xml_path, cutoff_nm=0.6, force
     bond_force.addPerBondParameter("c8ij")
     bond_force.addPerBondParameter("c10ij")
 
-    for (i, j), separation in bonded_pairs.items():
+    for (i, j), separation in nb_pairs.items():
         force.addExclusion(i, j)
         scale = scale_for_bond_separation(mscales_disp, separation)
         if abs(scale) > 1e-15:
@@ -455,6 +481,22 @@ def add_damped_dispersion_force(system, topology, xml_path, cutoff_nm=0.6, force
             bj = b_params.get(atom_types[j], 0.0)
             bond_force.addBond(i, j, [
                 scale,
+                math.sqrt(bi * bj),
+                math.sqrt(abs(pi["C6"] * pj["C6"])),
+                math.sqrt(abs(pi["C8"] * pj["C8"])),
+                math.sqrt(abs(pi["C10"] * pj["C10"])),
+            ])
+    # sep=4 (1-5) correction bonds: corr_scale = mScale15 - 1
+    for (i, j), separation in sep4_pairs.items():
+        mscale = scale_for_bond_separation(mscales_disp, separation)
+        corr_scale = mscale - 1.0
+        if abs(corr_scale) > 1e-15:
+            pi = disp_params.get(atom_types[i], {"C6": 0.0, "C8": 0.0, "C10": 0.0})
+            pj = disp_params.get(atom_types[j], {"C6": 0.0, "C8": 0.0, "C10": 0.0})
+            bi = b_params.get(atom_types[i], 0.0)
+            bj = b_params.get(atom_types[j], 0.0)
+            bond_force.addBond(i, j, [
+                corr_scale,
                 math.sqrt(bi * bj),
                 math.sqrt(abs(pi["C6"] * pj["C6"])),
                 math.sqrt(abs(pi["C8"] * pj["C8"])),
