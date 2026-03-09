@@ -30,7 +30,6 @@ import mpidplugin  # noqa: E402
 from dmff_sr_custom_forces import (  # noqa: E402
     add_dmff_short_range_forces_from_xml,
     add_undamped_dispersion_force,
-    add_short_range_repulsive_wall,
 )
 
 EXAMPLE_DIR = Path(__file__).resolve().parent
@@ -70,24 +69,19 @@ def main():
     vectors = pdb.topology.getPeriodicBoxVectors()
     system.setDefaultPeriodicBoxVectors(*vectors)
 
-    # ── Add short-range custom forces (Slater exchange, damping, etc.) ──
+    # ── Add short-range custom forces (Slater exchange + hardcore, damping, etc.) ──
+    # The SlaterExForce includes a (s12/r)^12 hardcore term (s12=0.169 nm) that
+    # prevents close-contact divergences in the MPIDForce polarization solver,
+    # mirroring the approach used in openmmtool.py (ByteFF).
     sr_start_group = system.getNumForces()
     add_dmff_short_range_forces_from_xml(
-        system, pdb.topology, str(dmff_xml), start_group=sr_start_group,
+        system, pdb.topology, str(dmff_xml), start_group=sr_start_group, s12=0.169,
     )
 
     # ── Add undamped C6/C8/C10 dispersion with long-range correction ──
     # cutoff must match the nonbondedCutoff used above
     cutoff_nm = 0.6
     add_undamped_dispersion_force(
-        system, pdb.topology, str(dmff_xml), cutoff_nm=cutoff_nm,
-    )
-
-    # ── Add repulsive wall to prevent close contacts ──
-    # Steep step-function wall: exactly zero for r >= 0.17 nm, provides
-    # ~100 kJ/mol at 0.15 nm to prevent O-H approaches that cause the
-    # MPIDForce polarization solver and Coulomb interaction to diverge.
-    add_short_range_repulsive_wall(
         system, pdb.topology, str(dmff_xml), cutoff_nm=cutoff_nm,
     )
 

@@ -122,11 +122,12 @@ def scale_for_bond_separation(mscales, separation):
     return mscales[separation - 1]
 
 
-def term_energy_expression(force_name):
+def term_energy_expression(force_name, s12=0.169):
     if force_name == "QqTtDampingForce":
         return "-0.1*dielectric*q1*q2*exp(-br)*(1+br)/r; br=sqrt(b1*b2)*r"
     if force_name == "SlaterExForce":
-        return "a1*a2*(1+br+br^2/3)*exp(-br) + a1*a2/(0.24*br)^14; br=sqrt(b1*b2)*r"
+        # Hardcore (s12/r)^12 prevents catastrophic close contacts at very short range.
+        return f"a1*a2*(1+br+br^2/3)*exp(-br) + ({s12}/r)^12; br=sqrt(b1*b2)*r"
     if force_name in {"SlaterSrEsForce", "SlaterSrPolForce", "SlaterSrDispForce", "SlaterDhfForce"}:
         return "-a1*a2*(1+br+br^2/3)*exp(-br); br=sqrt(b1*b2)*r"
     if force_name == "SlaterDampingForce":
@@ -142,8 +143,8 @@ def term_energy_expression(force_name):
     raise ValueError(force_name)
 
 
-def make_nonbonded_force(force_name):
-    force = mm.CustomNonbondedForce(term_energy_expression(force_name))
+def make_nonbonded_force(force_name, s12=0.169):
+    force = mm.CustomNonbondedForce(term_energy_expression(force_name, s12=s12))
     if force_name == "QqTtDampingForce":
         force.addGlobalParameter("dielectric", DIELECTRIC)
         force.addPerParticleParameter("b")
@@ -192,11 +193,11 @@ def configure_short_range_nonbonded_method(force, system):
             pass
 
 
-def bond_energy_expression(force_name):
+def bond_energy_expression(force_name, s12=0.169):
     if force_name == "QqTtDampingForce":
         return "scale*(-0.1*dielectric*qij*exp(-bij*r)*(1+bij*r)/r)"
     if force_name == "SlaterExForce":
-        return "scale*(aij*(1+bij*r+(bij*r)^2/3)*exp(-bij*r) + aij/(0.24*bij*r)^14)"
+        return f"scale*(aij*(1+bij*r+(bij*r)^2/3)*exp(-bij*r) + ({s12}/r)^12)"
     if force_name in {"SlaterSrEsForce", "SlaterSrPolForce", "SlaterSrDispForce", "SlaterDhfForce"}:
         return "scale*(-aij*(1+bij*r+(bij*r)^2/3)*exp(-bij*r))"
     if force_name == "SlaterDampingForce":
@@ -259,8 +260,8 @@ def bond_energy_expression(force_name):
     raise ValueError(force_name)
 
 
-def make_bond_force(force_name):
-    force = mm.CustomBondForce(bond_energy_expression(force_name))
+def make_bond_force(force_name, s12=0.169):
+    force = mm.CustomBondForce(bond_energy_expression(force_name, s12=s12))
     if force_name == "QqTtDampingForce":
         force.addGlobalParameter("dielectric", DIELECTRIC)
         for name in ("scale", "bij", "qij"):
@@ -305,13 +306,13 @@ def pair_params(force_name, force_section, type_i, type_j, scale):
     return [scale, p_i["A"] * p_j["A"], bij]
 
 
-def add_dmff_short_range_forces(system, atom_types, bonds, force_data, start_group=0):
+def add_dmff_short_range_forces(system, atom_types, bonds, force_data, start_group=0, s12=0.169):
     bonded_pairs = shortest_bond_separations(len(atom_types), bonds, max_sep=5)
     for group_offset, force_name in enumerate(TERM_ORDER):
         section = force_data[force_name]
-        nb_force = make_nonbonded_force(force_name)
+        nb_force = make_nonbonded_force(force_name, s12=s12)
         configure_short_range_nonbonded_method(nb_force, system)
-        bond_force = make_bond_force(force_name)
+        bond_force = make_bond_force(force_name, s12=s12)
         for atom_type in atom_types:
             nb_force.addParticle(particle_params(force_name, section, atom_type))
         for (i, j), separation in bonded_pairs.items():
@@ -326,10 +327,10 @@ def add_dmff_short_range_forces(system, atom_types, bonds, force_data, start_gro
     return system
 
 
-def add_dmff_short_range_forces_from_xml(system, topology, xml_path, start_group=0):
+def add_dmff_short_range_forces_from_xml(system, topology, xml_path, start_group=0, s12=0.169):
     atom_types, bonds = infer_atom_types_and_bonds_from_topology(topology, xml_path)
     force_data = parse_dmff_sr_xml(xml_path)
-    return add_dmff_short_range_forces(system, atom_types, bonds, force_data, start_group=start_group)
+    return add_dmff_short_range_forces(system, atom_types, bonds, force_data, start_group=start_group, s12=s12)
 
 
 def add_undamped_dispersion_force(system, topology, xml_path, cutoff_nm=0.6, force_group=None):
