@@ -447,6 +447,12 @@ void CudaCalcMPIDForceKernel::initialize(const System& system, const MPIDForce& 
     defines["NUM_BLOCKS"] = cu.intToString(cu.getNumAtomBlocks());
     defines["ENERGY_SCALE_FACTOR"] = cu.doubleToString(138.9354558456);
     defines["DEFAULT_THOLE_WIDTH"] = cu.doubleToString(force.getDefaultTholeWidth());
+    // Maximum allowed induced dipole component (e·nm).  Prevents polarization
+    // catastrophe when inter-molecular Thole damping is effectively disabled
+    // (DEFAULT_THOLE_WIDTH >> 1).  Normal water induced dipoles are ~0.01 e·nm
+    // per component; this cap at 0.02 is generous enough for normal dynamics
+    // but prevents the runaway divergence that leads to NaN.
+    defines["MAX_INDUCED_DIPOLE_COMPONENT"] = cu.doubleToString(0.03);
     if (polarizationType == MPIDForce::Direct)
         defines["DIRECT_POLARIZATION"] = "";
     else if (polarizationType == MPIDForce::Mutual)

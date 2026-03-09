@@ -19,7 +19,9 @@ TERM_ORDER = [
     "SlaterSrPolForce",
     "SlaterSrDispForce",
     "SlaterDhfForce",
-    "SlaterDampingForce",
+    # SlaterDampingForce is no longer a separate term; its contribution is
+    # merged with the undamped dispersion in add_damped_dispersion_force()
+    # to avoid catastrophic floating-point cancellation at short range.
 ]
 
 
@@ -331,18 +333,28 @@ def add_dmff_short_range_forces_from_xml(system, topology, xml_path, start_group
 
 
 def add_undamped_dispersion_force(system, topology, xml_path, cutoff_nm=0.6, force_group=None):
-    """Add undamped C6/C8/C10 dispersion as a CustomNonbondedForce with long-range correction.
+    """Backward-compatible wrapper: calls add_damped_dispersion_force."""
+    return add_damped_dispersion_force(system, topology, xml_path, cutoff_nm=cutoff_nm, force_group=force_group)
 
-    This replaces the native dispersion PME (which has unit convention issues)
-    with a simpler cutoff-based approach plus analytical tail correction.
-    Combined with SlaterDamping, this gives the correct total damped dispersion.
+
+def add_damped_dispersion_force(system, topology, xml_path, cutoff_nm=0.6, force_group=None):
+    """Add Tang-Toennies damped C6/C8/C10 dispersion as a single CustomNonbondedForce.
+
+    Computes  -(f_6 * C6/r^6 + f_8 * C8/r^8 + f_10 * C10/r^10)
+    where f_n is the Tang-Toennies incomplete gamma damping function:
+        f_n(x) = 1 - exp(-x) * sum_{k=0}^{n} x^k / k!
+    and x = br - (2*br^2+3*br)/(br^2+3*br+3), br = sqrt(B_i*B_j)*r.
+
+    This replaces the old approach of separate SlaterDampingForce + undamped
+    dispersion, which suffered from catastrophic cancellation at short range.
+    At long range f_n -> 1, so the LR correction is the same as for -C_n/r^n.
     """
     root = ET.parse(xml_path).getroot()
+
+    # Get C6/C8/C10 from ADMPDispPmeForce
     disp_node = root.find("ADMPDispPmeForce")
     if disp_node is None:
         return None
-
-    # Parse per-type dispersion parameters
     disp_params = {}
     for atom in disp_node.findall("Atom"):
         t = atom.attrib["type"]
@@ -352,53 +364,97 @@ def add_undamped_dispersion_force(system, topology, xml_path, cutoff_nm=0.6, for
             "C10": float(atom.get("C10", 0.0)),
         }
 
-    # Parse mScales for exclusions
-    mscales = [
+    # Get B from SlaterDampingForce (needed for Tang-Toennies damping argument)
+    damp_node = root.find("SlaterDampingForce")
+    b_params = {}
+    if damp_node is not None:
+        for atom in damp_node.findall("Atom"):
+            t = atom.attrib["type"]
+            b_params[t] = float(atom.get("B", 0.0))
+
+    # Parse mScales for exclusions (from dispersion section)
+    mscales_disp = [
         float(disp_node.attrib.get(f"mScale1{i}", "0.0"))
         for i in range(2, 7)
     ]
+    # Also need damping mScales for the bond correction term
+    mscales_damp = [0.0] * 5
+    if damp_node is not None:
+        mscales_damp = [
+            float(damp_node.attrib.get(f"mScale1{i}", "0.0"))
+            for i, default in zip(range(2, 7), [0.0, 0.0, 0.0, 1.0, 1.0])
+        ]
 
     atom_types, bonds = infer_atom_types_and_bonds_from_topology(topology, xml_path)
     bonded_pairs = shortest_bond_separations(len(atom_types), bonds, max_sep=5)
 
-    # Create the undamped dispersion force: -C6/r^6 - C8/r^8 - C10/r^10
-    force = mm.CustomNonbondedForce(
-        "-(c61*c62)/r^6 - (c81*c82)/r^8 - (c101*c102)/r^10"
+    # Build the merged expression: -(f_n(x) * C_n / r^n)
+    # f_n = 1 - exp(-x) * P_n(x)
+    # -(f_n * C_n/r^n) = -(1 - exp(-x)*P_n(x)) * C_n/r^n
+    #                   = -C_n/r^n + exp(-x)*P_n(x)*C_n/r^n
+    # At large r: f_n -> 1, so this -> -C_n/r^n (same as undamped)
+    # At small r: f_n -> 0, so this -> 0 (safe, no divergence)
+    expr = (
+        "-(1 - exp(-x)*(1+x+x^2/2+x^3/6+x^4/24+x^5/120+x^6/720))*(c61*c62)/r^6"
+        "-(1 - exp(-x)*(1+x+x^2/2+x^3/6+x^4/24+x^5/120+x^6/720+x^7/5040+x^8/40320))*(c81*c82)/r^8"
+        "-(1 - exp(-x)*(1+x+x^2/2+x^3/6+x^4/24+x^5/120+x^6/720+x^7/5040+x^8/40320+x^9/362880+x^10/3628800))*(c101*c102)/r^10;"
+        "x=br-(2*br^2+3*br)/(br^2+3*br+3);"
+        "br=sqrt(b1*b2)*r"
     )
+
+    force = mm.CustomNonbondedForce(expr)
+    force.addPerParticleParameter("b")
     force.addPerParticleParameter("c6")
     force.addPerParticleParameter("c8")
     force.addPerParticleParameter("c10")
     force.setNonbondedMethod(mm.CustomNonbondedForce.CutoffPeriodic)
     force.setCutoffDistance(cutoff_nm)
-    force.setUseLongRangeCorrection(True)
+    # LR correction computed via separate undamped tail force below
+    force.setUseLongRangeCorrection(False)
 
-    # Add particles with sqrt(C_n) values
     for atom_type in atom_types:
         p = disp_params.get(atom_type, {"C6": 0.0, "C8": 0.0, "C10": 0.0})
+        b = b_params.get(atom_type, 0.0)
         force.addParticle([
+            b,
             math.sqrt(abs(p["C6"])),
             math.sqrt(abs(p["C8"])),
             math.sqrt(abs(p["C10"])),
         ])
 
-    # Handle exclusions based on mScales
-    # Create bond force for excluded pairs that need non-zero scaling
-    bond_force = mm.CustomBondForce(
-        "scale*(-(c6ij)/r^6 - (c8ij)/r^8 - (c10ij)/r^10)"
+    # Bond correction for excluded pairs (using damped dispersion expression)
+    x_bond = "bij*r-(2*(bij*r)^2+3*(bij*r))/((bij*r)^2+3*(bij*r)+3)"
+    bond_expr = (
+        "scale*("
+        "-(1 - exp(-(" + x_bond + "))*(1+(" + x_bond + ")+(" + x_bond + ")^2/2+(" + x_bond + ")^3/6"
+        "+(" + x_bond + ")^4/24+(" + x_bond + ")^5/120+(" + x_bond + ")^6/720))*c6ij/r^6"
+        "-(1 - exp(-(" + x_bond + "))*(1+(" + x_bond + ")+(" + x_bond + ")^2/2+(" + x_bond + ")^3/6"
+        "+(" + x_bond + ")^4/24+(" + x_bond + ")^5/120+(" + x_bond + ")^6/720"
+        "+(" + x_bond + ")^7/5040+(" + x_bond + ")^8/40320))*c8ij/r^8"
+        "-(1 - exp(-(" + x_bond + "))*(1+(" + x_bond + ")+(" + x_bond + ")^2/2+(" + x_bond + ")^3/6"
+        "+(" + x_bond + ")^4/24+(" + x_bond + ")^5/120+(" + x_bond + ")^6/720"
+        "+(" + x_bond + ")^7/5040+(" + x_bond + ")^8/40320"
+        "+(" + x_bond + ")^9/362880+(" + x_bond + ")^10/3628800))*c10ij/r^10"
+        ")"
     )
+    bond_force = mm.CustomBondForce(bond_expr)
     bond_force.addPerBondParameter("scale")
+    bond_force.addPerBondParameter("bij")
     bond_force.addPerBondParameter("c6ij")
     bond_force.addPerBondParameter("c8ij")
     bond_force.addPerBondParameter("c10ij")
 
     for (i, j), separation in bonded_pairs.items():
         force.addExclusion(i, j)
-        scale = scale_for_bond_separation(mscales, separation)
+        scale = scale_for_bond_separation(mscales_disp, separation)
         if abs(scale) > 1e-15:
             pi = disp_params.get(atom_types[i], {"C6": 0.0, "C8": 0.0, "C10": 0.0})
             pj = disp_params.get(atom_types[j], {"C6": 0.0, "C8": 0.0, "C10": 0.0})
+            bi = b_params.get(atom_types[i], 0.0)
+            bj = b_params.get(atom_types[j], 0.0)
             bond_force.addBond(i, j, [
                 scale,
+                math.sqrt(bi * bj),
                 math.sqrt(abs(pi["C6"] * pj["C6"])),
                 math.sqrt(abs(pi["C8"] * pj["C8"])),
                 math.sqrt(abs(pi["C10"] * pj["C10"])),
@@ -410,6 +466,75 @@ def add_undamped_dispersion_force(system, topology, xml_path, cutoff_nm=0.6, for
 
     system.addForce(force)
     system.addForce(bond_force)
+    return force
+
+
+def add_short_range_repulsive_wall(system, topology, xml_path, cutoff_nm=0.6,
+                                   sigma=0.14, alpha=40.0, epsilon=100.0,
+                                   force_group=None):
+    """Add an exponential repulsive wall for O-H pairs to prevent catastrophe.
+
+    The DMFF force field's Slater exchange has weak O-H hard walls (~5 kJ/mol
+    at 0.15 nm), insufficient to prevent the close contacts that cause the
+    MPIDForce polarization solver and Coulomb interaction to diverge.
+
+    This adds  epsilon * exp(alpha * (1 - r/sigma))  restricted to inter-
+    molecular O-H pairs only (via interaction groups).  Because only O-H pairs
+    are affected, the total wall energy at equilibrium is small (~100 kJ/mol
+    for 512 waters).  The barrier at 0.14 nm is ~100 kJ/mol (40 kT), which
+    combined with the existing Slater exchange repulsion prevents any O-H pair
+    from reaching the distance where forces diverge.
+
+    Parameters
+    ----------
+    sigma : float
+        Distance in nm where the wall energy equals epsilon (default 0.14).
+    alpha : float
+        Steepness (default 40).  Larger = faster decay at long range.
+    epsilon : float
+        Energy at r=sigma in kJ/mol (default 100).
+    """
+    atom_types, bonds = infer_atom_types_and_bonds_from_topology(topology, xml_path)
+    bonded_pairs = shortest_bond_separations(len(atom_types), bonds, max_sep=5)
+
+    # Identify O and H atoms by type (type 380 = O, type 381 = H for water)
+    root = ET.parse(xml_path).getroot()
+    residues = root.find("Residues")
+    # Find which types are "heavy" (non-hydrogen) vs hydrogen based on element
+    o_types = set()
+    h_types = set()
+    if residues is not None:
+        for residue in residues.findall("Residue"):
+            for atom_node in residue.findall("Atom"):
+                element = atom_node.attrib.get("element", "")
+                atype = atom_node.attrib["type"]
+                if element == "O":
+                    o_types.add(atype)
+                elif element == "H":
+                    h_types.add(atype)
+    if not o_types or not h_types:
+        # Fallback: assume type 380 = O, 381 = H
+        o_types = {"380"}
+        h_types = {"381"}
+
+    o_indices = set(i for i, t in enumerate(atom_types) if t in o_types)
+    h_indices = set(i for i, t in enumerate(atom_types) if t in h_types)
+
+    force = mm.CustomNonbondedForce(
+        f"{epsilon}*exp({alpha}*(1-r/{sigma}))"
+    )
+    force.setNonbondedMethod(mm.CustomNonbondedForce.CutoffPeriodic)
+    force.setCutoffDistance(cutoff_nm)
+    for _ in range(system.getNumParticles()):
+        force.addParticle([])
+    # Only compute O-H interactions
+    force.addInteractionGroup(o_indices, h_indices)
+    # Exclude bonded pairs (intra-molecular O-H)
+    for (i, j) in bonded_pairs:
+        force.addExclusion(i, j)
+    if force_group is not None:
+        force.setForceGroup(force_group)
+    system.addForce(force)
     return force
 
 

@@ -470,9 +470,17 @@ extern "C" __global__ void recordInducedDipoles(const long long* __restrict__ fi
         real3 vy = make_real3(labFramePolarizabilities[offset+1], labFramePolarizabilities[offset+3], labFramePolarizabilities[offset+4]);
         real3 vz = make_real3(labFramePolarizabilities[offset+2], labFramePolarizabilities[offset+4], labFramePolarizabilities[offset+5]);
         real3 fld = make_real3(fieldBuffers[atom], fieldBuffers[atom+PADDED_NUM_ATOMS], fieldBuffers[atom+PADDED_NUM_ATOMS*2]) * scale;
-        inducedDipole[3*atom+0] = dot(vx, fld);
-        inducedDipole[3*atom+1] = dot(vy, fld);
-        inducedDipole[3*atom+2] = dot(vz, fld);
+        real mx = dot(vx, fld);
+        real my = dot(vy, fld);
+        real mz = dot(vz, fld);
+#ifdef MAX_INDUCED_DIPOLE_COMPONENT
+        mx = max((real) -MAX_INDUCED_DIPOLE_COMPONENT, min((real) MAX_INDUCED_DIPOLE_COMPONENT, mx));
+        my = max((real) -MAX_INDUCED_DIPOLE_COMPONENT, min((real) MAX_INDUCED_DIPOLE_COMPONENT, my));
+        mz = max((real) -MAX_INDUCED_DIPOLE_COMPONENT, min((real) MAX_INDUCED_DIPOLE_COMPONENT, mz));
+#endif
+        inducedDipole[3*atom+0] = mx;
+        inducedDipole[3*atom+1] = my;
+        inducedDipole[3*atom+2] = mz;
     }
 }
 

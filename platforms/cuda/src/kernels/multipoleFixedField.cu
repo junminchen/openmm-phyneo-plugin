@@ -181,13 +181,13 @@ __device__ void computeOneInteraction(AtomData& atom1, AtomData& atom2, real3 de
     real rr9 = 7*rr7*r2I;
  
     // get scaling factors, if needed
-    
+
     float damp = fabs(atom1.damp*atom2.damp);
     real dampExp;
     if (damp != 0) {
 
         // get scaling factors
-      
+
         real ratio = r/damp;
         float pGamma  = pScale == 0.0f ? atom1.thole + atom2.thole : DEFAULT_THOLE_WIDTH;
         damp = ratio*pGamma;

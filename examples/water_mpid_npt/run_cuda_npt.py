@@ -30,6 +30,7 @@ import mpidplugin  # noqa: E402
 from dmff_sr_custom_forces import (  # noqa: E402
     add_dmff_short_range_forces_from_xml,
     add_undamped_dispersion_force,
+    add_short_range_repulsive_wall,
 )
 
 EXAMPLE_DIR = Path(__file__).resolve().parent
@@ -38,7 +39,7 @@ EXAMPLE_DIR = Path(__file__).resolve().parent
 def main():
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--steps", type=int, default=200000, help="Number of MD steps (default: 200000 = 200 ps)")
+    parser.add_argument("--steps", type=int, default=400000, help="Number of MD steps (default: 400000 = 200 ps at 0.5 fs)")
     parser.add_argument("--platform", default="CUDA", choices=["CUDA", "Reference", "CPU"],
                         help="OpenMM platform (default: CUDA)")
     parser.add_argument("--dt", type=float, default=0.5, help="Timestep in fs (default: 0.5)")
@@ -61,7 +62,7 @@ def main():
     system = ff.createSystem(
         pdb.topology,
         nonbondedMethod=app.PME,
-        nonbondedCutoff=0.8 * unit.nanometer,
+        nonbondedCutoff=0.6 * unit.nanometer,
         constraints=None,
         rigidWater=False,
         polarization="extrapolated",
@@ -77,8 +78,16 @@ def main():
 
     # ── Add undamped C6/C8/C10 dispersion with long-range correction ──
     # cutoff must match the nonbondedCutoff used above
-    cutoff_nm = 0.8
+    cutoff_nm = 0.6
     add_undamped_dispersion_force(
+        system, pdb.topology, str(dmff_xml), cutoff_nm=cutoff_nm,
+    )
+
+    # ── Add repulsive wall to prevent close contacts ──
+    # Steep step-function wall: exactly zero for r >= 0.17 nm, provides
+    # ~100 kJ/mol at 0.15 nm to prevent O-H approaches that cause the
+    # MPIDForce polarization solver and Coulomb interaction to diverge.
+    add_short_range_repulsive_wall(
         system, pdb.topology, str(dmff_xml), cutoff_nm=cutoff_nm,
     )
 

@@ -162,10 +162,10 @@ __device__ void computeOneInteraction(AtomData& atom1, AtomData& atom2, real3 de
     real rr5 = -3*rr3*r2I;
     real rr7 = 5*rr5*r2I;
     real dampProd = fabs(atom1.damp*atom2.damp);
-    real ratio = (dampProd != 0 ? r/dampProd : 1);
+    real ratio = (dampProd != 0 ? r/dampProd : (real)1);
     float pGamma  = pScale == 0.0 ? atom1.thole + atom2.thole : DEFAULT_THOLE_WIDTH;
     real damp = ratio*pGamma;
-    real dampExp = (dampProd != 0 ? EXP(-damp) : 0); 
+    real dampExp = (dampProd != 0 ? EXP(-damp) : 0);
     rr3 *= 1 - dampExp*(1 + damp + damp*damp/2);
     rr5 *= 1 - dampExp*(1 + damp + damp*damp/2 + damp*damp*damp/6);
     rr7 *= 1 - dampExp*(1 + damp + damp*damp/2 + damp*damp*damp/6 + damp*damp*damp*damp/30);
@@ -412,6 +412,9 @@ extern "C" __global__ void recordInducedDipolesForDIIS(const long long* __restri
 
             real oldDipole = inducedDipole[dipoleIndex];
             real newDipole = fieldScale*dot(alpha, fld);
+#ifdef MAX_INDUCED_DIPOLE_COMPONENT
+            newDipole = max((real) -MAX_INDUCED_DIPOLE_COMPONENT, min((real) MAX_INDUCED_DIPOLE_COMPONENT, newDipole));
+#endif
             int storePrevIndex = dipoleIndex+min(iteration, MAX_PREV_DIIS_DIPOLES-1)*NUM_ATOMS*3;
             prevDipoles[storePrevIndex] = newDipole;
             if (recordPrevErrors)
@@ -587,13 +590,16 @@ extern "C" __global__ void solveDIISMatrix(int iteration, const real* __restrict
     }
 }
 
-extern "C" __global__ void updateInducedFieldByDIIS(real* __restrict__ inducedDipole, const real* __restrict__ prevDipoles, 
+extern "C" __global__ void updateInducedFieldByDIIS(real* __restrict__ inducedDipole, const real* __restrict__ prevDipoles,
                                                     const float* __restrict__ coefficients, int numPrev) {
     for (int index = blockIdx.x*blockDim.x + threadIdx.x; index < 3*NUM_ATOMS; index += blockDim.x*gridDim.x) {
         real sum = 0;
         for (int i = 0; i < numPrev; i++) {
             sum += coefficients[i]*prevDipoles[i*3*NUM_ATOMS+index];
         }
+#ifdef MAX_INDUCED_DIPOLE_COMPONENT
+        sum = max((real) -MAX_INDUCED_DIPOLE_COMPONENT, min((real) MAX_INDUCED_DIPOLE_COMPONENT, sum));
+#endif
         inducedDipole[index] = sum;
     }
 }
@@ -627,6 +633,9 @@ extern "C" __global__ void iterateExtrapolatedDipoles(int order, real* __restric
             else if(component==2)
                 alpha = make_real3(labFramePolarizabilities[offset+2], labFramePolarizabilities[offset+4], labFramePolarizabilities[offset+5]);
             real value = dot(alpha,fld)*fieldScale;
+#ifdef MAX_INDUCED_DIPOLE_COMPONENT
+            value = max((real) -MAX_INDUCED_DIPOLE_COMPONENT, min((real) MAX_INDUCED_DIPOLE_COMPONENT, value));
+#endif
             inducedDipole[3*atom+component] = value;
             extrapolatedDipole[order*3*NUM_ATOMS+3*atom+component] = value;
         }
@@ -651,6 +660,9 @@ extern "C" __global__ void computeExtrapolatedDipoles(real* __restrict__ induced
         for (int order = 0; order < MAX_EXTRAPOLATION_ORDER; order++) {
             sum += extrapolatedDipole[order*3*NUM_ATOMS+index]*coeff[order];
         }
+#ifdef MAX_INDUCED_DIPOLE_COMPONENT
+        sum = max((real) -MAX_INDUCED_DIPOLE_COMPONENT, min((real) MAX_INDUCED_DIPOLE_COMPONENT, sum));
+#endif
         inducedDipole[index] = sum;
     }
 }
