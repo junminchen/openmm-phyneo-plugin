@@ -1,0 +1,105 @@
+<ForceField>
+    <AtomTypes>
+        <Type name="1" class="OS" element="O" mass="15.999"/>
+        <Type name="2" class="CT" element="C" mass="12.0107"/>
+        <Type name="3" class="OS" element="O" mass="15.999"/>
+        <Type name="4" class="CT" element="C" mass="12.0107"/>
+        <Type name="5" class="HC" element="H" mass="1.00784"/>
+    </AtomTypes>
+    <Residues>
+        <Residue name="ECA">
+            <Atom name="O00" type="1"/>
+            <Atom name="C01" type="2"/>
+            <Atom name="O02" type="3"/>
+            <Atom name="C03" type="4"/>
+            <Atom name="C04" type="4"/>
+            <Atom name="O05" type="3"/>
+            <Atom name="H06" type="5"/>
+            <Atom name="H07" type="5"/>
+            <Atom name="H08" type="5"/>
+            <Atom name="H09" type="5"/>
+            <Bond from="0" to="1"/>
+            <Bond from="1" to="2"/>
+            <Bond from="1" to="5"/>
+            <Bond from="2" to="3"/>
+            <Bond from="5" to="4"/>
+            <Bond from="3" to="4"/>
+            <Bond from="3" to="6"/>
+            <Bond from="3" to="7"/>
+            <Bond from="4" to="8"/>
+            <Bond from="4" to="9"/>
+        </Residue>
+    </Residues>
+
+    <CustomBondForce energy="kb*(r-b0)^2">
+        <PerBondParameter name="b0"/>
+        <PerBondParameter name="kb"/>
+        <Bond class1="1" class2="2" b0="0.122900" kb="476976.0"/>
+        <Bond class1="3" class2="2" b0="0.132700" kb="179075.2"/>
+        <Bond class1="4" class2="3" b0="0.141000" kb="267776.0"/>
+        <Bond class1="4" class2="4" b0="0.152900" kb="224262.4"/>
+        <Bond class1="5" class2="4" b0="0.109000" kb="284512.0"/>
+    </CustomBondForce>
+
+    <HarmonicAngleForce>
+        <Angle class1="1" class2="2" class3="3" angle="2.153736" k="694.544"/>
+        <Angle class1="2" class2="3" class3="4" angle="2.040290" k="694.544"/>
+        <Angle class1="3" class2="4" class3="4" angle="1.911136" k="418.400"/>
+        <Angle class1="3" class2="4" class3="5" angle="1.911136" k="292.880"/>
+        <Angle class1="4" class2="4" class3="5" angle="1.932079" k="313.800"/>
+        <Angle class1="5" class2="4" class3="5" angle="1.881465" k="276.144"/>
+        <Angle class1="3" class2="2" class3="3" angle="2.062630" k="584.9232"/>
+    </HarmonicAngleForce>
+
+    <PeriodicTorsionForce>
+        <Proper class1="4" class2="4" class3="3" class4="2" k1="-2.552240" k2="-0.263592" k3="0.882824" k4="0.0" periodicity1="1" periodicity2="2" periodicity3="3" periodicity4="4" phase1="0.0" phase2="3.14159" phase3="0.0" phase4="3.14159"/>
+        <Proper class1="5" class2="4" class3="4" class4="3" k1="0.0" k2="0.0" k3="0.979056" k4="0.0" periodicity1="1" periodicity2="2" periodicity3="3" periodicity4="4" phase1="0.0" phase2="3.14159" phase3="0.0" phase4="3.14159"/>
+        <Proper class1="5" class2="4" class3="3" class4="2" k1="0.0" k2="0.0" k3="0.414216" k4="0.0" periodicity1="1" periodicity2="2" periodicity3="3" periodicity4="4" phase1="0.0" phase2="3.14159" phase3="0.0" phase4="3.14159"/>
+        <Proper class1="5" class2="4" class3="4" class4="5" k1="0.0" k2="0.0" k3="0.627600" k4="0.0" periodicity1="1" periodicity2="2" periodicity3="3" periodicity4="4" phase1="0.0" phase2="3.14159" phase3="0.0" phase4="3.14159"/>
+        <Proper class1="3" class2="4" class3="4" class4="3" k1="-1.150600" k2="0.0" k3="0.0" k4="0.0" periodicity1="1" periodicity2="2" periodicity3="3" periodicity4="4" phase1="0.0" phase2="3.14159" phase3="0.0" phase4="3.14159"/>
+    </PeriodicTorsionForce>
+
+    <!-- Combined Slater Nonbonded Force -->
+    <CustomNonbondedForce bondCutoff="3" 
+        energy="A*K2*exp(-B*r) + (-138.93542)*exp(-B*r)*(1+B*r)*Q/r 
+        - (1-exp(-x)*(1+x+0.5*x^2+x^3/6+x^4/24+x^5/120+x^6/720)) * C6/(r^6) 
+        - (1-exp(-x)*(1+x+0.5*x^2+x^3/6+x^4/24+x^5/120+x^6/720+x^7/5040+x^8/40320)) * C8/(r^8) 
+        - (1-exp(-x)*(1+x+0.5*x^2+x^3/6+x^4/24+x^5/120+x^6/720+x^7/5040+x^8/40320+x^9/362880+x^10/3628800)) * C10/(r^10);
+        x=B*r - (2*B^2*r+3*B)/(B^2*r^2+3*B*r+3)*r;
+        K2=(Br^2)/3 + Br + 1;
+        Br = B*r;
+        B=sqrt(Bexp1*Bexp2);
+        Q=Q1*Q2;
+        C6=sqrt(C61*C62);
+        C8=sqrt(C81*C82);
+        C10=sqrt(C101*C102);
+        A=abs(Aex-Ael-Ain-Adh-Adi);
+        Aex=(Aexch1*Aexch2);
+        Ael=(Aelec1*Aelec2);
+        Ain=(Aind1*Aind2);
+        Adh=(Adhf1*Adhf2);
+        Adi=(Adisp1*Adisp2)">
+        
+        <PerParticleParameter name="Aexch"/>
+        <PerParticleParameter name="Aelec"/>
+        <PerParticleParameter name="Aind"/>
+        <PerParticleParameter name="Adhf"/>
+        <PerParticleParameter name="Adisp"/>
+        <PerParticleParameter name="Bexp"/>
+        <PerParticleParameter name="Q"/>
+        <PerParticleParameter name="C6"/>
+        <PerParticleParameter name="C8"/>
+        <PerParticleParameter name="C10"/>
+
+        <!-- Type 1 (O - OS) -->
+        <Atom type="1" Aexch="116.86696" Aelec="72.55953" Aind="1e-32" Adhf="38.34251" Adisp="26.35646" Bexp="38.98815" Q="-0.61622" C6="1.158425e-03" C8="7.175195e-05" C10="2.082804e-06"/>
+        <!-- Type 2 (C - CT) -->
+        <Atom type="2" Aexch="320.80572" Aelec="101.19607" Aind="136.95673" Adhf="19.29324" Adisp="0.27812" Bexp="57.20990" Q="0.92986" C6="8.422619e-04" C8="4.418617e-05" C10="1.240508e-06"/>
+        <!-- Type 3 (O - OS) -->
+        <Atom type="3" Aexch="128.09716" Aelec="89.42519" Aind="13.16513" Adhf="30.55278" Adisp="1.68355" Bexp="41.04477" Q="-0.37628" C6="8.381411e-04" C8="4.308587e-05" C10="1.073917e-06"/>
+        <!-- Type 4 (C - CT) -->
+        <Atom type="4" Aexch="99.21663" Aelec="38.49363" Aind="0.91481" Adhf="1.88151" Adisp="6.75148" Bexp="38.69656" Q="0.10045" C6="1.263260e-03" C8="8.710687e-05" C10="2.910050e-06"/>
+        <!-- Type 5 (H - HC) -->
+        <Atom type="5" Aexch="32.34617" Aelec="18.66811" Aind="5.01515" Adhf="15.75499" Adisp="10.35077" Bexp="43.92731" Q="0.05954" C6="9.962492e-05" C8="3.288732e-06" C10="5.645362e-08"/>
+    </CustomNonbondedForce>
+</ForceField>
