@@ -1,0 +1,391 @@
+/* -------------------------------------------------------------------------- *
+ *                               OpenMMPhyNEOForce                                 *
+ * -------------------------------------------------------------------------- *
+ * This is part of the OpenMM molecular simulation toolkit originating from   *
+ * Simbios, the NIH National Center for Physics-Based Simulation of           *
+ * Biological Structures at Stanford, funded under the NIH Roadmap for        *
+ * Medical Research, grant U54 GM072970. See https://simtk.org.               *
+ *                                                                            *
+ * Portions copyright (c) 2008-2016 Stanford University and the Authors.      *
+ * Authors:                                                                   *
+ * Contributors:                                                              *
+ *                                                                            *
+ * This program is free software: you can redistribute it and/or modify       *
+ * it under the terms of the GNU Lesser General Public License as published   *
+ * by the Free Software Foundation, either version 3 of the License, or       *
+ * (at your option) any later version.                                        *
+ *                                                                            *
+ * This program is distributed in the hope that it will be useful,            *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of             *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the              *
+ * GNU Lesser General Public License for more details.                        *
+ *                                                                            *
+ * You should have received a copy of the GNU Lesser General Public License   *
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.      *
+ * -------------------------------------------------------------------------- */
+
+#include "ADMPPmeReferenceKernels.h"
+#include "ReferencePlatform.h"
+#include "openmm/internal/ContextImpl.h"
+#include "openmm/ADMPPmeForce.h"
+#include "openmm/internal/ADMPPmeForceImpl.h"
+#include "openmm/NonbondedForce.h"
+#include "openmm/internal/NonbondedForceImpl.h"
+
+#include <cmath>
+#ifdef _MSC_VER
+#include <windows.h>
+#endif
+
+using namespace OpenMM;
+using namespace std;
+
+static vector<Vec3>& extractPositions(ContextImpl& context) {
+    ReferencePlatform::PlatformData* data = reinterpret_cast<ReferencePlatform::PlatformData*>(context.getPlatformData());
+    return *((vector<Vec3>*) data->positions);
+}
+
+static vector<Vec3>& extractVelocities(ContextImpl& context) {
+    ReferencePlatform::PlatformData* data = reinterpret_cast<ReferencePlatform::PlatformData*>(context.getPlatformData());
+    return *((vector<Vec3>*) data->velocities);
+}
+
+static vector<Vec3>& extractForces(ContextImpl& context) {
+    ReferencePlatform::PlatformData* data = reinterpret_cast<ReferencePlatform::PlatformData*>(context.getPlatformData());
+    return *((vector<Vec3>*) data->forces);
+}
+
+static Vec3& extractBoxSize(ContextImpl& context) {
+    ReferencePlatform::PlatformData* data = reinterpret_cast<ReferencePlatform::PlatformData*>(context.getPlatformData());
+    return *(Vec3*) data->periodicBoxSize;
+}
+
+static Vec3* extractBoxVectors(ContextImpl& context) {
+    ReferencePlatform::PlatformData* data = reinterpret_cast<ReferencePlatform::PlatformData*>(context.getPlatformData());
+    return (Vec3*) data->periodicBoxVectors;
+}
+
+// ***************************************************************************
+
+
+/* -------------------------------------------------------------------------- *
+ *                             ADMPPmeForce                                      *
+ * -------------------------------------------------------------------------- */
+
+ReferenceCalcADMPPmeForceKernel::ReferenceCalcADMPPmeForceKernel(std::string name, const Platform& platform, const System& system) : 
+         CalcADMPPmeForceKernel(name, platform), system(system), numMultipoles(0), mutualInducedMaxIterations(60), mutualInducedTargetEpsilon(1.0e-03),
+                                                         usePme(false),alphaEwald(0.0), cutoffDistance(1.0) {  
+
+}
+
+ReferenceCalcADMPPmeForceKernel::~ReferenceCalcADMPPmeForceKernel() {
+}
+
+void ReferenceCalcADMPPmeForceKernel::initialize(const System& system, const ADMPPmeForce& force) {
+
+    numMultipoles   = force.getNumMultipoles();
+
+    charges.resize(numMultipoles);
+    dipoles.resize(3*numMultipoles);
+    quadrupoles.resize(6*numMultipoles);
+    octopoles.resize(10*numMultipoles);
+    tholes.resize(numMultipoles);
+    dampingFactors.resize(numMultipoles);
+    polarity.resize(numMultipoles);
+    axisTypes.resize(numMultipoles);
+    multipoleAtomZs.resize(numMultipoles);
+    multipoleAtomXs.resize(numMultipoles);
+    multipoleAtomYs.resize(numMultipoles);
+    multipoleAtomCovalentInfo.resize(numMultipoles);
+
+    int dipoleIndex      = 0;
+    int quadrupoleIndex  = 0;
+    int octopoleIndex    = 0;
+    double totalCharge   = 0.0;
+    for (int ii = 0; ii < numMultipoles; ii++) {
+
+        // multipoles
+
+        int axisType, multipoleAtomZ, multipoleAtomX, multipoleAtomY;
+        double charge, tholeD;
+        std::vector<double> alphasD;
+        std::vector<double> dipolesD;
+        std::vector<double> quadrupolesD;
+        std::vector<double> octopolesD;
+        force.getMultipoleParameters(ii, charge, dipolesD, quadrupolesD, octopolesD, axisType, multipoleAtomZ, multipoleAtomX, multipoleAtomY,
+                                     tholeD, alphasD);
+
+        totalCharge                       += charge;
+        axisTypes[ii]                      = axisType;
+        multipoleAtomZs[ii]                = multipoleAtomZ;
+        multipoleAtomXs[ii]                = multipoleAtomX;
+        multipoleAtomYs[ii]                = multipoleAtomY;
+
+        charges[ii]                        = charge;
+        tholes[ii]                         = tholeD;
+        dampingFactors[ii]                 = pow((alphasD[0]+alphasD[1]+alphasD[2])/3.0, 1.0/6.0);
+        polarity[ii]                       = alphasD;
+
+        for(int i = 0; i < 3; ++i)
+            dipoles[dipoleIndex++] = dipolesD[i];
+        for(int i = 0; i < 6; ++i)
+            quadrupoles[quadrupoleIndex++] = quadrupolesD[i];
+        for(int i = 0; i < 10; ++i)
+            octopoles[octopoleIndex++] = octopolesD[i];
+
+        // covalent info
+
+        std::vector< std::vector<int> > covalentLists;
+        force.getCovalentMaps(ii, covalentLists);
+        multipoleAtomCovalentInfo[ii] = covalentLists;
+
+        defaultTholeWidth = force.getDefaultTholeWidth();
+    }
+
+    polarizationType = force.getPolarizationType();
+    if (polarizationType == ADMPPmeForce::Mutual) {
+        mutualInducedMaxIterations = force.getMutualInducedMaxIterations();
+        mutualInducedTargetEpsilon = force.getMutualInducedTargetEpsilon();
+    } else if (polarizationType == ADMPPmeForce::Extrapolated) {
+        extrapolationCoefficients = force.getExtrapolationCoefficients();
+    }
+
+    // PME
+
+    nonbondedMethod  = force.getNonbondedMethod();
+    if (nonbondedMethod == ADMPPmeForce::PME) {
+        usePme     = true;
+        pmeGridDimension.resize(3);
+        force.getPMEParameters(alphaEwald, pmeGridDimension[0], pmeGridDimension[1], pmeGridDimension[2]);
+        cutoffDistance = force.getCutoffDistance();
+        if (pmeGridDimension[0] == 0 || alphaEwald == 0.0) {
+            NonbondedForce nb;
+            nb.setEwaldErrorTolerance(force.getEwaldErrorTolerance());
+            nb.setCutoffDistance(force.getCutoffDistance());
+            int gridSizeX, gridSizeY, gridSizeZ;
+            NonbondedForceImpl::calcPMEParameters(system, nb, alphaEwald, gridSizeX, gridSizeY, gridSizeZ, false);
+            pmeGridDimension[0] = gridSizeX;
+            pmeGridDimension[1] = gridSizeY;
+            pmeGridDimension[2] = gridSizeZ;
+        }    
+    } else {
+        usePme = false;
+    }
+    force.getMScales(mScales);
+    force.getPScales(pScales);
+    force.getDScales(dScales);
+
+    return;
+}
+
+ADMPPmeReferenceForce* ReferenceCalcADMPPmeForceKernel::setupADMPPmeReferenceForce(ContextImpl& context)
+{
+
+    // ADMPPmeReferenceForce is set to ADMPPmeReferencePmeForce if 'usePme' is set
+    // ADMPPmeReferenceForce is set to ADMPPmeReferenceForce otherwise
+
+
+    ADMPPmeReferenceForce* mpidReferenceForce = NULL;
+    if (usePme) {
+
+        ADMPPmeReferencePmeForce* mpidReferencePmeForce = new ADMPPmeReferencePmeForce();
+        mpidReferencePmeForce->setAlphaEwald(alphaEwald);
+        mpidReferencePmeForce->setCutoffDistance(cutoffDistance);
+        mpidReferencePmeForce->setPmeGridDimensions(pmeGridDimension);
+        Vec3* boxVectors = extractBoxVectors(context);
+        double minAllowedSize = 1.999999*cutoffDistance;
+        if (boxVectors[0][0] < minAllowedSize || boxVectors[1][1] < minAllowedSize || boxVectors[2][2] < minAllowedSize) {
+            throw OpenMMException("The periodic box size has decreased to less than twice the nonbonded cutoff.");
+        }
+        mpidReferencePmeForce->setPeriodicBoxSize(boxVectors);
+        mpidReferenceForce = static_cast<ADMPPmeReferenceForce*>(mpidReferencePmeForce);
+
+    } else {
+         mpidReferenceForce = new ADMPPmeReferenceForce(ADMPPmeReferenceForce::NoCutoff);
+    }
+
+    // set polarization type
+    mpidReferenceForce->setDefaultTholeWidth(defaultTholeWidth);
+    if (polarizationType == ADMPPmeForce::Mutual) {
+        mpidReferenceForce->setPolarizationType(ADMPPmeReferenceForce::Mutual);
+        mpidReferenceForce->setMutualInducedDipoleTargetEpsilon(mutualInducedTargetEpsilon);
+        mpidReferenceForce->setMaximumMutualInducedDipoleIterations(mutualInducedMaxIterations);
+    } else if (polarizationType == ADMPPmeForce::Direct) {
+        mpidReferenceForce->setPolarizationType(ADMPPmeReferenceForce::Direct);
+    } else if (polarizationType == ADMPPmeForce::Extrapolated) {
+        mpidReferenceForce->setPolarizationType(ADMPPmeReferenceForce::Extrapolated);
+        mpidReferenceForce->setExtrapolationCoefficients(extrapolationCoefficients);
+    } else {
+        throw OpenMMException("Polarization type not recognzied.");
+    }
+    mpidReferenceForce->setMScales(mScales);
+    mpidReferenceForce->setPScales(pScales);
+    mpidReferenceForce->setDScales(dScales);
+
+    return mpidReferenceForce;
+
+}
+
+double ReferenceCalcADMPPmeForceKernel::execute(ContextImpl& context, bool includeForces, bool includeEnergy) {
+
+    ADMPPmeReferenceForce* ADMPPmeReferenceForce = setupADMPPmeReferenceForce(context);
+
+    vector<Vec3>& posData = extractPositions(context);
+    vector<Vec3>& forceData = extractForces(context);
+    double energy = ADMPPmeReferenceForce->calculateForceAndEnergy(posData, charges, dipoles, quadrupoles, octopoles, tholes,
+                                                                           dampingFactors, polarity, axisTypes, 
+                                                                           multipoleAtomZs, multipoleAtomXs, multipoleAtomYs,
+                                                                           multipoleAtomCovalentInfo, forceData);
+
+    delete ADMPPmeReferenceForce;
+
+    return static_cast<double>(energy);
+}
+
+void ReferenceCalcADMPPmeForceKernel::getInducedDipoles(ContextImpl& context, vector<Vec3>& outputDipoles) {
+    int numParticles = context.getSystem().getNumParticles();
+    outputDipoles.resize(numParticles);
+
+    // Create an ADMPPmeReferenceForce to do the calculation.
+    
+    ADMPPmeReferenceForce* ADMPPmeReferenceForce = setupADMPPmeReferenceForce(context);
+    vector<Vec3>& posData = extractPositions(context);
+    
+    // Retrieve the induced dipoles.
+    
+    vector<Vec3> inducedDipoles;
+    ADMPPmeReferenceForce->calculateInducedDipoles(posData, charges, dipoles, quadrupoles, octopoles, tholes,
+            dampingFactors, polarity, axisTypes, multipoleAtomZs, multipoleAtomXs, multipoleAtomYs, multipoleAtomCovalentInfo, inducedDipoles);
+    for (int i = 0; i < numParticles; i++)
+        outputDipoles[i] = inducedDipoles[i];
+    delete ADMPPmeReferenceForce;
+}
+
+void ReferenceCalcADMPPmeForceKernel::getLabFramePermanentDipoles(ContextImpl& context, vector<Vec3>& outputDipoles) {
+    int numParticles = context.getSystem().getNumParticles();
+    outputDipoles.resize(numParticles);
+
+    // Create an ADMPPmeReferenceForce to do the calculation.
+    
+    ADMPPmeReferenceForce* ADMPPmeReferenceForce = setupADMPPmeReferenceForce(context);
+    vector<Vec3>& posData = extractPositions(context);
+    
+    // Retrieve the permanent dipoles in the lab frame.
+    
+    vector<Vec3> labFramePermanentDipoles;
+    ADMPPmeReferenceForce->calculateLabFramePermanentDipoles(posData, charges, dipoles, quadrupoles, octopoles, tholes,
+            dampingFactors, polarity, axisTypes, multipoleAtomZs, multipoleAtomXs, multipoleAtomYs, multipoleAtomCovalentInfo, labFramePermanentDipoles);
+    for (int i = 0; i < numParticles; i++)
+        outputDipoles[i] = labFramePermanentDipoles[i];
+    delete ADMPPmeReferenceForce;
+}
+
+
+void ReferenceCalcADMPPmeForceKernel::getTotalDipoles(ContextImpl& context, vector<Vec3>& outputDipoles) {
+    int numParticles = context.getSystem().getNumParticles();
+    outputDipoles.resize(numParticles);
+
+    // Create an ADMPPmeReferenceForce to do the calculation.
+    
+    ADMPPmeReferenceForce* ADMPPmeReferenceForce = setupADMPPmeReferenceForce(context);
+    vector<Vec3>& posData = extractPositions(context);
+    
+    // Retrieve the permanent dipoles in the lab frame.
+    
+    vector<Vec3> totalDipoles;
+    ADMPPmeReferenceForce->calculateTotalDipoles(posData, charges, dipoles, quadrupoles, octopoles, tholes,
+            dampingFactors, polarity, axisTypes, multipoleAtomZs, multipoleAtomXs, multipoleAtomYs, multipoleAtomCovalentInfo, totalDipoles);
+
+    for (int i = 0; i < numParticles; i++)
+        outputDipoles[i] = totalDipoles[i];
+    delete ADMPPmeReferenceForce;
+}
+
+
+
+void ReferenceCalcADMPPmeForceKernel::getElectrostaticPotential(ContextImpl& context, const std::vector< Vec3 >& inputGrid,
+                                                                        std::vector< double >& outputElectrostaticPotential) {
+
+    ADMPPmeReferenceForce* ADMPPmeReferenceForce = setupADMPPmeReferenceForce(context);
+    vector<Vec3>& posData                                     = extractPositions(context);
+    vector<Vec3> grid(inputGrid.size());
+    vector<double> potential(inputGrid.size());
+    for (unsigned int ii = 0; ii < inputGrid.size(); ii++) {
+        grid[ii] = inputGrid[ii];
+    }
+    ADMPPmeReferenceForce->calculateElectrostaticPotential(posData, charges, dipoles, quadrupoles, octopoles, tholes,
+                                                                   dampingFactors, polarity, axisTypes, 
+                                                                   multipoleAtomZs, multipoleAtomXs, multipoleAtomYs,
+                                                                   multipoleAtomCovalentInfo, grid, potential);
+
+    outputElectrostaticPotential.resize(inputGrid.size());
+    for (unsigned int ii = 0; ii < inputGrid.size(); ii++) {
+        outputElectrostaticPotential[ii] = potential[ii];
+    }
+
+    delete ADMPPmeReferenceForce;
+}
+
+void ReferenceCalcADMPPmeForceKernel::getSystemMultipoleMoments(ContextImpl& context, std::vector< double >& outputMultipoleMoments) {
+
+    // retrieve masses
+
+    const System& system             = context.getSystem();
+    vector<double> masses;
+    for (int i = 0; i <  system.getNumParticles(); ++i) {
+        masses.push_back(system.getParticleMass(i));
+    }    
+
+    ADMPPmeReferenceForce* ADMPPmeReferenceForce = setupADMPPmeReferenceForce(context);
+    vector<Vec3>& posData                                     = extractPositions(context);
+    ADMPPmeReferenceForce->calculateMPIDSystemMultipoleMoments(masses, posData, charges, dipoles, quadrupoles, octopoles, tholes,
+                                                                         dampingFactors, polarity, axisTypes, 
+                                                                         multipoleAtomZs, multipoleAtomXs, multipoleAtomYs,
+                                                                         multipoleAtomCovalentInfo, outputMultipoleMoments);
+
+    delete ADMPPmeReferenceForce;
+}
+
+void ReferenceCalcADMPPmeForceKernel::copyParametersToContext(ContextImpl& context, const ADMPPmeForce& force) {
+    if (numMultipoles != force.getNumMultipoles())
+        throw OpenMMException("updateParametersInContext: The number of multipoles has changed");
+
+    // Record the values.
+
+    int dipoleIndex = 0;
+    int quadrupoleIndex = 0;
+    int octopoleIndex = 0;
+    for (int i = 0; i < numMultipoles; ++i) {
+        int axisType, multipoleAtomZ, multipoleAtomX, multipoleAtomY;
+        double charge, tholeD, dampingFactorD;
+        std::vector<double> dipolesD;
+        std::vector<double> quadrupolesD;
+        std::vector<double> octopolesD;
+        std::vector<double> polarityD;
+        force.getMultipoleParameters(i, charge, dipolesD, quadrupolesD, octopolesD, axisType, multipoleAtomZ, multipoleAtomX, multipoleAtomY, tholeD, polarityD);
+        dampingFactorD = pow((polarityD[0]+polarityD[1]+polarityD[2])/3.0, 1.0/6.0);
+        axisTypes[i] = axisType;
+        multipoleAtomZs[i] = multipoleAtomZ;
+        multipoleAtomXs[i] = multipoleAtomX;
+        multipoleAtomYs[i] = multipoleAtomY;
+        charges[i] = charge;
+        tholes[i] = tholeD;
+        dampingFactors[i] = dampingFactorD;
+        polarity[i] = polarityD;
+        for(int i = 0; i < 3; ++i)
+            octopoles[dipoleIndex++] = dipolesD[i];
+        for(int i = 0; i < 6; ++i)
+            octopoles[quadrupoleIndex++] = quadrupolesD[i];
+        for(int i = 0; i < 10; ++i)
+            octopoles[octopoleIndex++] = octopolesD[i];
+    }
+}
+
+void ReferenceCalcADMPPmeForceKernel::getPMEParameters(double& alpha, int& nx, int& ny, int& nz) const {
+    if (!usePme)
+        throw OpenMMException("getPMEParametersInContext: This Context is not using PME");
+    alpha = alphaEwald;
+    nx = pmeGridDimension[0];
+    ny = pmeGridDimension[1];
+    nz = pmeGridDimension[2];
+}

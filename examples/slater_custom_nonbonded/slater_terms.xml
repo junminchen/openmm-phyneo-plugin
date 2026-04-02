@@ -1,0 +1,44 @@
+<ForceField>
+  <QqTtDampingForce mScale12="0.00" mScale13="0.00" mScale14="0.00" mScale15="1.00" mScale16="1.00">
+    <Atom type="6" B="3.943734e+01" Q="-3.707494e-02" />
+    <Atom type="7" B="4.598339e+01" Q="3.363521e-02" />
+    <Atom type="8" B="3.736954e+01" Q="-3.217984e-01" />
+    <Atom type="9" B="4.647681e+01" Q="8.749089e-02" />
+  </QqTtDampingForce>
+  <SlaterExForce mScale12="0.00" mScale13="0.00" mScale14="0.00" mScale15="1.00" mScale16="1.00">
+    <Atom type="6" A="1.0" B="3.943734e+01" />
+    <Atom type="7" A="1.0" B="4.598339e+01" />
+    <Atom type="8" A="1.0" B="3.736954e+01" />
+    <Atom type="9" A="1.0" B="4.647681e+01" />
+  </SlaterExForce>
+  <SlaterSrEsForce mScale12="0.00" mScale13="0.00" mScale14="0.00" mScale15="1.00" mScale16="1.00">
+    <Atom type="6" A="1.0" B="3.943734e+01" Q="-3.707494e-02" />
+    <Atom type="7" A="1.0" B="4.598339e+01" Q="3.363521e-02" />
+    <Atom type="8" A="1.0" B="3.736954e+01" Q="-3.217984e-01" />
+    <Atom type="9" A="1.0" B="4.647681e+01" Q="8.749089e-02" />
+  </SlaterSrEsForce>
+  <SlaterSrPolForce mScale12="0.00" mScale13="0.00" mScale14="0.00" mScale15="1.00" mScale16="1.00">
+    <Atom type="6" A="1.0" B="3.943734e+01" />
+    <Atom type="7" A="1.0" B="4.598339e+01" />
+    <Atom type="8" A="1.0" B="3.736954e+01" />
+    <Atom type="9" A="1.0" B="4.647681e+01" />
+  </SlaterSrPolForce>
+  <SlaterSrDispForce mScale12="0.00" mScale13="0.00" mScale14="0.00" mScale15="1.00" mScale16="1.00">
+    <Atom type="6" A="1.0" B="3.943734e+01" />
+    <Atom type="7" A="1.0" B="4.598339e+01" />
+    <Atom type="8" A="1.0" B="3.736954e+01" />
+    <Atom type="9" A="1.0" B="4.647681e+01" />
+  </SlaterSrDispForce>
+  <SlaterDhfForce mScale12="0.00" mScale13="0.00" mScale14="0.00" mScale15="1.00" mScale16="1.00">
+    <Atom type="6" A="1.0" B="3.943734e+01" />
+    <Atom type="7" A="1.0" B="4.598339e+01" />
+    <Atom type="8" A="1.0" B="3.736954e+01" />
+    <Atom type="9" A="1.0" B="4.647681e+01" />
+  </SlaterDhfForce>
+  <SlaterDampingForce mScale12="0.00" mScale13="0.00" mScale14="0.00" mScale15="1.00" mScale16="1.00">
+    <Atom type="6" B="3.943734e+01" C6="1.436947e-03" C8="1.251711e-04" C10="5.257316e-06" />
+    <Atom type="7" B="4.598339e+01" C6="1.200126e-04" C8="4.187812e-06" C10="7.623403e-08" />
+    <Atom type="8" B="3.736954e+01" C6="1.589166e-03" C8="1.462542e-04" C10="6.377302e-06" />
+    <Atom type="9" B="4.647681e+01" C6="1.173294e-04" C8="3.790009e-06" C10="6.383936e-08" />
+  </SlaterDampingForce>
+</ForceField>

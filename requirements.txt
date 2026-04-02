@@ -1,0 +1,21 @@
+# ─────────────────────────────────────────────────────────────
+#  MPID OpenMM Plugin — Python dependencies
+#
+#  Core (required):
+#    Install via conda:  conda install -c conda-forge openmm>=8.4 numpy
+#    These are NOT pip-installable in a working way; use conda.
+#
+#  Optional (for DMFF validation only):
+#    pip install dmff   OR   install from source
+# ─────────────────────────────────────────────────────────────
+
+# --- Core (also need openmm>=8.4 via conda) ---
+numpy>=1.24
+
+# --- Optional: DMFF validation ---
+# Uncomment below if you need dispersion_pme_bridge.py or
+# dmff_reference_energies() for energy validation against DMFF.
+#
+# dmff>=1.0
+# jax>=0.4
+# jaxlib>=0.4

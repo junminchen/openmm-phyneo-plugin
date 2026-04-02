@@ -1,0 +1,36 @@
+{
+  "point_0": {
+    "shift": -0.7,
+    "dmff_admp": -603.1255603021165,
+    "compare_phyneo_pme_extrap": -553.9395995782984,
+    "pme_extrap": -553.9395995782984,
+    "real_extrap": -553.9147090203253,
+    "pme_direct": -560.8752550653811,
+    "real_direct": -560.8678462671301,
+    "pme_extrap_all1": -155.6233608409741,
+    "real_extrap_all1": -155.6320222232282,
+    "recip_estimate_extrap": -0.024890557973094474,
+    "recip_estimate_direct": -0.00740879825104912,
+    "scale_effect_pme": 398.3162387373243,
+    "scale_effect_real": 398.2826867970971,
+    "real_minus_dmff": 49.21085128179118,
+    "pme_minus_dmff": 49.185960723818084
+  },
+  "point_11": {
+    "shift": 3.7625,
+    "dmff_admp": -17.761868269991613,
+    "compare_phyneo_pme_extrap": -14.368289226349958,
+    "pme_extrap": -14.368289226349958,
+    "real_extrap": -14.334941726120519,
+    "pme_direct": -14.577660997705948,
+    "real_direct": -14.545611271003906,
+    "pme_extrap_all1": 19.428647627844384,
+    "real_extrap_all1": 19.57603522179147,
+    "recip_estimate_extrap": -0.03334750022943922,
+    "recip_estimate_direct": -0.032049726702041426,
+    "scale_effect_pme": 33.79693685419434,
+    "scale_effect_real": 33.91097694791199,
+    "real_minus_dmff": 3.426926543871094,
+    "pme_minus_dmff": 3.3935790436416546
+  }
+}

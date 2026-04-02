@@ -1,0 +1,43 @@
+<ForceField>
+  <AtomTypes>
+    <Type class="HT" element="H" mass="1.008" name="HT"/>
+    <Type class="OT" element="O" mass="15.9994" name="OT"/>
+  </AtomTypes>
+  <Residues>
+    <Residue name="HOH">
+      <Atom name="O" type="OT"/>
+      <Atom name="H1" type="HT"/>
+      <Atom name="H2" type="HT"/>
+      <Bond from="0" to="1"/>
+      <Bond from="0" to="2"/>
+    </Residue>
+  </Residues>
+  <QqTtDampingForce mScale12="0.00" mScale13="0.00" mScale14="1.00" mScale15="1.00" mScale16="1.00">
+    <Atom type="OT" B="32.0" Q="-0.834"/>
+    <Atom type="HT" B="38.0" Q="0.417"/>
+  </QqTtDampingForce>
+  <SlaterExForce mScale12="0.00" mScale13="0.00" mScale14="1.00" mScale15="1.00" mScale16="1.00">
+    <Atom type="OT" A="0.15" B="32.0"/>
+    <Atom type="HT" A="0.05" B="38.0"/>
+  </SlaterExForce>
+  <SlaterSrEsForce mScale12="0.00" mScale13="0.00" mScale14="1.00" mScale15="1.00" mScale16="1.00">
+    <Atom type="OT" A="0.08" B="32.0" Q="-0.834"/>
+    <Atom type="HT" A="0.03" B="38.0" Q="0.417"/>
+  </SlaterSrEsForce>
+  <SlaterSrPolForce mScale12="0.00" mScale13="0.00" mScale14="1.00" mScale15="1.00" mScale16="1.00">
+    <Atom type="OT" A="0.04" B="32.0"/>
+    <Atom type="HT" A="0.01" B="38.0"/>
+  </SlaterSrPolForce>
+  <SlaterSrDispForce mScale12="0.00" mScale13="0.00" mScale14="1.00" mScale15="1.00" mScale16="1.00">
+    <Atom type="OT" A="0.03" B="32.0"/>
+    <Atom type="HT" A="0.01" B="38.0"/>
+  </SlaterSrDispForce>
+  <SlaterDhfForce mScale12="0.00" mScale13="0.00" mScale14="1.00" mScale15="1.00" mScale16="1.00">
+    <Atom type="OT" A="0.02" B="32.0"/>
+    <Atom type="HT" A="0.01" B="38.0"/>
+  </SlaterDhfForce>
+  <SlaterDampingForce mScale12="0.00" mScale13="0.00" mScale14="1.00" mScale15="1.00" mScale16="1.00">
+    <Atom type="OT" B="32.0" C6="1.0e-4" C8="1.0e-5" C10="1.0e-6"/>
+    <Atom type="HT" B="38.0" C6="2.0e-5" C8="2.0e-6" C10="2.0e-7"/>
+  </SlaterDampingForce>
+</ForceField>

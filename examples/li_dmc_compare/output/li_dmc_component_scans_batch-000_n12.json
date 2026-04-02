@@ -1,0 +1,86 @@
+{
+  "pair": "conf_060_Li_DMC",
+  "batch": "000",
+  "points": 12,
+  "source_compare_csv": "/Users/jeremychen/Desktop/Project/project_admp_mpid/OpenMMPhyNEOPlugin/examples/li_dmc_compare/output/li_dmc_reference_compare_batch-000_n12.csv",
+  "ADMPPmeForce": {
+    "mean": 1.6249515115961704,
+    "max_abs": 12.052207366504376,
+    "rmse": 3.7069771522840607
+  },
+  "QqTtDampingForce": {
+    "mean": -8.176195601329396e-15,
+    "max_abs": 5.861977570020827e-14,
+    "rmse": 1.8481866953715873e-14
+  },
+  "SlaterExForce": {
+    "mean": 2.1199547443208773,
+    "max_abs": 20.96698077177456,
+    "rmse": 6.139957129630305
+  },
+  "SlaterSrEsForce": {
+    "mean": 0.0,
+    "max_abs": 0.0,
+    "rmse": 0.0
+  },
+  "SlaterSrPolForce": {
+    "mean": 0.0,
+    "max_abs": 0.0,
+    "rmse": 0.0
+  },
+  "SlaterSrDispForce": {
+    "mean": 1.7755894557844695e-14,
+    "max_abs": 9.947598300641403e-14,
+    "rmse": 3.472743980651262e-14
+  },
+  "SlaterDhfForce": {
+    "mean": 0.0,
+    "max_abs": 0.0,
+    "rmse": 0.0
+  },
+  "DampedDispersionForce": {
+    "mean": 1.4698528852385984e-15,
+    "max_abs": 1.1546319456101628e-14,
+    "rmse": 3.6908761839160345e-15
+  },
+  "ShortRangeTotal": {
+    "mean": 2.1199547443208884,
+    "max_abs": 20.966980771774615,
+    "rmse": 6.139957129630323
+  },
+  "PhyNEOTotalComparable": {
+    "mean": 3.744906255917059,
+    "max_abs": 33.01918813827899,
+    "rmse": 9.803345633719902
+  },
+  "espol": {
+    "mean": 1.6249515115961561,
+    "max_abs": 12.052207366504263,
+    "rmse": 3.7069771522840274
+  },
+  "espol_phyneo_vs_sapt": {
+    "mean": -31.21014666064579,
+    "max_abs": 206.36655252369962,
+    "rmse": 66.9940796985376
+  },
+  "espol_dmff_vs_sapt": {
+    "mean": -32.83509817224194,
+    "max_abs": 218.4187598902039,
+    "rmse": 70.67375548852989
+  },
+  "disp_total": {
+    "mean": 1.9226120984613033e-14,
+    "max_abs": 1.0658141036401503e-13,
+    "rmse": 3.7687809832498385e-14
+  },
+  "disp_total_phyneo_vs_sapt": {
+    "mean": -3.770675231204543,
+    "max_abs": 21.853934506140774,
+    "rmse": 7.501808945165471
+  },
+  "disp_total_dmff_vs_sapt": {
+    "mean": -3.770675231204562,
+    "max_abs": 21.85393450614088,
+    "rmse": 7.501808945165509
+  }
+}

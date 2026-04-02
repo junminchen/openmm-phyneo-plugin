@@ -1,0 +1,10 @@
+#ifndef OPENMM_WINDOWSEXPORTMPID_COMPAT_H_
+#define OPENMM_WINDOWSEXPORTMPID_COMPAT_H_
+
+#include "openmm/internal/windowsExportPhyNEOForce.h"
+
+#ifndef OPENMM_EXPORT_MPID
+#define OPENMM_EXPORT_MPID OPENMM_EXPORT_PHYNEOFORCE
+#endif
+
+#endif

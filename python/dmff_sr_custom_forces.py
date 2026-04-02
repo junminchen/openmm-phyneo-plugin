@@ -1,0 +1,728 @@
+"""Build OpenMM custom-force versions of DMFF short-range terms."""
+
+from __future__ import annotations
+
+import math
+import xml.etree.ElementTree as ET
+from collections import deque
+
+import openmm as mm
+import openmm.app as app
+from openmm import unit
+
+DIELECTRIC = 1389.35455846
+
+TERM_ORDER = [
+    "QqTtDampingForce",
+    "SlaterExForce",
+    "SlaterSrEsForce",
+    "SlaterSrPolForce",
+    "SlaterSrDispForce",
+    "SlaterDhfForce",
+    # SlaterDampingForce is no longer a separate term; its contribution is
+    # merged with the undamped dispersion in add_damped_dispersion_force()
+    # to avoid catastrophic floating-point cancellation at short range.
+]
+
+
+def parse_force_section(root, force_name):
+    node = root.find(force_name)
+    if node is None:
+        raise ValueError(f"Missing <{force_name}> in XML")
+    params = {}
+    for atom in node.findall("Atom"):
+        atom_type = atom.attrib["type"]
+        params[atom_type] = {key: float(val) for key, val in atom.attrib.items() if key != "type"}
+    mscales = [
+        float(node.attrib.get(f"mScale1{i}", default))
+        for i, default in zip(range(2, 7), [0.0, 0.0, 0.0, 1.0, 1.0])
+    ]
+    return {"params": params, "mscales": mscales}
+
+
+def parse_dmff_sr_xml(xml_path, include_slater_damping=False):
+    root = ET.parse(xml_path).getroot()
+    force_names = list(TERM_ORDER)
+    if include_slater_damping and root.find("SlaterDampingForce") is not None:
+        force_names.append("SlaterDampingForce")
+    return {force_name: parse_force_section(root, force_name) for force_name in force_names}
+
+
+def parse_residue_templates(root):
+    templates = {}
+    residues = root.find("Residues")
+    if residues is None:
+        return templates
+    for residue in residues.findall("Residue"):
+        atoms = [(atom.attrib["name"], atom.attrib["type"]) for atom in residue.findall("Atom")]
+        bonds = [(int(bond.attrib["from"]), int(bond.attrib["to"])) for bond in residue.findall("Bond")]
+        templates[residue.attrib["name"]] = {"atoms": atoms, "bonds": bonds}
+    return templates
+
+
+def load_pdb_types_and_bonds(pdb_path, xml_path):
+    pdb = app.PDBFile(pdb_path)
+    atom_types, bonds = infer_atom_types_and_bonds_from_topology(pdb.topology, xml_path)
+    positions_nm = pdb.positions.value_in_unit(unit.nanometer)
+    return atom_types, bonds, positions_nm
+
+
+def infer_atom_types_and_bonds_from_topology(topology, xml_path):
+    root = ET.parse(xml_path).getroot()
+    templates = parse_residue_templates(root)
+    atom_types = []
+    bonds = set()
+    atom_index_map = {}
+    index = 0
+    for residue in topology.residues():
+        if residue.name not in templates:
+            raise ValueError(f"Residue {residue.name} not found in XML template section")
+        template = templates[residue.name]
+        by_name = {name: atom_type for name, atom_type in template["atoms"]}
+        residue_atoms = list(residue.atoms())
+        for atom in residue_atoms:
+            if atom.name not in by_name:
+                raise ValueError(f"Atom {atom.name} in residue {residue.name} not found in XML template")
+            atom_types.append(by_name[atom.name])
+            atom_index_map[(residue.index, atom.name)] = index
+            index += 1
+        for i, j in template["bonds"]:
+            global_i = atom_index_map[(residue.index, residue_atoms[i].name)]
+            global_j = atom_index_map[(residue.index, residue_atoms[j].name)]
+            bonds.add(tuple(sorted((global_i, global_j))))
+    for bond in topology.bonds():
+        bonds.add(tuple(sorted((bond[0].index, bond[1].index))))
+    return atom_types, sorted(bonds)
+
+
+def shortest_bond_separations(num_atoms, bonds, max_sep=5):
+    graph = [[] for _ in range(num_atoms)]
+    for i, j in bonds:
+        graph[i].append(j)
+        graph[j].append(i)
+    components = []
+    seen = set()
+    for start in range(num_atoms):
+        if start in seen:
+            continue
+        queue = deque([start])
+        component = []
+        seen.add(start)
+        while queue:
+            src = queue.popleft()
+            component.append(src)
+            for dst in graph[src]:
+                if dst not in seen:
+                    seen.add(dst)
+                    queue.append(dst)
+        components.append(sorted(component))
+
+    out = {}
+    for component in components:
+        component_set = set(component)
+        for start in component:
+            visited = {start: 0}
+            queue = deque([start])
+            all_neighbors = {start}
+            while queue:
+                src = queue.popleft()
+                dist = visited[src]
+                if dist >= 4:
+                    continue
+                for dst in graph[src]:
+                    if dst not in visited:
+                        visited[dst] = dist + 1
+                        queue.append(dst)
+            for stop, dist in visited.items():
+                if start == stop:
+                    continue
+                all_neighbors.add(stop)
+                if start < stop and 1 <= dist <= 4 and dist <= max_sep:
+                    out[(start, stop)] = dist
+            if max_sep >= 5:
+                for stop in component_set - all_neighbors:
+                    if start < stop:
+                        out[(start, stop)] = 5
+    return out
+
+
+def scale_for_bond_separation(mscales, separation):
+    if separation is None or separation > 5:
+        return 1.0
+    return mscales[separation - 1]
+
+
+def term_energy_expression(force_name, s12=0.169):
+    if force_name == "QqTtDampingForce":
+        return "-0.1*dielectric*q1*q2*exp(-br)*(1+br)/r; br=sqrt(b1*b2)*r"
+    if force_name == "SlaterExForce":
+        # Hardcore (s12/r)^12 prevents catastrophic close contacts at very short range.
+        return f"a1*a2*(1+br+br^2/3)*exp(-br) + ({s12}/r)^12; br=sqrt(b1*b2)*r"
+    if force_name in {"SlaterSrEsForce", "SlaterSrPolForce", "SlaterSrDispForce", "SlaterDhfForce"}:
+        return "-a1*a2*(1+br+br^2/3)*exp(-br); br=sqrt(b1*b2)*r"
+    if force_name == "SlaterDampingForce":
+        return (
+            "exp(-x)*("
+            "(1+x+x^2/2+x^3/6+x^4/24+x^5/120+x^6/720)*(c61*c62)/r^6"
+            "+(1+x+x^2/2+x^3/6+x^4/24+x^5/120+x^6/720+x^7/5040+x^8/40320)*(c81*c82)/r^8"
+            "+(1+x+x^2/2+x^3/6+x^4/24+x^5/120+x^6/720+x^7/5040+x^8/40320+x^9/362880+x^10/3628800)*(c101*c102)/r^10"
+            ");"
+            "x=br-(2*br^2+3*br)/(br^2+3*br+3);"
+            "br=sqrt(b1*b2)*r"
+        )
+    raise ValueError(force_name)
+
+
+def make_nonbonded_force(force_name, s12=0.169):
+    force = mm.CustomNonbondedForce(term_energy_expression(force_name, s12=s12))
+    if force_name == "QqTtDampingForce":
+        force.addGlobalParameter("dielectric", DIELECTRIC)
+        force.addPerParticleParameter("b")
+        force.addPerParticleParameter("q")
+    elif force_name == "SlaterDampingForce":
+        force.addPerParticleParameter("b")
+        force.addPerParticleParameter("c6")
+        force.addPerParticleParameter("c8")
+        force.addPerParticleParameter("c10")
+    else:
+        force.addPerParticleParameter("a")
+        force.addPerParticleParameter("b")
+    force.setNonbondedMethod(mm.CustomNonbondedForce.NoCutoff)
+    return force
+
+
+def configure_short_range_nonbonded_method(force, system):
+    for parent_force in system.getForces():
+        if isinstance(parent_force, mm.NonbondedForce):
+            method = parent_force.getNonbondedMethod()
+            if method in (mm.NonbondedForce.PME, mm.NonbondedForce.CutoffPeriodic, mm.NonbondedForce.LJPME, mm.NonbondedForce.Ewald):
+                force.setNonbondedMethod(mm.CustomNonbondedForce.CutoffPeriodic)
+                force.setCutoffDistance(parent_force.getCutoffDistance())
+                if hasattr(parent_force, "getUseSwitchingFunction") and parent_force.getUseSwitchingFunction():
+                    force.setUseSwitchingFunction(True)
+                    force.setSwitchingDistance(parent_force.getSwitchingDistance())
+            elif method == mm.NonbondedForce.CutoffNonPeriodic:
+                force.setNonbondedMethod(mm.CustomNonbondedForce.CutoffNonPeriodic)
+                force.setCutoffDistance(parent_force.getCutoffDistance())
+            else:
+                force.setNonbondedMethod(mm.CustomNonbondedForce.NoCutoff)
+            return
+        try:
+            import phyneoforceplugin  # type: ignore
+
+            if phyneoforceplugin.ADMPPmeForce.isinstance(parent_force):
+                mpid_force = phyneoforceplugin.ADMPPmeForce.cast(parent_force)
+                method = mpid_force.getNonbondedMethod()
+                if method == phyneoforceplugin.ADMPPmeForce.PME:
+                    force.setNonbondedMethod(mm.CustomNonbondedForce.CutoffPeriodic)
+                    force.setCutoffDistance(mpid_force.getCutoffDistance())
+                else:
+                    force.setNonbondedMethod(mm.CustomNonbondedForce.NoCutoff)
+                return
+        except Exception:
+            pass
+
+
+def bond_energy_expression(force_name, s12=0.169):
+    if force_name == "QqTtDampingForce":
+        return "scale*(-0.1*dielectric*qij*exp(-bij*r)*(1+bij*r)/r)"
+    if force_name == "SlaterExForce":
+        return f"scale*(aij*(1+bij*r+(bij*r)^2/3)*exp(-bij*r) + ({s12}/r)^12)"
+    if force_name in {"SlaterSrEsForce", "SlaterSrPolForce", "SlaterSrDispForce", "SlaterDhfForce"}:
+        return "scale*(-aij*(1+bij*r+(bij*r)^2/3)*exp(-bij*r))"
+    if force_name == "SlaterDampingForce":
+        x = "bij*r-(2*(bij*r)^2+3*(bij*r))/((bij*r)^2+3*(bij*r)+3)"
+        return (
+            "scale*exp(-("
+            + x
+            + "))*((1+("
+            + x
+            + ")+("
+            + x
+            + ")^2/2+("
+            + x
+            + ")^3/6+("
+            + x
+            + ")^4/24+("
+            + x
+            + ")^5/120+("
+            + x
+            + ")^6/720)*c6ij/r^6"
+            "+(1+("
+            + x
+            + ")+("
+            + x
+            + ")^2/2+("
+            + x
+            + ")^3/6+("
+            + x
+            + ")^4/24+("
+            + x
+            + ")^5/120+("
+            + x
+            + ")^6/720+("
+            + x
+            + ")^7/5040+("
+            + x
+            + ")^8/40320)*c8ij/r^8"
+            "+(1+("
+            + x
+            + ")+("
+            + x
+            + ")^2/2+("
+            + x
+            + ")^3/6+("
+            + x
+            + ")^4/24+("
+            + x
+            + ")^5/120+("
+            + x
+            + ")^6/720+("
+            + x
+            + ")^7/5040+("
+            + x
+            + ")^8/40320+("
+            + x
+            + ")^9/362880+("
+            + x
+            + ")^10/3628800)*c10ij/r^10)"
+        )
+    raise ValueError(force_name)
+
+
+def make_bond_force(force_name, s12=0.169):
+    force = mm.CustomBondForce(bond_energy_expression(force_name, s12=s12))
+    if force_name == "QqTtDampingForce":
+        force.addGlobalParameter("dielectric", DIELECTRIC)
+        for name in ("scale", "bij", "qij"):
+            force.addPerBondParameter(name)
+    elif force_name == "SlaterDampingForce":
+        for name in ("scale", "bij", "c6ij", "c8ij", "c10ij"):
+            force.addPerBondParameter(name)
+    else:
+        for name in ("scale", "aij", "bij"):
+            force.addPerBondParameter(name)
+    return force
+
+
+def particle_params(force_name, force_section, atom_type):
+    atom_params = force_section["params"][atom_type]
+    if force_name == "QqTtDampingForce":
+        return [atom_params["B"], atom_params["Q"]]
+    if force_name == "SlaterDampingForce":
+        return [
+            atom_params["B"],
+            math.sqrt(atom_params["C6"]),
+            math.sqrt(atom_params["C8"]),
+            math.sqrt(atom_params["C10"]),
+        ]
+    return [atom_params["A"], atom_params["B"]]
+
+
+def pair_params(force_name, force_section, type_i, type_j, scale):
+    p_i = force_section["params"][type_i]
+    p_j = force_section["params"][type_j]
+    bij = math.sqrt(p_i["B"] * p_j["B"])
+    if force_name == "QqTtDampingForce":
+        return [scale, bij, p_i["Q"] * p_j["Q"]]
+    if force_name == "SlaterDampingForce":
+        return [
+            scale,
+            bij,
+            math.sqrt(p_i["C6"] * p_j["C6"]),
+            math.sqrt(p_i["C8"] * p_j["C8"]),
+            math.sqrt(p_i["C10"] * p_j["C10"]),
+        ]
+    return [scale, p_i["A"] * p_j["A"], bij]
+
+
+def add_dmff_short_range_term(system, atom_types, bonds, force_name, force_section, start_group=0, s12=0.169):
+    """Add one DMFF short-range term as CustomNonbondedForce + CustomBondForce."""
+    # ADMPPmeForce only exposes Covalent12/13/14 (path length ≤ 3 = 1-2/1-3/1-4 pairs).
+    # CUDA requires all CustomNonbondedForce exclusion lists to exactly match
+    # ADMPPmeForce's covalent-pair set, so exclusions are limited to max_sep=3.
+    nb_pairs = shortest_bond_separations(len(atom_types), bonds, max_sep=3)
+
+    # 1-5 and 1-6 pairs remain in the CustomNonbondedForce (CUDA constraint).
+    # Add a bond-force correction with corr_scale = mScale - 1 so the net
+    # interaction matches the requested intramolecular shell scale.
+    all_intra = shortest_bond_separations(len(atom_types), bonds, max_sep=5)
+    corr_pairs = {k: v for k, v in all_intra.items() if k not in nb_pairs}
+
+    nb_force = make_nonbonded_force(force_name, s12=s12)
+    nb_force.setName(force_name)
+    configure_short_range_nonbonded_method(nb_force, system)
+
+    bond_force = make_bond_force(force_name, s12=s12)
+    bond_force.setName(force_name)
+
+    for atom_type in atom_types:
+        nb_force.addParticle(particle_params(force_name, force_section, atom_type))
+
+    # sep 1-3 (1-2, 1-3, 1-4): exclude + optional bond correction for mScale≠0
+    for (i, j), separation in nb_pairs.items():
+        nb_force.addExclusion(i, j)
+        scale = scale_for_bond_separation(force_section["mscales"], separation)
+        if abs(scale) > 1e-15:
+            bond_force.addBond(i, j, pair_params(force_name, force_section, atom_types[i], atom_types[j], scale))
+
+    # sep 4/5 (1-5/1-6): not excluded; correction bond rescales the nonbonded contribution.
+    for (i, j), separation in corr_pairs.items():
+        mscale = scale_for_bond_separation(force_section["mscales"], separation)
+        corr_scale = mscale - 1.0
+        if abs(corr_scale) > 1e-15:
+            bond_force.addBond(i, j, pair_params(force_name, force_section, atom_types[i], atom_types[j], corr_scale))
+
+    nb_force.setForceGroup(start_group)
+    bond_force.setForceGroup(start_group)
+    system.addForce(nb_force)
+    system.addForce(bond_force)
+    return system
+
+
+def add_dmff_short_range_forces(system, atom_types, bonds, force_data, start_group=0, s12=0.169):
+    for group_offset, force_name in enumerate(TERM_ORDER):
+        add_dmff_short_range_term(
+            system,
+            atom_types,
+            bonds,
+            force_name,
+            force_data[force_name],
+            start_group=start_group + group_offset,
+            s12=s12,
+        )
+    return system
+
+
+def add_dmff_short_range_forces_from_xml(system, topology, xml_path, start_group=0, s12=0.169):
+    atom_types, bonds = infer_atom_types_and_bonds_from_topology(topology, xml_path)
+    force_data = parse_dmff_sr_xml(xml_path)
+    return add_dmff_short_range_forces(system, atom_types, bonds, force_data, start_group=start_group, s12=s12)
+
+
+def add_dmff_short_range_term_from_xml(system, topology, xml_path, force_name, start_group=0, s12=0.169):
+    atom_types, bonds = infer_atom_types_and_bonds_from_topology(topology, xml_path)
+    force_data = parse_dmff_sr_xml(xml_path)
+    if force_name not in force_data:
+        raise ValueError(f"{force_name} not found in XML")
+    return add_dmff_short_range_term(
+        system,
+        atom_types,
+        bonds,
+        force_name,
+        force_data[force_name],
+        start_group=start_group,
+        s12=s12,
+    )
+
+
+def add_undamped_dispersion_force(system, topology, xml_path, cutoff_nm=0.6, force_group=None):
+    """Backward-compatible wrapper: calls add_damped_dispersion_force."""
+    return add_damped_dispersion_force(system, topology, xml_path, cutoff_nm=cutoff_nm, force_group=force_group)
+
+
+def add_damped_dispersion_force(system, topology, xml_path, cutoff_nm=0.6, force_group=None):
+    """Add Tang-Toennies damped C6/C8/C10 dispersion as a single CustomNonbondedForce.
+
+    Computes  -(f_6 * C6/r^6 + f_8 * C8/r^8 + f_10 * C10/r^10)
+    where f_n is the Tang-Toennies incomplete gamma damping function:
+        f_n(x) = 1 - exp(-x) * sum_{k=0}^{n} x^k / k!
+    and x = br - (2*br^2+3*br)/(br^2+3*br+3), br = sqrt(B_i*B_j)*r.
+
+    This replaces the old approach of separate SlaterDampingForce + undamped
+    dispersion, which suffered from catastrophic cancellation at short range.
+    At long range f_n -> 1, so the LR correction is the same as for -C_n/r^n.
+    """
+    root = ET.parse(xml_path).getroot()
+
+    # Get C6/C8/C10 from ADMPDispPmeForce
+    disp_node = root.find("ADMPDispPmeForce")
+    if disp_node is None:
+        return None
+    disp_params = {}
+    for atom in disp_node.findall("Atom"):
+        t = atom.attrib["type"]
+        disp_params[t] = {
+            "C6": float(atom.get("C6", 0.0)),
+            "C8": float(atom.get("C8", 0.0)),
+            "C10": float(atom.get("C10", 0.0)),
+        }
+
+    # Get B from SlaterDampingForce (needed for Tang-Toennies damping argument)
+    damp_node = root.find("SlaterDampingForce")
+    b_params = {}
+    if damp_node is not None:
+        for atom in damp_node.findall("Atom"):
+            t = atom.attrib["type"]
+            b_params[t] = float(atom.get("B", 0.0))
+
+    # Parse mScales for exclusions (from dispersion section)
+    mscales_disp = [
+        float(disp_node.attrib.get(f"mScale1{i}", "0.0"))
+        for i in range(2, 7)
+    ]
+    # Also need damping mScales for the bond correction term
+    mscales_damp = [0.0] * 5
+    if damp_node is not None:
+        mscales_damp = [
+            float(damp_node.attrib.get(f"mScale1{i}", "0.0"))
+            for i, default in zip(range(2, 7), [0.0, 0.0, 0.0, 1.0, 1.0])
+        ]
+
+    atom_types, bonds = infer_atom_types_and_bonds_from_topology(topology, xml_path)
+    # Use max_sep=3 (1-2, 1-3, 1-4 pairs) to match ADMPPmeForce's Covalent12/13/14
+    # exclusion set — required by the CUDA platform for neighbor-list sharing.
+    nb_pairs   = shortest_bond_separations(len(atom_types), bonds, max_sep=3)
+    # sep=4/5 (1-5/1-6) pairs: not excluded (CUDA constraint); corrected via bond
+    # force with corr_scale = mScale - 1 so net interaction = mScale × full.
+    all_intra  = shortest_bond_separations(len(atom_types), bonds, max_sep=5)
+    corr_pairs = {k: v for k, v in all_intra.items() if k not in nb_pairs}
+
+    # Build the merged expression: -(f_n(x) * C_n / r^n)
+    # f_n = 1 - exp(-x) * P_n(x)
+    # -(f_n * C_n/r^n) = -(1 - exp(-x)*P_n(x)) * C_n/r^n
+    #                   = -C_n/r^n + exp(-x)*P_n(x)*C_n/r^n
+    # At large r: f_n -> 1, so this -> -C_n/r^n (same as undamped)
+    # At small r: f_n -> 0, so this -> 0 (safe, no divergence)
+    expr = (
+        "-(1 - exp(-x)*(1+x+x^2/2+x^3/6+x^4/24+x^5/120+x^6/720))*(c61*c62)/r^6"
+        "-(1 - exp(-x)*(1+x+x^2/2+x^3/6+x^4/24+x^5/120+x^6/720+x^7/5040+x^8/40320))*(c81*c82)/r^8"
+        "-(1 - exp(-x)*(1+x+x^2/2+x^3/6+x^4/24+x^5/120+x^6/720+x^7/5040+x^8/40320+x^9/362880+x^10/3628800))*(c101*c102)/r^10;"
+        "x=br-(2*br^2+3*br)/(br^2+3*br+3);"
+        "br=sqrt(b1*b2)*r"
+    )
+
+    force = mm.CustomNonbondedForce(expr)
+    force.addPerParticleParameter("b")
+    force.addPerParticleParameter("c6")
+    force.addPerParticleParameter("c8")
+    force.addPerParticleParameter("c10")
+    force.setNonbondedMethod(mm.CustomNonbondedForce.CutoffPeriodic)
+    force.setCutoffDistance(cutoff_nm)
+    # LR correction computed via separate undamped tail force below
+    force.setUseLongRangeCorrection(False)
+
+    for atom_type in atom_types:
+        p = disp_params.get(atom_type, {"C6": 0.0, "C8": 0.0, "C10": 0.0})
+        b = b_params.get(atom_type, 0.0)
+        force.addParticle([
+            b,
+            math.sqrt(abs(p["C6"])),
+            math.sqrt(abs(p["C8"])),
+            math.sqrt(abs(p["C10"])),
+        ])
+
+    # Bond correction for excluded pairs (using damped dispersion expression)
+    x_bond = "bij*r-(2*(bij*r)^2+3*(bij*r))/((bij*r)^2+3*(bij*r)+3)"
+    bond_expr = (
+        "scale*("
+        "-(1 - exp(-(" + x_bond + "))*(1+(" + x_bond + ")+(" + x_bond + ")^2/2+(" + x_bond + ")^3/6"
+        "+(" + x_bond + ")^4/24+(" + x_bond + ")^5/120+(" + x_bond + ")^6/720))*c6ij/r^6"
+        "-(1 - exp(-(" + x_bond + "))*(1+(" + x_bond + ")+(" + x_bond + ")^2/2+(" + x_bond + ")^3/6"
+        "+(" + x_bond + ")^4/24+(" + x_bond + ")^5/120+(" + x_bond + ")^6/720"
+        "+(" + x_bond + ")^7/5040+(" + x_bond + ")^8/40320))*c8ij/r^8"
+        "-(1 - exp(-(" + x_bond + "))*(1+(" + x_bond + ")+(" + x_bond + ")^2/2+(" + x_bond + ")^3/6"
+        "+(" + x_bond + ")^4/24+(" + x_bond + ")^5/120+(" + x_bond + ")^6/720"
+        "+(" + x_bond + ")^7/5040+(" + x_bond + ")^8/40320"
+        "+(" + x_bond + ")^9/362880+(" + x_bond + ")^10/3628800))*c10ij/r^10"
+        ")"
+    )
+    bond_force = mm.CustomBondForce(bond_expr)
+    bond_force.addPerBondParameter("scale")
+    bond_force.addPerBondParameter("bij")
+    bond_force.addPerBondParameter("c6ij")
+    bond_force.addPerBondParameter("c8ij")
+    bond_force.addPerBondParameter("c10ij")
+
+    for (i, j), separation in nb_pairs.items():
+        force.addExclusion(i, j)
+        scale = scale_for_bond_separation(mscales_disp, separation)
+        if abs(scale) > 1e-15:
+            pi = disp_params.get(atom_types[i], {"C6": 0.0, "C8": 0.0, "C10": 0.0})
+            pj = disp_params.get(atom_types[j], {"C6": 0.0, "C8": 0.0, "C10": 0.0})
+            bi = b_params.get(atom_types[i], 0.0)
+            bj = b_params.get(atom_types[j], 0.0)
+            bond_force.addBond(i, j, [
+                scale,
+                math.sqrt(bi * bj),
+                math.sqrt(abs(pi["C6"] * pj["C6"])),
+                math.sqrt(abs(pi["C8"] * pj["C8"])),
+                math.sqrt(abs(pi["C10"] * pj["C10"])),
+            ])
+    # sep=4/5 (1-5/1-6) correction bonds: corr_scale = mScale - 1
+    for (i, j), separation in corr_pairs.items():
+        mscale = scale_for_bond_separation(mscales_disp, separation)
+        corr_scale = mscale - 1.0
+        if abs(corr_scale) > 1e-15:
+            pi = disp_params.get(atom_types[i], {"C6": 0.0, "C8": 0.0, "C10": 0.0})
+            pj = disp_params.get(atom_types[j], {"C6": 0.0, "C8": 0.0, "C10": 0.0})
+            bi = b_params.get(atom_types[i], 0.0)
+            bj = b_params.get(atom_types[j], 0.0)
+            bond_force.addBond(i, j, [
+                corr_scale,
+                math.sqrt(bi * bj),
+                math.sqrt(abs(pi["C6"] * pj["C6"])),
+                math.sqrt(abs(pi["C8"] * pj["C8"])),
+                math.sqrt(abs(pi["C10"] * pj["C10"])),
+            ])
+
+    if force_group is not None:
+        force.setForceGroup(force_group)
+        bond_force.setForceGroup(force_group)
+
+    system.addForce(force)
+    system.addForce(bond_force)
+    return force
+
+
+def add_short_range_repulsive_wall(system, topology, xml_path, cutoff_nm=0.6,
+                                   sigma=0.14, alpha=40.0, epsilon=100.0,
+                                   force_group=None):
+    """Add an exponential repulsive wall for O-H pairs to prevent catastrophe.
+
+    The DMFF force field's Slater exchange has weak O-H hard walls (~5 kJ/mol
+    at 0.15 nm), insufficient to prevent the close contacts that cause the
+    ADMPPmeForce polarization solver and Coulomb interaction to diverge.
+
+    This adds  epsilon * exp(alpha * (1 - r/sigma))  restricted to inter-
+    molecular O-H pairs only (via interaction groups).  Because only O-H pairs
+    are affected, the total wall energy at equilibrium is small (~100 kJ/mol
+    for 512 waters).  The barrier at 0.14 nm is ~100 kJ/mol (40 kT), which
+    combined with the existing Slater exchange repulsion prevents any O-H pair
+    from reaching the distance where forces diverge.
+
+    Parameters
+    ----------
+    sigma : float
+        Distance in nm where the wall energy equals epsilon (default 0.14).
+    alpha : float
+        Steepness (default 40).  Larger = faster decay at long range.
+    epsilon : float
+        Energy at r=sigma in kJ/mol (default 100).
+    """
+    atom_types, bonds = infer_atom_types_and_bonds_from_topology(topology, xml_path)
+    bonded_pairs = shortest_bond_separations(len(atom_types), bonds, max_sep=5)
+
+    # Identify O and H atoms by type (type 380 = O, type 381 = H for water)
+    root = ET.parse(xml_path).getroot()
+    residues = root.find("Residues")
+    # Find which types are "heavy" (non-hydrogen) vs hydrogen based on element
+    o_types = set()
+    h_types = set()
+    if residues is not None:
+        for residue in residues.findall("Residue"):
+            for atom_node in residue.findall("Atom"):
+                element = atom_node.attrib.get("element", "")
+                atype = atom_node.attrib["type"]
+                if element == "O":
+                    o_types.add(atype)
+                elif element == "H":
+                    h_types.add(atype)
+    if not o_types or not h_types:
+        # Fallback: assume type 380 = O, 381 = H
+        o_types = {"380"}
+        h_types = {"381"}
+
+    o_indices = set(i for i, t in enumerate(atom_types) if t in o_types)
+    h_indices = set(i for i, t in enumerate(atom_types) if t in h_types)
+
+    force = mm.CustomNonbondedForce(
+        f"{epsilon}*exp({alpha}*(1-r/{sigma}))"
+    )
+    force.setNonbondedMethod(mm.CustomNonbondedForce.CutoffPeriodic)
+    force.setCutoffDistance(cutoff_nm)
+    for _ in range(system.getNumParticles()):
+        force.addParticle([])
+    # Only compute O-H interactions
+    force.addInteractionGroup(o_indices, h_indices)
+    # Exclude bonded pairs (intra-molecular O-H)
+    for (i, j) in bonded_pairs:
+        force.addExclusion(i, j)
+    if force_group is not None:
+        force.setForceGroup(force_group)
+    system.addForce(force)
+    return force
+
+
+def build_system(atom_types, bonds, force_data, particle_mass=39.9):
+    system = mm.System()
+    for _ in atom_types:
+        system.addParticle(particle_mass)
+    return add_dmff_short_range_forces(system, atom_types, bonds, force_data)
+
+
+def default_types(topology_name):
+    if topology_name == "dimer":
+        return ["6", "8"]
+    if topology_name == "chain7":
+        return ["6", "7", "8", "9", "6", "7", "8"]
+    raise ValueError(topology_name)
+
+
+def default_bonds(topology_name):
+    if topology_name == "dimer":
+        return []
+    if topology_name == "chain7":
+        return [(i, i + 1) for i in range(6)]
+    raise ValueError(topology_name)
+
+
+def build_positions(topology_name, spacing_nm):
+    if topology_name == "dimer":
+        return [(0.0, 0.0, 0.0), (spacing_nm, 0.0, 0.0)]
+    if topology_name == "chain7":
+        return [(i * spacing_nm, 0.0, 0.0) for i in range(7)]
+    raise ValueError(topology_name)
+
+
+def energy_by_group(context, group):
+    state = context.getState(getEnergy=True, groups={group})
+    return state.getPotentialEnergy().value_in_unit(unit.kilojoule_per_mole)
+
+
+def dmff_reference_energies(force_data, atom_types, bonds, positions_nm):
+    try:
+        import jax.numpy as jnp
+        from dmff.admp.pairwise import TT_damping_qq_kernel, slater_disp_damping_kernel, slater_sr_hc_kernel, slater_sr_kernel
+    except Exception as exc:
+        raise RuntimeError("DMFF import failed. Run this option in an environment that can import dmff.") from exc
+
+    bonded_pairs = shortest_bond_separations(len(atom_types), bonds, max_sep=5)
+    positions_nm = [tuple(p) for p in positions_nm]
+    out = {}
+    for force_name in TERM_ORDER:
+        section = force_data[force_name]
+        total = 0.0
+        for i in range(len(atom_types)):
+            for j in range(i + 1, len(atom_types)):
+                separation = bonded_pairs.get((i, j))
+                scale = scale_for_bond_separation(section["mscales"], separation)
+                if abs(scale) < 1e-15:
+                    continue
+                dx = positions_nm[i][0] - positions_nm[j][0]
+                dy = positions_nm[i][1] - positions_nm[j][1]
+                dz = positions_nm[i][2] - positions_nm[j][2]
+                dr_a = math.sqrt(dx * dx + dy * dy + dz * dz) * 10.0
+                m = jnp.array([scale])
+                pi = section["params"][atom_types[i]]
+                pj = section["params"][atom_types[j]]
+                bi = jnp.array([pi["B"] / 10.0])
+                bj = jnp.array([pj["B"] / 10.0])
+                if force_name == "QqTtDampingForce":
+                    energy = TT_damping_qq_kernel(jnp.array([dr_a]), m, bi, bj, jnp.array([pi["Q"]]), jnp.array([pj["Q"]]))
+                elif force_name == "SlaterExForce":
+                    energy = slater_sr_hc_kernel(jnp.array([dr_a]), m, jnp.array([pi["A"]]), jnp.array([pj["A"]]), bi, bj)
+                elif force_name in {"SlaterSrEsForce", "SlaterSrPolForce", "SlaterSrDispForce", "SlaterDhfForce"}:
+                    energy = -slater_sr_kernel(jnp.array([dr_a]), m, jnp.array([pi["A"]]), jnp.array([pj["A"]]), bi, bj)
+                elif force_name == "SlaterDampingForce":
+                    energy = slater_disp_damping_kernel(
+                        jnp.array([dr_a]), m, bi, bj,
+                        jnp.array([math.sqrt(pi["C6"] * 1e6)]), jnp.array([math.sqrt(pj["C6"] * 1e6)]),
+                        jnp.array([math.sqrt(pi["C8"] * 1e8)]), jnp.array([math.sqrt(pj["C8"] * 1e8)]),
+                        jnp.array([math.sqrt(pi["C10"] * 1e10)]), jnp.array([math.sqrt(pj["C10"] * 1e10)]),
+                    )
+                else:
+                    raise ValueError(force_name)
+                total += float(energy[0])
+        out[force_name] = total
+    return out

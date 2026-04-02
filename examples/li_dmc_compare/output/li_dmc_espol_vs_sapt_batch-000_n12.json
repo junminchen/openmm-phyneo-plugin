@@ -1,0 +1,149 @@
+{
+  "pair": "conf_060_Li_DMC",
+  "batch": "000",
+  "points": 12,
+  "definition": {
+    "sapt_espol": "(es+lr_es)+(pol+lr_pol)",
+    "dmff_espol": "ADMPPmeForce+QqTtDampingForce+SlaterSrEsForce+SlaterSrPolForce",
+    "phyneo_espol": "ADMPPmeForce+QqTtDampingForce+SlaterSrEsForce+SlaterSrPolForce"
+  },
+  "stats": {
+    "dmff_vs_sapt_espol": {
+      "mean": -32.83509856960624,
+      "max_abs": 218.4187598902039,
+      "rmse": 70.67375549077535
+    },
+    "phyneo_vs_sapt_espol": {
+      "mean": -15.1995297575599,
+      "max_abs": 169.23279916638592,
+      "rmse": 52.8963020361601
+    },
+    "phyneo_vs_dmff_espol": {
+      "mean": 17.63556881204634,
+      "max_abs": 49.18596072381797,
+      "rmse": 22.20193018166331
+    }
+  },
+  "rows": [
+    {
+      "point": 0,
+      "shift": -0.7,
+      "sapt_espol": -369.28570556640625,
+      "dmff_espol": -587.7044654566101,
+      "phyneo_espol": -538.5185047327922,
+      "dmff_minus_sapt": -218.4187598902039,
+      "phyneo_minus_sapt": -169.23279916638592,
+      "phyneo_minus_dmff": 49.18596072381797
+    },
+    {
+      "point": 1,
+      "shift": -0.4875,
+      "sapt_espol": -295.3113708496094,
+      "dmff_espol": -393.91254470037035,
+      "phyneo_espol": -358.9313534818646,
+      "dmff_minus_sapt": -98.60117385076097,
+      "phyneo_minus_sapt": -63.619982632255244,
+      "phyneo_minus_dmff": 34.98119121850573
+    },
+    {
+      "point": 2,
+      "shift": -0.275,
+      "sapt_espol": -239.34561157226562,
+      "dmff_espol": -284.07942813718614,
+      "phyneo_espol": -256.17271245483664,
+      "dmff_minus_sapt": -44.73381656492052,
+      "phyneo_minus_sapt": -16.827100882571017,
+      "phyneo_minus_dmff": 27.9067156823495
+    },
+    {
+      "point": 3,
+      "shift": -0.0625,
+      "sapt_espol": -194.75498962402344,
+      "dmff_espol": -215.14090570204274,
+      "phyneo_espol": -191.8710411682879,
+      "dmff_minus_sapt": -20.385916078019306,
+      "phyneo_minus_sapt": 2.883948455735549,
+      "phyneo_minus_dmff": 23.269864533754856
+    },
+    {
+      "point": 4,
+      "shift": 0.15,
+      "sapt_espol": -159.40525817871094,
+      "dmff_espol": -168.74235554628274,
+      "phyneo_espol": -148.91334209916747,
+      "dmff_minus_sapt": -9.3370973675718,
+      "phyneo_minus_sapt": 10.491916079543472,
+      "phyneo_minus_dmff": 19.829013447115273
+    },
+    {
+      "point": 5,
+      "shift": 0.575,
+      "sapt_espol": -109.6649169921875,
+      "dmff_espol": -111.70082567999486,
+      "phyneo_espol": -96.77281509412073,
+      "dmff_minus_sapt": -2.035908687807364,
+      "phyneo_minus_sapt": 12.89210189806677,
+      "phyneo_minus_dmff": 14.928010585874134
+    },
+    {
+      "point": 6,
+      "shift": 1.0,
+      "sapt_espol": -78.54146575927734,
+      "dmff_espol": -79.08070431123461,
+      "phyneo_espol": -67.48758795779301,
+      "dmff_minus_sapt": -0.5392385519572684,
+      "phyneo_minus_sapt": 11.053877801484333,
+      "phyneo_minus_dmff": 11.593116353441602
+    },
+    {
+      "point": 7,
+      "shift": 1.425,
+      "sapt_espol": -58.42655944824219,
+      "dmff_espol": -58.629726392749596,
+      "phyneo_espol": -49.42066330162088,
+      "dmff_minus_sapt": -0.2031669445074087,
+      "phyneo_minus_sapt": 9.00589614662131,
+      "phyneo_minus_dmff": 9.20906309112872
+    },
+    {
+      "point": 8,
+      "shift": 1.85,
+      "sapt_espol": -44.885658264160156,
+      "dmff_espol": -44.97100419275022,
+      "phyneo_espol": -37.52019573564522,
+      "dmff_minus_sapt": -0.08534592859006551,
+      "phyneo_minus_sapt": 7.365462528514939,
+      "phyneo_minus_dmff": 7.450808457105005
+    },
+    {
+      "point": 9,
+      "shift": 2.4875,
+      "sapt_espol": -31.71867561340332,
+      "dmff_espol": -31.6902039198849,
+      "phyneo_espol": -26.110560791348018,
+      "dmff_minus_sapt": 0.028471693518419272,
+      "phyneo_minus_sapt": 5.6081148220553025,
+      "phyneo_minus_dmff": 5.579643128536883
+    },
+    {
+      "point": 10,
+      "shift": 3.125,
+      "sapt_espol": -23.444652557373047,
+      "dmff_espol": -23.3290343496023,
+      "phyneo_espol": -19.029174870317558,
+      "dmff_minus_sapt": 0.11561820777074772,
+      "phyneo_minus_sapt": 4.415477687055489,
+      "phyneo_minus_dmff": 4.299859479284741
+    },
+    {
+      "point": 11,
+      "shift": 3.7625,
+      "sapt_espol": -17.93701934814453,
+      "dmff_espol": -17.76186822037002,
+      "phyneo_espol": -14.368289176728364,
+      "dmff_minus_sapt": 0.17515112777451236,
+      "phyneo_minus_sapt": 3.568730171416167,
+      "phyneo_minus_dmff": 3.3935790436416546
+    }
+  ]
+}
