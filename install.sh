@@ -68,8 +68,8 @@ conda install -y -c conda-forge python=3.11 openmm">=8.4" swig cmake make cxx-co
 # For CUDA builds, ensure libcufft-dev is available
 if [[ "$BUILD_CUDA" == "ON" ]]; then
     echo "  Installing CUDA build dependencies..."
-    conda install -y -c conda-forge libcufft-dev 2>/dev/null || \
-        echo "  WARNING: libcufft-dev not available via conda. Ensure CUDA toolkit is installed."
+    conda install -y -c conda-forge libcufft-dev cuda-cudart-dev cuda-nvcc 2>/dev/null || \
+        echo "  WARNING: CUDA dev packages not fully available via conda. Ensure CUDA toolkit is installed."
 fi
 
 echo "  Python: $(python --version)"
@@ -88,7 +88,8 @@ cmake -S . -B "${BUILD_DIR}" \
     -DPYTHON_EXECUTABLE="$(which python)" \
     -DSWIG_EXECUTABLE="$(which swig)" \
     -DMPID_BUILD_CUDA_LIB="${BUILD_CUDA}" \
-    -DMPID_BUILD_PYTHON_WRAPPERS=ON
+    -DMPID_BUILD_PYTHON_WRAPPERS=ON \
+    -DCUDA_TOOLKIT_ROOT_DIR="${CONDA_PREFIX}"
 
 # ── Step 3: Compile ──
 echo ""
