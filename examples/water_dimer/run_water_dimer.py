@@ -15,7 +15,7 @@ pdb = PDBFile('waterdimer_aligned.pdb')
 forcefield = ForceField('charmm_polar_2019.xml')
 modeller = Modeller(pdb.topology, pdb.positions)
 modeller.addExtraParticles(forcefield)
-system = forcefield.createSystem(modeller.topology, nonbondedMethod=LJPME, nonbondedCutoff=8*angstrom, constraints=HBonds)
+system = forcefield.createSystem(modeller.topology, nonbondedMethod=PME, nonbondedCutoff=8*angstrom, constraints=HBonds)
 integrator = DrudeSCFIntegrator(1e-10*femtoseconds)
 integrator.setMinimizationErrorTolerance(1e-12)
 
@@ -23,16 +23,12 @@ try:
     myplatform = Platform.getPlatformByName('CUDA')
     # Figure out which GPU to run on, i.e. did the user tell us?
     deviceid = argv[1] if len(argv) > 1 else '0'
-    myproperties = {'DeviceIndex': deviceid, 'Precision': 'mixed'}
     myproperties = {'DeviceIndex': deviceid, 'Precision': 'double'}
-except:
-    print("CUDA NOT FOUND!!!!!!!!!!")
+    simulation = Simulation(modeller.topology, system, integrator, myplatform, myproperties)
+except Exception:
+    print("CUDA not available, falling back to Reference")
     myplatform = None
     deviceid = "N/A"
-
-if myplatform:
-    simulation = Simulation(modeller.topology, system, integrator, myplatform, myproperties)
-else:
     simulation = Simulation(modeller.topology, system, integrator)
 
 context = simulation.context
@@ -59,11 +55,14 @@ for r in rvals:
 #MPID
 #    
 forcefield = ForceField('mpidwater.xml')
-system = forcefield.createSystem(pdb.topology, nonbondedMethod=LJPME, nonbondedCutoff=8*angstrom, constraints=HBonds, defaultTholeWidth=8)
+system = forcefield.createSystem(pdb.topology, nonbondedMethod=PME, nonbondedCutoff=8*angstrom, constraints=HBonds, defaultTholeWidth=8)
 integrator = VerletIntegrator(1e-10*femtoseconds)
-if myplatform:
-    simulation = Simulation(pdb.topology, system, integrator, myplatform, myproperties)
-else:
+try:
+    if myplatform:
+        simulation = Simulation(pdb.topology, system, integrator, myplatform, myproperties)
+    else:
+        simulation = Simulation(pdb.topology, system, integrator)
+except Exception:
     simulation = Simulation(pdb.topology, system, integrator)
 context = simulation.context
 context.setPositions(pdb.positions)
