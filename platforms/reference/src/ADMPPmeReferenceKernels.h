@@ -156,6 +156,11 @@ private:
     std::vector<double> mScales;
     std::vector<double> pScales;
     std::vector<double> dScales;
+    bool useDispersionPme;
+    int dispersionPmax;
+    double alphaDispersionEwald;
+    std::vector<double> dispMScales;
+    std::vector<Vec3> dispersionParams;
     double cutoffDistance;
     std::vector<int> pmeGridDimension;
 

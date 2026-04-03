@@ -1463,9 +1463,10 @@ extern "C" __global__ void gridSpreadDispersion(const real4* __restrict__ posq, 
         pos -= periodicBoxVecY*floor(pos.y*recipBoxVecY.z+0.5f);
         pos -= periodicBoxVecX*floor(pos.x*recipBoxVecX.z+0.5f);
         real4 disp = dispersionParams[m];
-        real coeff = (component == 0 ? disp.x : (component == 1 ? disp.y : disp.z));
-        if (coeff == 0)
+        real rawCoeff = (component == 0 ? disp.x : (component == 1 ? disp.y : disp.z));
+        if (rawCoeff == 0)
             continue;
+        real coeff = SQRT(rawCoeff);
 
         real w = pos.x*recipBoxVecX.x+pos.y*recipBoxVecY.x+pos.z*recipBoxVecZ.x;
         real fr = GRID_SIZE_X*(w-(int)(w+0.5f)+0.5f);
@@ -1682,9 +1683,10 @@ extern "C" __global__ void computeDispersionForceAndEnergy(unsigned long long* _
 
     for (int i = blockIdx.x*blockDim.x+threadIdx.x; i < NUM_ATOMS; i += blockDim.x*gridDim.x) {
         real4 disp = dispersionParams[i];
-        real c = (component == 0 ? disp.x : (component == 1 ? disp.y : disp.z));
-        if (c == 0)
+        real rawCoeff = (component == 0 ? disp.x : (component == 1 ? disp.y : disp.z));
+        if (rawCoeff == 0)
             continue;
+        real c = SQRT(rawCoeff);
         energy -= c*dispPhi[i];
         real fx = -2*c*dispPhi[i+NUM_ATOMS];
         real fy = -2*c*dispPhi[i+NUM_ATOMS*2];

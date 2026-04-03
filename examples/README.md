@@ -23,6 +23,10 @@ Maintained for current plugin
 
 Works with current plugin but not actively validated
 ----------------------------------------------------
+- `dmc_bulk_compare`
+  periodic 100-DMC box builder and bulk diagnostic helper; includes
+  `PME` vs `NoCutoff`, plugin vs DMFF term comparisons, and a maintained
+  `Reference` dispersion comparison showing plugin native PME close to DMFF PME
 - `water_dimer`
   simple parser/import demo; useful for quick manual checks
 - `water_dimer_elecpol_verify`

@@ -60,6 +60,9 @@ POLFF_ROOT = WORKSPACE_ROOT / "polff"
 DEFAULT_THOLE_WIDTH = 5.0
 DEFAULT_POLARIZATION = "extrapolated"
 DEFAULT_S12 = 0.169
+DEFAULT_DISPERSION_MODE = "lrc"
+DEFAULT_DISPERSION_PMAX = 10
+DEFAULT_DISPERSION_PME_GRID = (0, 0, 0)
 
 
 def _add_local_python_paths() -> None:
@@ -99,10 +102,14 @@ from dmff_sr_custom_forces import (  # noqa: E402
 def load_local_plugin_libraries() -> None:
     """Load locally built plugin libraries when the package is not installed."""
 
-    for build_dir in sorted(PLUGIN_ROOT.glob("build*/")):
+    loaded_names: set[str] = set()
+    for build_dir in sorted(PLUGIN_ROOT.glob("build*/"), reverse=True):
         for lib_path in build_dir.glob("platforms/*/libOpenMMPhyNEOForce*.dylib"):
+            if lib_path.name in loaded_names:
+                continue
             try:
                 omm.Platform.loadPluginLibrary(str(lib_path.resolve()))
+                loaded_names.add(lib_path.name)
             except Exception as exc:  # pragma: no cover - best effort loader
                 msg = str(exc).lower()
                 if "already" not in msg:
@@ -139,8 +146,40 @@ def _find_admp_pme_force(system: omm.System):
     for i in range(system.getNumForces()):
         force = system.getForce(i)
         if phyneoforceplugin.ADMPPmeForce.isinstance(force):
-            return force
+            return phyneoforceplugin.ADMPPmeForce.cast(force)
     raise RuntimeError("ADMPPmeForce not found after XML parsing.")
+
+
+def _normalize_dispersion_mode(mode: str) -> str:
+    normalized = str(mode).strip().lower()
+    if normalized not in {"lrc", "native_pme"}:
+        raise ValueError(f"Unsupported dispersion mode: {mode!r}. Expected 'lrc' or 'native_pme'.")
+    return normalized
+
+
+def _get_dispersion_mscales(xml_path: str) -> list[float]:
+    root = ET.parse(xml_path).getroot()
+    disp_node = root.find("ADMPDispPmeForce")
+    if disp_node is None:
+        raise ValueError("dispersion_mode='native_pme' requires an <ADMPDispPmeForce> section in the XML.")
+    return [
+        float(disp_node.attrib.get(f"mScale1{i}", default))
+        for i, default in zip(range(2, 7), [0.0, 0.0, 0.0, 0.0, 1.0])
+    ]
+
+
+def _configure_native_dispersion_pme(
+    admp_force,
+    xml_path: str,
+    *,
+    pmax: int = DEFAULT_DISPERSION_PMAX,
+    alpha_ewald: float = 0.0,
+    grid_dimensions: tuple[int, int, int] = DEFAULT_DISPERSION_PME_GRID,
+) -> None:
+    admp_force.setUseDispersionPME(True)
+    admp_force.setDispersionPmax(int(pmax))
+    admp_force.setDPMEParameters(float(alpha_ewald), int(grid_dimensions[0]), int(grid_dimensions[1]), int(grid_dimensions[2]))
+    admp_force.setDispMScales(_get_dispersion_mscales(xml_path))
 
 
 def normalize_identifier(name: str) -> str:
@@ -527,12 +566,27 @@ def generate_openmm_system(
     default_thole_width: float = DEFAULT_THOLE_WIDTH,
     s12: float = DEFAULT_S12,
     add_slater_damping: bool = True,
+    dispersion_mode: str = DEFAULT_DISPERSION_MODE,
+    dispersion_pmax: int = DEFAULT_DISPERSION_PMAX,
+    dispersion_alpha_ewald: float = 0.0,
+    dispersion_pme_grid_dimensions: tuple[int, int, int] = DEFAULT_DISPERSION_PME_GRID,
     enable_intra: bool = False,
     intra_params_dir: T.Optional[T.Union[str, Path]] = None,
 ) -> tuple[app.PDBFile, omm.System]:
-    """Build a PDB + XML based OpenMM system using ADMPPmeForce + custom SR forces."""
+    """Build a PDB + XML based OpenMM system using ADMPPmeForce + custom SR forces.
+
+    Dispersion handling is controlled by ``dispersion_mode``:
+
+    - ``"lrc"`` keeps the current production-default path:
+      ``DampedDispersionForce`` plus ``setUseLongRangeCorrection(True)``.
+    - ``"native_pme"`` enables dispersion PME on ``ADMPPmeForce`` and skips the
+      separate long-range dispersion force. This path now works on
+      ``Reference`` for energy validation and is intended for ``CUDA`` for
+      full-force production use once CUDA runtime validation is complete.
+    """
 
     load_local_plugin_libraries()
+    dispersion_mode = _normalize_dispersion_mode(dispersion_mode)
 
     pdb = app.PDBFile(str(pdb_path))
     xml_path = str(xml_path)
@@ -545,6 +599,8 @@ def generate_openmm_system(
         use_periodic = active_box is not None
     if use_periodic and active_box is None:
         raise ValueError("Periodic simulation requested but no periodic box vectors were provided in the PDB or arguments.")
+    if dispersion_mode == "native_pme" and not use_periodic:
+        raise ValueError("dispersion_mode='native_pme' requires a periodic system.")
     if explicit_box is not None:
         pdb.topology.setPeriodicBoxVectors(explicit_box)
 
@@ -564,21 +620,30 @@ def generate_openmm_system(
 
     admp_force = _find_admp_pme_force(system)
     admp_force.setName("ADMPPmeForce")
+    if dispersion_mode == "native_pme":
+        _configure_native_dispersion_pme(
+            admp_force,
+            xml_path,
+            pmax=dispersion_pmax,
+            alpha_ewald=dispersion_alpha_ewald,
+            grid_dimensions=dispersion_pme_grid_dimensions,
+        )
 
     atom_types, bonds = infer_atom_types_and_bonds_from_topology(pdb.topology, xml_path)
     force_data = parse_dmff_sr_xml(xml_path, include_slater_damping=add_slater_damping)
 
     next_group = system.getNumForces()
-    add_long_range_dispersion_force(
-        system,
-        pdb.topology,
-        xml_path,
-        cutoff_nm=cutoff,
-        force_group=next_group,
-        atom_types=atom_types,
-        bonds=bonds,
-    )
-    next_group += 1
+    if dispersion_mode == "lrc":
+        add_long_range_dispersion_force(
+            system,
+            pdb.topology,
+            xml_path,
+            cutoff_nm=cutoff,
+            force_group=next_group,
+            atom_types=atom_types,
+            bonds=bonds,
+        )
+        next_group += 1
 
     add_dmff_short_range_forces(
         system,
@@ -632,6 +697,10 @@ class PhyNEOCalculator(BaseCalculator):
         default_thole_width: float = DEFAULT_THOLE_WIDTH,
         s12: float = DEFAULT_S12,
         add_slater_damping: bool = True,
+        dispersion_mode: str = DEFAULT_DISPERSION_MODE,
+        dispersion_pmax: int = DEFAULT_DISPERSION_PMAX,
+        dispersion_alpha_ewald: float = 0.0,
+        dispersion_pme_grid_dimensions: tuple[int, int, int] = DEFAULT_DISPERSION_PME_GRID,
         enable_intra: bool = False,
         intra_params_dir: T.Optional[T.Union[str, Path]] = None,
     ) -> None:
@@ -639,6 +708,12 @@ class PhyNEOCalculator(BaseCalculator):
 
         if platform_name not in ["CPU", "Reference", "CUDA"]:
             raise ValueError(f"Unsupported platform: {platform_name}")
+        dispersion_mode = _normalize_dispersion_mode(dispersion_mode)
+        if dispersion_mode == "native_pme" and platform_name == "CPU":
+            raise ValueError(
+                "dispersion_mode='native_pme' is not available on platform_name='CPU'. "
+                "Use platform_name='Reference' for validated energy comparisons or 'CUDA' for full support."
+            )
 
         self.pdb, self.system = generate_openmm_system(
             pdb_path,
@@ -650,6 +725,10 @@ class PhyNEOCalculator(BaseCalculator):
             default_thole_width=default_thole_width,
             s12=s12,
             add_slater_damping=add_slater_damping,
+            dispersion_mode=dispersion_mode,
+            dispersion_pmax=dispersion_pmax,
+            dispersion_alpha_ewald=dispersion_alpha_ewald,
+            dispersion_pme_grid_dimensions=dispersion_pme_grid_dimensions,
             enable_intra=enable_intra,
             intra_params_dir=intra_params_dir,
         )

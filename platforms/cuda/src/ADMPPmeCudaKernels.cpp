@@ -531,14 +531,14 @@ void CudaCalcADMPPmeForceKernel::initialize(const System& system, const ADMPPmeF
             double sumC6 = 0.0, sumC8 = 0.0, sumC10 = 0.0;
             for (int i = 0; i < numMultipoles; i++) {
                 if (cu.getUseDoublePrecision()) {
-                    sumC6 += (double) dispersionParamsVecDouble[i].x*(double) dispersionParamsVecDouble[i].x;
-                    sumC8 += (double) dispersionParamsVecDouble[i].y*(double) dispersionParamsVecDouble[i].y;
-                    sumC10 += (double) dispersionParamsVecDouble[i].z*(double) dispersionParamsVecDouble[i].z;
+                    sumC6 += (double) dispersionParamsVecDouble[i].x;
+                    sumC8 += (double) dispersionParamsVecDouble[i].y;
+                    sumC10 += (double) dispersionParamsVecDouble[i].z;
                 }
                 else {
-                    sumC6 += (double) dispersionParamsVecFloat[i].x*(double) dispersionParamsVecFloat[i].x;
-                    sumC8 += (double) dispersionParamsVecFloat[i].y*(double) dispersionParamsVecFloat[i].y;
-                    sumC10 += (double) dispersionParamsVecFloat[i].z*(double) dispersionParamsVecFloat[i].z;
+                    sumC6 += (double) dispersionParamsVecFloat[i].x;
+                    sumC8 += (double) dispersionParamsVecFloat[i].y;
+                    sumC10 += (double) dispersionParamsVecFloat[i].z;
                 }
             }
             dispersionSelfEnergy = (alpha6/12.0)*sumC6;
@@ -1609,14 +1609,14 @@ void CudaCalcADMPPmeForceKernel::copyParametersToContext(ContextImpl& context, c
         double sumC6 = 0.0, sumC8 = 0.0, sumC10 = 0.0;
         for (int i = 0; i < force.getNumMultipoles(); i++) {
             if (cu.getUseDoublePrecision()) {
-                sumC6 += (double) dispersionParamsVecDouble[i].x*(double) dispersionParamsVecDouble[i].x;
-                sumC8 += (double) dispersionParamsVecDouble[i].y*(double) dispersionParamsVecDouble[i].y;
-                sumC10 += (double) dispersionParamsVecDouble[i].z*(double) dispersionParamsVecDouble[i].z;
+                sumC6 += (double) dispersionParamsVecDouble[i].x;
+                sumC8 += (double) dispersionParamsVecDouble[i].y;
+                sumC10 += (double) dispersionParamsVecDouble[i].z;
             }
             else {
-                sumC6 += (double) dispersionParamsVecFloat[i].x*(double) dispersionParamsVecFloat[i].x;
-                sumC8 += (double) dispersionParamsVecFloat[i].y*(double) dispersionParamsVecFloat[i].y;
-                sumC10 += (double) dispersionParamsVecFloat[i].z*(double) dispersionParamsVecFloat[i].z;
+                sumC6 += (double) dispersionParamsVecFloat[i].x;
+                sumC8 += (double) dispersionParamsVecFloat[i].y;
+                sumC10 += (double) dispersionParamsVecFloat[i].z;
             }
         }
         dispersionSelfEnergy = (alpha6/12.0)*sumC6;

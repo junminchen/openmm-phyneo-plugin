@@ -1,0 +1,108 @@
+{
+  "pdb": "/Users/jeremychen/Desktop/Project/project_admp_mpid/OpenMMPhyNEOPlugin/examples/dmc_bulk_compare/dmc_100mol_box.pdb",
+  "xml": "/Users/jeremychen/Desktop/Project/project_admp_mpid/OpenMMPhyNEOPlugin/examples/li_dmc_compare/fixtures/phyneo_ecl.xml",
+  "platform": "Reference",
+  "cutoff_nm": 1.2,
+  "enable_intra": false,
+  "atom_count": 1200,
+  "molecule_count": 100,
+  "box_density_g_ml": 0.43815233505771556,
+  "dmff_raw_terms_kj_mol": {
+    "ADMPPmeForce": 1228.8450044258243,
+    "ADMPDispPmeForce": -4711.374493960207,
+    "QqTtDampingForce": -1.349574201119461,
+    "SlaterExForce": 6484.104434132916,
+    "SlaterSrEsForce": -2350.223302287882,
+    "SlaterSrPolForce": -22.775774776062093,
+    "SlaterSrDispForce": -350.78524056167447,
+    "SlaterDhfForce": -430.04990695472077,
+    "SlaterDampingForce": 1282.851950801079
+  },
+  "note": "Plugin energies are compared against DMFF comparable PME terms on the same periodic box geometry. Plugin intra terms are intentionally excluded.",
+  "rows": [
+    {
+      "term": "ADMPPmeForce",
+      "plugin_kj_mol": 1231.160677019332,
+      "dmff_kj_mol": 1228.8450044258243,
+      "delta_kj_mol": 2.31567259350777,
+      "delta_per_molecule_kj_mol": 0.023156725935077702
+    },
+    {
+      "term": "DampedDispersionForce",
+      "plugin_kj_mol": -4705.87098529138,
+      "dmff_kj_mol": -3428.5225431591275,
+      "delta_kj_mol": -1277.3484421322523,
+      "delta_per_molecule_kj_mol": -12.773484421322523
+    },
+    {
+      "term": "PhyNEOTotalComparable",
+      "plugin_kj_mol": -135.2343307657461,
+      "dmff_kj_mol": 1129.2430966181541,
+      "delta_kj_mol": -1264.4774273839002,
+      "delta_per_molecule_kj_mol": -12.644774273839003
+    },
+    {
+      "term": "QqTtDampingForce",
+      "plugin_kj_mol": -1.3495708363524064,
+      "dmff_kj_mol": -1.349574201119461,
+      "delta_kj_mol": 3.3647670545366992e-06,
+      "delta_per_molecule_kj_mol": 3.364767054536699e-08
+    },
+    {
+      "term": "ShortRangeTotal",
+      "plugin_kj_mol": 3339.4759775063017,
+      "dmff_kj_mol": 3328.9206353514573,
+      "delta_kj_mol": 10.555342154844311,
+      "delta_per_molecule_kj_mol": 0.1055534215484431
+    },
+    {
+      "term": "SlaterDampingForce",
+      "plugin_kj_mol": 1282.8505129183143,
+      "dmff_kj_mol": 0.0,
+      "delta_kj_mol": 1282.8505129183143,
+      "delta_per_molecule_kj_mol": 12.828505129183142
+    },
+    {
+      "term": "SlaterDhfForce",
+      "plugin_kj_mol": -430.04659953211103,
+      "dmff_kj_mol": -430.04990695472077,
+      "delta_kj_mol": 0.003307422609736932,
+      "delta_per_molecule_kj_mol": 3.307422609736932e-05
+    },
+    {
+      "term": "SlaterExForce",
+      "plugin_kj_mol": 6494.649494748253,
+      "dmff_kj_mol": 6484.104434132916,
+      "delta_kj_mol": 10.545060615337206,
+      "delta_per_molecule_kj_mol": 0.10545060615337207
+    },
+    {
+      "term": "SlaterSrDispForce",
+      "plugin_kj_mol": -350.78366085364223,
+      "dmff_kj_mol": -350.78524056167447,
+      "delta_kj_mol": 0.0015797080322386137,
+      "delta_per_molecule_kj_mol": 1.5797080322386137e-05
+    },
+    {
+      "term": "SlaterSrEsForce",
+      "plugin_kj_mol": -2350.218093903758,
+      "dmff_kj_mol": -2350.223302287882,
+      "delta_kj_mol": 0.005208384123761789,
+      "delta_per_molecule_kj_mol": 5.208384123761789e-05
+    },
+    {
+      "term": "SlaterSrPolForce",
+      "plugin_kj_mol": -22.775592116087576,
+      "dmff_kj_mol": -22.775774776062093,
+      "delta_kj_mol": 0.00018265997451649696,
+      "delta_per_molecule_kj_mol": 1.8265997451649697e-06
+    },
+    {
+      "term": "TotalPotentialEnergy",
+      "plugin_kj_mol": 1147.6161821525684,
+      "dmff_kj_mol": 1129.2430966181541,
+      "delta_kj_mol": 18.37308553441426,
+      "delta_per_molecule_kj_mol": 0.18373085534414257
+    }
+  ]
+}

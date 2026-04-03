@@ -145,12 +145,12 @@ __device__ void computeOneInteraction(AtomData& atom1, AtomData& atom2, bool has
 
 #ifdef USE_DISPERSION_PME
     bool updateSecond = (forceFactor == 1);
-    addDispersionPairContribution(atom1.dispersion.x*atom2.dispersion.x, 6, mScale, r, r2, rInv, (real) DISPERSION_ALPHA, forceFactor, energy, delta, atom1.force, atom2.force, updateSecond);
+    addDispersionPairContribution(SQRT(atom1.dispersion.x*atom2.dispersion.x), 6, mScale, r, r2, rInv, (real) DISPERSION_ALPHA, forceFactor, energy, delta, atom1.force, atom2.force, updateSecond);
 #if DISPERSION_PMAX >= 8
-    addDispersionPairContribution(atom1.dispersion.y*atom2.dispersion.y, 8, mScale, r, r2, rInv, (real) DISPERSION_ALPHA, forceFactor, energy, delta, atom1.force, atom2.force, updateSecond);
+    addDispersionPairContribution(SQRT(atom1.dispersion.y*atom2.dispersion.y), 8, mScale, r, r2, rInv, (real) DISPERSION_ALPHA, forceFactor, energy, delta, atom1.force, atom2.force, updateSecond);
 #endif
 #if DISPERSION_PMAX >= 10
-    addDispersionPairContribution(atom1.dispersion.z*atom2.dispersion.z, 10, mScale, r, r2, rInv, (real) DISPERSION_ALPHA, forceFactor, energy, delta, atom1.force, atom2.force, updateSecond);
+    addDispersionPairContribution(SQRT(atom1.dispersion.z*atom2.dispersion.z), 10, mScale, r, r2, rInv, (real) DISPERSION_ALPHA, forceFactor, energy, delta, atom1.force, atom2.force, updateSecond);
 #endif
 #endif
 

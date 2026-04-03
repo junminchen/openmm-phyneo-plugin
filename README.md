@@ -23,6 +23,8 @@ What is working and actively validated:
 - the current builder workflow uses the repo-root [`openmmtool.py`](./openmmtool.py)
 - short-range custom forces, intra-builder smoke tests, and short MD smoke
   tests are all wired up on the local Li-DMC fixture
+- `Reference` native dispersion PME energy comparisons now run and match DMFF
+  PME closely on the maintained `100 DMC` bulk comparison example
 
 What is not yet fully validated:
 
@@ -30,6 +32,8 @@ What is not yet fully validated:
   local CUDA build/run validation has not been completed on this machine
 - `OpenCL` is not supported by this plugin
 - native dispersion PME is not the current default simulation path
+- `CPU` is still not a plugin backend for native dispersion PME; use
+  `Reference` for energy validation
 
 ## Main Capabilities
 
@@ -178,8 +182,9 @@ treated as secondary examples rather than the main verification path.
 
 ## Dispersion Status
 
-The current validated builder path does **not** use native dispersion PME as its
-default long-range treatment.
+The current validated builder path still defaults to `LRC`, but native
+dispersion PME is now available for `Reference` energy validation through
+[`openmmtool.py`](./openmmtool.py).
 
 Current main workflow:
 
@@ -188,9 +193,31 @@ Current main workflow:
 - short-range overlap and damping remain in the dedicated custom short-range
   forces
 
-Native / validated dispersion PME remains a follow-up item. The repo still
-contains reference material and bridge code for that work, but it is not the
-default production path today.
+Current `openmmtool.py` dispersion modes:
+
+- `dispersion_mode="lrc"`
+  default, production-style builder path using `DampedDispersionForce +
+  LongRangeCorrection`
+- `dispersion_mode="native_pme"`
+  enables dispersion PME on `ADMPPmeForce`
+
+Current backend status for `dispersion_mode="native_pme"`:
+
+- `Reference`
+  validated for energy comparison; on the maintained `100 DMC` bulk example,
+  plugin native PME dispersion differs from DMFF PME by about
+  `0.13 kJ/mol`
+- `CUDA`
+  source has been updated to the same coefficient semantics as `Reference`, but
+  runtime validation is still pending on a CUDA-capable machine
+- `CPU`
+  not supported for native dispersion PME
+
+So the current recommendation is:
+
+- use `dispersion_mode="lrc"` for the default builder path
+- use `dispersion_mode="native_pme"` on `Reference` when validating dispersion
+  energies against DMFF PME
 
 ## Examples
 

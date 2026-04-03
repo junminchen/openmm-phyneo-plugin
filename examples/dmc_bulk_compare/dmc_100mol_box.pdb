@@ -1,0 +1,2407 @@
+HEADER 
+TITLE     Built with Packmol                                             
+REMARK   Packmol generated pdb file 
+REMARK   Home-Page: http://m3g.iqm.unicamp.br/packmol
+REMARK
+CRYST1    32.45    32.42    32.45  90.00  90.00  90.00 P 1           1
+ATOM      1  C00 DMC A   1      22.393  11.841   3.488  0.00  1.00      SYST C  
+ATOM      2  O01 DMC A   1      22.773  10.589   2.867  0.00  1.00      SYST O  
+ATOM      3  C02 DMC A   1      22.127   9.525   3.386  0.00  1.00      SYST C  
+ATOM      4  O03 DMC A   1      21.299   9.552   4.284  0.00  1.00      SYST O  
+ATOM      5  O04 DMC A   1      22.560   8.428   2.733  0.00  1.00      SYST O  
+ATOM      6  C05 DMC A   1      21.935   7.208   3.202  0.00  1.00      SYST C  
+ATOM      7  H06 DMC A   1      22.988  12.603   2.973  0.00  1.00      SYST H  
+ATOM      8  H07 DMC A   1      22.627  11.819   4.561  0.00  1.00      SYST H  
+ATOM      9  H08 DMC A   1      21.318  12.022   3.349  0.00  1.00      SYST H  
+ATOM     10  H09 DMC A   1      22.377   6.414   2.590  0.00  1.00      SYST H  
+ATOM     11  H10 DMC A   1      20.847   7.256   3.055  0.00  1.00      SYST H  
+ATOM     12  H11 DMC A   1      22.157   7.053   4.267  0.00  1.00      SYST H  
+ATOM     13  C00 DMC A   2      16.306  20.393  18.905  0.00  1.00      SYST C  
+ATOM     14  O01 DMC A   2      15.299  19.374  19.122  0.00  1.00      SYST O  
+ATOM     15  C02 DMC A   2      15.128  19.070  20.425  0.00  1.00      SYST C  
+ATOM     16  O03 DMC A   2      15.728  19.567  21.366  0.00  1.00      SYST O  
+ATOM     17  O04 DMC A   2      14.175  18.119  20.499  0.00  1.00      SYST O  
+ATOM     18  C05 DMC A   2      13.896  17.704  21.859  0.00  1.00      SYST C  
+ATOM     19  H06 DMC A   2      16.334  20.533  17.819  0.00  1.00      SYST H  
+ATOM     20  H07 DMC A   2      17.279  20.051  19.282  0.00  1.00      SYST H  
+ATOM     21  H08 DMC A   2      16.019  21.323  19.414  0.00  1.00      SYST H  
+ATOM     22  H09 DMC A   2      13.116  16.941  21.764  0.00  1.00      SYST H  
+ATOM     23  H10 DMC A   2      13.540  18.557  22.452  0.00  1.00      SYST H  
+ATOM     24  H11 DMC A   2      14.801  17.285  22.321  0.00  1.00      SYST H  
+ATOM     25  C00 DMC A   3      14.215  24.144  13.829  0.00  1.00      SYST C  
+ATOM     26  O01 DMC A   3      14.498  23.389  12.625  0.00  1.00      SYST O  
+ATOM     27  C02 DMC A   3      15.042  24.140  11.647  0.00  1.00      SYST C  
+ATOM     28  O03 DMC A   3      15.293  25.334  11.710  0.00  1.00      SYST O  
+ATOM     29  O04 DMC A   3      15.260  23.335  10.588  0.00  1.00      SYST O  
+ATOM     30  C05 DMC A   3      15.848  24.028   9.461  0.00  1.00      SYST C  
+ATOM     31  H06 DMC A   3      13.784  23.415  14.523  0.00  1.00      SYST H  
+ATOM     32  H07 DMC A   3      13.500  24.949  13.612  0.00  1.00      SYST H  
+ATOM     33  H08 DMC A   3      15.141  24.573  14.234  0.00  1.00      SYST H  
+ATOM     34  H09 DMC A   3      15.965  23.260   8.689  0.00  1.00      SYST H  
+ATOM     35  H10 DMC A   3      16.822  24.453   9.742  0.00  1.00      SYST H  
+ATOM     36  H11 DMC A   3      15.180  24.831   9.118  0.00  1.00      SYST H  
+ATOM     37  C00 DMC A   4      16.776  19.417   5.811  0.00  1.00      SYST C  
+ATOM     38  O01 DMC A   4      17.303  18.194   5.239  0.00  1.00      SYST O  
+ATOM     39  C02 DMC A   4      16.393  17.523   4.504  0.00  1.00      SYST C  
+ATOM     40  O03 DMC A   4      15.237  17.859   4.304  0.00  1.00      SYST O  
+ATOM     41  O04 DMC A   4      16.994  16.413   4.028  0.00  1.00      SYST O  
+ATOM     42  C05 DMC A   4      16.116  15.599   3.214  0.00  1.00      SYST C  
+ATOM     43  H06 DMC A   4      17.613  19.848   6.371  0.00  1.00      SYST H  
+ATOM     44  H07 DMC A   4      15.933  19.192   6.476  0.00  1.00      SYST H  
+ATOM     45  H08 DMC A   4      16.447  20.097   5.013  0.00  1.00      SYST H  
+ATOM     46  H09 DMC A   4      16.731  14.747   2.903  0.00  1.00      SYST H  
+ATOM     47  H10 DMC A   4      15.767  16.170   2.342  0.00  1.00      SYST H  
+ATOM     48  H11 DMC A   4      15.252  15.264   3.805  0.00  1.00      SYST H  
+ATOM     49  C00 DMC A   5      11.543  24.792  26.213  0.00  1.00      SYST C  
+ATOM     50  O01 DMC A   5      10.484  24.218  27.019  0.00  1.00      SYST O  
+ATOM     51  C02 DMC A   5       9.473  23.717  26.281  0.00  1.00      SYST C  
+ATOM     52  O03 DMC A   5       9.400  23.717  25.062  0.00  1.00      SYST O  
+ATOM     53  O04 DMC A   5       8.557  23.215  27.134  0.00  1.00      SYST O  
+ATOM     54  C05 DMC A   5       7.410  22.642  26.460  0.00  1.00      SYST C  
+ATOM     55  H06 DMC A   5      12.282  25.152  26.936  0.00  1.00      SYST H  
+ATOM     56  H07 DMC A   5      11.151  25.619  25.607  0.00  1.00      SYST H  
+ATOM     57  H08 DMC A   5      11.976  24.026  25.556  0.00  1.00      SYST H  
+ATOM     58  H09 DMC A   5       6.763  22.281  27.266  0.00  1.00      SYST H  
+ATOM     59  H10 DMC A   5       7.726  21.814  25.810  0.00  1.00      SYST H  
+ATOM     60  H11 DMC A   5       6.900  23.408  25.859  0.00  1.00      SYST H  
+ATOM     61  C00 DMC A   6       4.390  27.051  14.850  0.00  1.00      SYST C  
+ATOM     62  O01 DMC A   6       5.589  26.349  15.260  0.00  1.00      SYST O  
+ATOM     63  C02 DMC A   6       6.272  26.993  16.228  0.00  1.00      SYST C  
+ATOM     64  O03 DMC A   6       5.964  28.056  16.743  0.00  1.00      SYST O  
+ATOM     65  O04 DMC A   6       7.358  26.249  16.523  0.00  1.00      SYST O  
+ATOM     66  C05 DMC A   6       8.182  26.837  17.559  0.00  1.00      SYST C  
+ATOM     67  H06 DMC A   6       3.946  26.420  14.073  0.00  1.00      SYST H  
+ATOM     68  H07 DMC A   6       4.648  28.041  14.452  0.00  1.00      SYST H  
+ATOM     69  H08 DMC A   6       3.706  27.163  15.702  0.00  1.00      SYST H  
+ATOM     70  H09 DMC A   6       9.011  26.134  17.690  0.00  1.00      SYST H  
+ATOM     71  H10 DMC A   6       7.606  26.943  18.489  0.00  1.00      SYST H  
+ATOM     72  H11 DMC A   6       8.549  27.822  17.238  0.00  1.00      SYST H  
+ATOM     73  C00 DMC A   7      20.340   0.903   7.468  0.00  1.00      SYST C  
+ATOM     74  O01 DMC A   7      19.090   1.112   6.766  0.00  1.00      SYST O  
+ATOM     75  C02 DMC A   7      18.279   1.993   7.385  0.00  1.00      SYST C  
+ATOM     76  O03 DMC A   7      18.517   2.585   8.426  0.00  1.00      SYST O  
+ATOM     77  O04 DMC A   7      17.157   2.103   6.645  0.00  1.00      SYST O  
+ATOM     78  C05 DMC A   7      16.197   3.030   7.207  0.00  1.00      SYST C  
+ATOM     79  H06 DMC A   7      20.887   0.176   6.858  0.00  1.00      SYST H  
+ATOM     80  H07 DMC A   7      20.149   0.507   8.474  0.00  1.00      SYST H  
+ATOM     81  H08 DMC A   7      20.895   1.848   7.543  0.00  1.00      SYST H  
+ATOM     82  H09 DMC A   7      15.352   3.016   6.510  0.00  1.00      SYST H  
+ATOM     83  H10 DMC A   7      16.633   4.036   7.274  0.00  1.00      SYST H  
+ATOM     84  H11 DMC A   7      15.886   2.695   8.207  0.00  1.00      SYST H  
+ATOM     85  C00 DMC A   8      13.473   4.922   7.793  0.00  1.00      SYST C  
+ATOM     86  O01 DMC A   8      12.899   3.603   7.968  0.00  1.00      SYST O  
+ATOM     87  C02 DMC A   8      12.481   3.052   6.811  0.00  1.00      SYST C  
+ATOM     88  O03 DMC A   8      12.553   3.560   5.703  0.00  1.00      SYST O  
+ATOM     89  O04 DMC A   8      11.971   1.837   7.099  0.00  1.00      SYST O  
+ATOM     90  C05 DMC A   8      11.485   1.136   5.929  0.00  1.00      SYST C  
+ATOM     91  H06 DMC A   8      13.762   5.238   8.801  0.00  1.00      SYST H  
+ATOM     92  H07 DMC A   8      12.728   5.606   7.366  0.00  1.00      SYST H  
+ATOM     93  H08 DMC A   8      14.348   4.869   7.131  0.00  1.00      SYST H  
+ATOM     94  H09 DMC A   8      11.107   0.182   6.311  0.00  1.00      SYST H  
+ATOM     95  H10 DMC A   8      12.304   0.975   5.214  0.00  1.00      SYST H  
+ATOM     96  H11 DMC A   8      10.682   1.712   5.447  0.00  1.00      SYST H  
+ATOM     97  C00 DMC A   9      19.166   9.723  15.711  0.00  1.00      SYST C  
+ATOM     98  O01 DMC A   9      20.434  10.411  15.578  0.00  1.00      SYST O  
+ATOM     99  C02 DMC A   9      20.939  10.349  14.329  0.00  1.00      SYST C  
+ATOM    100  O03 DMC A   9      20.428   9.790  13.371  0.00  1.00      SYST O  
+ATOM    101  O04 DMC A   9      22.110  11.018  14.330  0.00  1.00      SYST O  
+ATOM    102  C05 DMC A   9      22.757  11.026  13.034  0.00  1.00      SYST C  
+ATOM    103  H06 DMC A   9      18.883   9.856  16.761  0.00  1.00      SYST H  
+ATOM    104  H07 DMC A   9      19.284   8.659  15.468  0.00  1.00      SYST H  
+ATOM    105  H08 DMC A   9      18.419  10.174  15.043  0.00  1.00      SYST H  
+ATOM    106  H09 DMC A   9      23.680  11.596  13.186  0.00  1.00      SYST H  
+ATOM    107  H10 DMC A   9      22.113  11.514  12.290  0.00  1.00      SYST H  
+ATOM    108  H11 DMC A   9      22.978   9.999  12.714  0.00  1.00      SYST H  
+ATOM    109  C00 DMC A  10      19.195  14.004  17.733  0.00  1.00      SYST C  
+ATOM    110  O01 DMC A  10      20.485  13.603  17.209  0.00  1.00      SYST O  
+ATOM    111  C02 DMC A  10      21.273  13.023  18.136  0.00  1.00      SYST C  
+ATOM    112  O03 DMC A  10      20.986  12.827  19.307  0.00  1.00      SYST O  
+ATOM    113  O04 DMC A  10      22.435  12.697  17.535  0.00  1.00      SYST O  
+ATOM    114  C05 DMC A  10      23.377  12.059  18.433  0.00  1.00      SYST C  
+ATOM    115  H06 DMC A  10      18.672  14.452  16.881  0.00  1.00      SYST H  
+ATOM    116  H07 DMC A  10      19.324  14.734  18.542  0.00  1.00      SYST H  
+ATOM    117  H08 DMC A  10      18.651  13.127  18.110  0.00  1.00      SYST H  
+ATOM    118  H09 DMC A  10      24.258  11.855  17.816  0.00  1.00      SYST H  
+ATOM    119  H10 DMC A  10      22.952  11.127  18.830  0.00  1.00      SYST H  
+ATOM    120  H11 DMC A  10      23.626  12.734  19.264  0.00  1.00      SYST H  
+ATOM    121  C00 DMC A  11      22.363  26.936  21.896  0.00  1.00      SYST C  
+ATOM    122  O01 DMC A  11      21.273  26.617  22.796  0.00  1.00      SYST O  
+ATOM    123  C02 DMC A  11      21.527  26.960  24.075  0.00  1.00      SYST C  
+ATOM    124  O03 DMC A  11      22.547  27.486  24.491  0.00  1.00      SYST O  
+ATOM    125  O04 DMC A  11      20.450  26.617  24.810  0.00  1.00      SYST O  
+ATOM    126  C05 DMC A  11      20.598  26.937  26.215  0.00  1.00      SYST C  
+ATOM    127  H06 DMC A  11      22.019  26.607  20.910  0.00  1.00      SYST H  
+ATOM    128  H07 DMC A  11      23.272  26.397  22.196  0.00  1.00      SYST H  
+ATOM    129  H08 DMC A  11      22.557  28.017  21.904  0.00  1.00      SYST H  
+ATOM    130  H09 DMC A  11      19.662  26.608  26.678  0.00  1.00      SYST H  
+ATOM    131  H10 DMC A  11      20.741  28.019  26.346  0.00  1.00      SYST H  
+ATOM    132  H11 DMC A  11      21.457  26.398  26.638  0.00  1.00      SYST H  
+ATOM    133  C00 DMC A  12       9.245  21.161  20.761  0.00  1.00      SYST C  
+ATOM    134  O01 DMC A  12       9.778  21.192  22.109  0.00  1.00      SYST O  
+ATOM    135  C02 DMC A  12       9.794  19.979  22.697  0.00  1.00      SYST C  
+ATOM    136  O03 DMC A  12       9.415  18.930  22.198  0.00  1.00      SYST O  
+ATOM    137  O04 DMC A  12      10.305  20.133  23.935  0.00  1.00      SYST O  
+ATOM    138  C05 DMC A  12      10.378  18.891  24.676  0.00  1.00      SYST C  
+ATOM    139  H06 DMC A  12       9.293  22.200  20.417  0.00  1.00      SYST H  
+ATOM    140  H07 DMC A  12       8.208  20.799  20.772  0.00  1.00      SYST H  
+ATOM    141  H08 DMC A  12       9.858  20.508  20.127  0.00  1.00      SYST H  
+ATOM    142  H09 DMC A  12      10.806  19.168  25.646  0.00  1.00      SYST H  
+ATOM    143  H10 DMC A  12      11.024  18.173  24.153  0.00  1.00      SYST H  
+ATOM    144  H11 DMC A  12       9.373  18.463  24.798  0.00  1.00      SYST H  
+ATOM    145  C00 DMC A  13      12.017   6.461  24.094  0.00  1.00      SYST C  
+ATOM    146  O01 DMC A  13      13.390   6.142  24.432  0.00  1.00      SYST O  
+ATOM    147  C02 DMC A  13      13.508   4.993  25.128  0.00  1.00      SYST C  
+ATOM    148  O03 DMC A  13      12.594   4.257  25.465  0.00  1.00      SYST O  
+ATOM    149  O04 DMC A  13      14.818   4.804  25.382  0.00  1.00      SYST O  
+ATOM    150  C05 DMC A  13      15.081   3.592  26.130  0.00  1.00      SYST C  
+ATOM    151  H06 DMC A  13      12.076   7.404  23.539  0.00  1.00      SYST H  
+ATOM    152  H07 DMC A  13      11.419   6.579  25.007  0.00  1.00      SYST H  
+ATOM    153  H08 DMC A  13      11.586   5.665  23.471  0.00  1.00      SYST H  
+ATOM    154  H09 DMC A  13      16.168   3.572  26.259  0.00  1.00      SYST H  
+ATOM    155  H10 DMC A  13      14.737   2.714  25.565  0.00  1.00      SYST H  
+ATOM    156  H11 DMC A  13      14.570   3.627  27.102  0.00  1.00      SYST H  
+ATOM    157  C00 DMC A  14       8.258   3.032   3.920  0.00  1.00      SYST C  
+ATOM    158  O01 DMC A  14       8.983   2.851   2.678  0.00  1.00      SYST O  
+ATOM    159  C02 DMC A  14       9.982   3.742   2.516  0.00  1.00      SYST C  
+ATOM    160  O03 DMC A  14      10.292   4.628   3.297  0.00  1.00      SYST O  
+ATOM    161  O04 DMC A  14      10.577   3.475   1.336  0.00  1.00      SYST O  
+ATOM    162  C05 DMC A  14      11.678   4.370   1.042  0.00  1.00      SYST C  
+ATOM    163  H06 DMC A  14       7.491   2.251   3.914  0.00  1.00      SYST H  
+ATOM    164  H07 DMC A  14       7.803   4.031   3.951  0.00  1.00      SYST H  
+ATOM    165  H08 DMC A  14       8.937   2.910   4.775  0.00  1.00      SYST H  
+ATOM    166  H09 DMC A  14      12.057   4.039   0.070  0.00  1.00      SYST H  
+ATOM    167  H10 DMC A  14      12.454   4.285   1.816  0.00  1.00      SYST H  
+ATOM    168  H11 DMC A  14      11.320   5.408   0.991  0.00  1.00      SYST H  
+ATOM    169  C00 DMC A  15       3.141  20.292   2.421  0.00  1.00      SYST C  
+ATOM    170  O01 DMC A  15       4.181  20.360   3.428  0.00  1.00      SYST O  
+ATOM    171  C02 DMC A  15       5.418  20.186   2.920  0.00  1.00      SYST C  
+ATOM    172  O03 DMC A  15       5.696  19.989   1.747  0.00  1.00      SYST O  
+ATOM    173  O04 DMC A  15       6.293  20.270   3.943  0.00  1.00      SYST O  
+ATOM    174  C05 DMC A  15       7.669  20.099   3.525  0.00  1.00      SYST C  
+ATOM    175  H06 DMC A  15       2.207  20.449   2.971  0.00  1.00      SYST H  
+ATOM    176  H07 DMC A  15       3.149  19.308   1.934  0.00  1.00      SYST H  
+ATOM    177  H08 DMC A  15       3.291  21.077   1.668  0.00  1.00      SYST H  
+ATOM    178  H09 DMC A  15       8.255  20.190   4.447  0.00  1.00      SYST H  
+ATOM    179  H10 DMC A  15       7.948  20.879   2.804  0.00  1.00      SYST H  
+ATOM    180  H11 DMC A  15       7.808  19.109   3.069  0.00  1.00      SYST H  
+ATOM    181  C00 DMC A  16      24.903  25.642  14.981  0.00  1.00      SYST C  
+ATOM    182  O01 DMC A  16      24.190  26.545  15.862  0.00  1.00      SYST O  
+ATOM    183  C02 DMC A  16      24.513  26.378  17.161  0.00  1.00      SYST C  
+ATOM    184  O03 DMC A  16      25.313  25.571  17.607  0.00  1.00      SYST O  
+ATOM    185  O04 DMC A  16      23.793  27.266  17.876  0.00  1.00      SYST O  
+ATOM    186  C05 DMC A  16      24.052  27.189  19.299  0.00  1.00      SYST C  
+ATOM    187  H06 DMC A  16      24.545  25.889  13.976  0.00  1.00      SYST H  
+ATOM    188  H07 DMC A  16      24.669  24.600  15.236  0.00  1.00      SYST H  
+ATOM    189  H08 DMC A  16      25.986  25.808  15.064  0.00  1.00      SYST H  
+ATOM    190  H09 DMC A  16      23.407  27.954  19.743  0.00  1.00      SYST H  
+ATOM    191  H10 DMC A  16      25.110  27.399  19.505  0.00  1.00      SYST H  
+ATOM    192  H11 DMC A  16      23.793  26.190  19.678  0.00  1.00      SYST H  
+ATOM    193  C00 DMC A  17      17.881  27.197   8.654  0.00  1.00      SYST C  
+ATOM    194  O01 DMC A  17      16.497  27.273   8.232  0.00  1.00      SYST O  
+ATOM    195  C02 DMC A  17      16.317  26.913   6.946  0.00  1.00      SYST C  
+ATOM    196  O03 DMC A  17      17.188  26.551   6.170  0.00  1.00      SYST O  
+ATOM    197  O04 DMC A  17      15.001  27.024   6.672  0.00  1.00      SYST O  
+ATOM    198  C05 DMC A  17      14.675  26.660   5.308  0.00  1.00      SYST C  
+ATOM    199  H06 DMC A  17      17.873  27.513   9.703  0.00  1.00      SYST H  
+ATOM    200  H07 DMC A  17      18.500  27.869   8.046  0.00  1.00      SYST H  
+ATOM    201  H08 DMC A  17      18.250  26.167   8.557  0.00  1.00      SYST H  
+ATOM    202  H09 DMC A  17      13.591  26.798   5.234  0.00  1.00      SYST H  
+ATOM    203  H10 DMC A  17      14.952  25.615   5.116  0.00  1.00      SYST H  
+ATOM    204  H11 DMC A  17      15.203  27.318   4.603  0.00  1.00      SYST H  
+ATOM    205  C00 DMC A  18       3.324  27.095   8.664  0.00  1.00      SYST C  
+ATOM    206  O01 DMC A  18       4.758  27.013   8.472  0.00  1.00      SYST O  
+ATOM    207  C02 DMC A  18       5.450  27.097   9.626  0.00  1.00      SYST C  
+ATOM    208  O03 DMC A  18       4.976  27.228  10.744  0.00  1.00      SYST O  
+ATOM    209  O04 DMC A  18       6.761  27.009   9.322  0.00  1.00      SYST O  
+ATOM    210  C05 DMC A  18       7.618  27.086  10.487  0.00  1.00      SYST C  
+ATOM    211  H06 DMC A  18       2.901  27.014   7.657  0.00  1.00      SYST H  
+ATOM    212  H07 DMC A  18       3.058  28.055   9.125  0.00  1.00      SYST H  
+ATOM    213  H08 DMC A  18       2.980  26.271   9.303  0.00  1.00      SYST H  
+ATOM    214  H09 DMC A  18       8.636  27.001  10.092  0.00  1.00      SYST H  
+ATOM    215  H10 DMC A  18       7.396  26.261  11.178  0.00  1.00      SYST H  
+ATOM    216  H11 DMC A  18       7.475  28.046  11.001  0.00  1.00      SYST H  
+ATOM    217  C00 DMC A  19      16.509  13.140  14.204  0.00  1.00      SYST C  
+ATOM    218  O01 DMC A  19      17.571  13.849  14.890  0.00  1.00      SYST O  
+ATOM    219  C02 DMC A  19      17.957  14.970  14.247  0.00  1.00      SYST C  
+ATOM    220  O03 DMC A  19      17.498  15.393  13.197  0.00  1.00      SYST O  
+ATOM    221  O04 DMC A  19      18.940  15.538  14.974  0.00  1.00      SYST O  
+ATOM    222  C05 DMC A  19      19.445  16.761  14.386  0.00  1.00      SYST C  
+ATOM    223  H06 DMC A  19      16.303  12.267  14.832  0.00  1.00      SYST H  
+ATOM    224  H07 DMC A  19      16.843  12.834  13.203  0.00  1.00      SYST H  
+ATOM    225  H08 DMC A  19      15.621  13.780  14.117  0.00  1.00      SYST H  
+ATOM    226  H09 DMC A  19      20.224  17.103  15.075  0.00  1.00      SYST H  
+ATOM    227  H10 DMC A  19      18.640  17.504  14.304  0.00  1.00      SYST H  
+ATOM    228  H11 DMC A  19      19.862  16.559  13.389  0.00  1.00      SYST H  
+ATOM    229  C00 DMC A  20      14.370  13.161  22.538  0.00  1.00      SYST C  
+ATOM    230  O01 DMC A  20      13.575  14.257  23.054  0.00  1.00      SYST O  
+ATOM    231  C02 DMC A  20      12.414  14.426  22.389  0.00  1.00      SYST C  
+ATOM    232  O03 DMC A  20      12.020  13.758  21.445  0.00  1.00      SYST O  
+ATOM    233  O04 DMC A  20      11.768  15.465  22.955  0.00  1.00      SYST O  
+ATOM    234  C05 DMC A  20      10.495  15.750  22.326  0.00  1.00      SYST C  
+ATOM    235  H06 DMC A  20      15.267  13.145  23.166  0.00  1.00      SYST H  
+ATOM    236  H07 DMC A  20      14.629  13.343  21.487  0.00  1.00      SYST H  
+ATOM    237  H08 DMC A  20      13.814  12.218  22.622  0.00  1.00      SYST H  
+ATOM    238  H09 DMC A  20      10.092  16.603  22.882  0.00  1.00      SYST H  
+ATOM    239  H10 DMC A  20       9.828  14.880  22.404  0.00  1.00      SYST H  
+ATOM    240  H11 DMC A  20      10.643  16.006  21.267  0.00  1.00      SYST H  
+ATOM    241  C00 DMC A  21      17.820  25.223  18.330  0.00  1.00      SYST C  
+ATOM    242  O01 DMC A  21      17.251  26.002  19.411  0.00  1.00      SYST O  
+ATOM    243  C02 DMC A  21      18.142  26.282  20.384  0.00  1.00      SYST C  
+ATOM    244  O03 DMC A  21      19.315  25.944  20.407  0.00  1.00      SYST O  
+ATOM    245  O04 DMC A  21      17.502  27.004  21.326  0.00  1.00      SYST O  
+ATOM    246  C05 DMC A  21      18.357  27.373  22.435  0.00  1.00      SYST C  
+ATOM    247  H06 DMC A  21      16.994  25.075  17.626  0.00  1.00      SYST H  
+ATOM    248  H07 DMC A  21      18.190  24.261  18.710  0.00  1.00      SYST H  
+ATOM    249  H08 DMC A  21      18.645  25.774  17.858  0.00  1.00      SYST H  
+ATOM    250  H09 DMC A  21      17.712  27.946  23.109  0.00  1.00      SYST H  
+ATOM    251  H10 DMC A  21      19.197  27.986  22.080  0.00  1.00      SYST H  
+ATOM    252  H11 DMC A  21      18.743  26.472  22.932  0.00  1.00      SYST H  
+ATOM    253  C00 DMC A  22       3.474  14.977   9.854  0.00  1.00      SYST C  
+ATOM    254  O01 DMC A  22       3.464  14.004   8.781  0.00  1.00      SYST O  
+ATOM    255  C02 DMC A  22       4.110  12.864   9.098  0.00  1.00      SYST C  
+ATOM    256  O03 DMC A  22       4.661  12.618  10.159  0.00  1.00      SYST O  
+ATOM    257  O04 DMC A  22       4.034  12.044   8.030  0.00  1.00      SYST O  
+ATOM    258  C05 DMC A  22       4.695  10.772   8.245  0.00  1.00      SYST C  
+ATOM    259  H06 DMC A  22       2.922  15.837   9.459  0.00  1.00      SYST H  
+ATOM    260  H07 DMC A  22       4.506  15.255  10.106  0.00  1.00      SYST H  
+ATOM    261  H08 DMC A  22       2.975  14.566  10.743  0.00  1.00      SYST H  
+ATOM    262  H09 DMC A  22       4.554  10.221   7.309  0.00  1.00      SYST H  
+ATOM    263  H10 DMC A  22       4.231  10.241   9.088  0.00  1.00      SYST H  
+ATOM    264  H11 DMC A  22       5.763  10.930   8.451  0.00  1.00      SYST H  
+ATOM    265  C00 DMC A  23      19.660  22.780   5.226  0.00  1.00      SYST C  
+ATOM    266  O01 DMC A  23      18.399  23.111   4.593  0.00  1.00      SYST O  
+ATOM    267  C02 DMC A  23      18.521  24.052   3.635  0.00  1.00      SYST C  
+ATOM    268  O03 DMC A  23      19.556  24.602   3.292  0.00  1.00      SYST O  
+ATOM    269  O04 DMC A  23      17.293  24.274   3.125  0.00  1.00      SYST O  
+ATOM    270  C05 DMC A  23      17.289  25.273   2.076  0.00  1.00      SYST C  
+ATOM    271  H06 DMC A  23      19.409  22.015   5.969  0.00  1.00      SYST H  
+ATOM    272  H07 DMC A  23      20.088  23.669   5.706  0.00  1.00      SYST H  
+ATOM    273  H08 DMC A  23      20.365  22.387   4.481  0.00  1.00      SYST H  
+ATOM    274  H09 DMC A  23      16.242  25.346   1.762  0.00  1.00      SYST H  
+ATOM    275  H10 DMC A  23      17.926  24.951   1.241  0.00  1.00      SYST H  
+ATOM    276  H11 DMC A  23      17.650  26.235   2.466  0.00  1.00      SYST H  
+ATOM    277  C00 DMC A  24       2.099   9.723  15.699  0.00  1.00      SYST C  
+ATOM    278  O01 DMC A  24       1.837   8.399  15.173  0.00  1.00      SYST O  
+ATOM    279  C02 DMC A  24       1.961   8.330  13.832  0.00  1.00      SYST C  
+ATOM    280  O03 DMC A  24       2.260   9.251  13.087  0.00  1.00      SYST O  
+ATOM    281  O04 DMC A  24       1.696   7.061  13.463  0.00  1.00      SYST O  
+ATOM    282  C05 DMC A  24       1.797   6.854  12.033  0.00  1.00      SYST C  
+ATOM    283  H06 DMC A  24       1.964   9.627  16.782  0.00  1.00      SYST H  
+ATOM    284  H07 DMC A  24       1.389  10.446  15.277  0.00  1.00      SYST H  
+ATOM    285  H08 DMC A  24       3.126  10.030  15.458  0.00  1.00      SYST H  
+ATOM    286  H09 DMC A  24       1.559   5.795  11.885  0.00  1.00      SYST H  
+ATOM    287  H10 DMC A  24       2.815   7.079  11.687  0.00  1.00      SYST H  
+ATOM    288  H11 DMC A  24       1.078   7.496  11.505  0.00  1.00      SYST H  
+ATOM    289  C00 DMC A  25       5.983  18.058   6.731  0.00  1.00      SYST C  
+ATOM    290  O01 DMC A  25       6.864  17.340   7.630  0.00  1.00      SYST O  
+ATOM    291  C02 DMC A  25       8.123  17.823   7.630  0.00  1.00      SYST C  
+ATOM    292  O03 DMC A  25       8.536  18.761   6.967  0.00  1.00      SYST O  
+ATOM    293  O04 DMC A  25       8.843  17.082   8.497  0.00  1.00      SYST O  
+ATOM    294  C05 DMC A  25      10.225  17.504   8.590  0.00  1.00      SYST C  
+ATOM    295  H06 DMC A  25       5.011  17.563   6.835  0.00  1.00      SYST H  
+ATOM    296  H07 DMC A  25       6.352  17.984   5.699  0.00  1.00      SYST H  
+ATOM    297  H08 DMC A  25       5.919  19.114   7.026  0.00  1.00      SYST H  
+ATOM    298  H09 DMC A  25      10.678  16.822   9.318  0.00  1.00      SYST H  
+ATOM    299  H10 DMC A  25      10.283  18.544   8.938  0.00  1.00      SYST H  
+ATOM    300  H11 DMC A  25      10.716  17.415   7.611  0.00  1.00      SYST H  
+ATOM    301  C00 DMC A  26       9.772  21.253   8.841  0.00  1.00      SYST C  
+ATOM    302  O01 DMC A  26       9.971  20.767   7.491  0.00  1.00      SYST O  
+ATOM    303  C02 DMC A  26      11.255  20.844   7.087  0.00  1.00      SYST C  
+ATOM    304  O03 DMC A  26      12.194  21.267   7.744  0.00  1.00      SYST O  
+ATOM    305  O04 DMC A  26      11.315  20.368   5.827  0.00  1.00      SYST O  
+ATOM    306  C05 DMC A  26      12.654  20.396   5.274  0.00  1.00      SYST C  
+ATOM    307  H06 DMC A  26       8.700  21.131   9.028  0.00  1.00      SYST H  
+ATOM    308  H07 DMC A  26      10.065  22.309   8.911  0.00  1.00      SYST H  
+ATOM    309  H08 DMC A  26      10.364  20.658   9.549  0.00  1.00      SYST H  
+ATOM    310  H09 DMC A  26      12.548  19.986   4.264  0.00  1.00      SYST H  
+ATOM    311  H10 DMC A  26      13.329  19.776   5.880  0.00  1.00      SYST H  
+ATOM    312  H11 DMC A  26      13.030  21.428   5.243  0.00  1.00      SYST H  
+ATOM    313  C00 DMC A  27      24.163  18.679   1.904  0.00  1.00      SYST C  
+ATOM    314  O01 DMC A  27      24.246  18.916   3.331  0.00  1.00      SYST O  
+ATOM    315  C02 DMC A  27      23.835  20.150   3.685  0.00  1.00      SYST C  
+ATOM    316  O03 DMC A  27      23.426  21.018   2.930  0.00  1.00      SYST O  
+ATOM    317  O04 DMC A  27      23.957  20.251   5.024  0.00  1.00      SYST O  
+ATOM    318  C05 DMC A  27      23.544  21.542   5.534  0.00  1.00      SYST C  
+ATOM    319  H06 DMC A  27      24.523  17.653   1.768  0.00  1.00      SYST H  
+ATOM    320  H07 DMC A  27      24.799  19.393   1.364  0.00  1.00      SYST H  
+ATOM    321  H08 DMC A  27      23.124  18.779   1.563  0.00  1.00      SYST H  
+ATOM    322  H09 DMC A  27      23.696  21.478   6.617  0.00  1.00      SYST H  
+ATOM    323  H10 DMC A  27      22.486  21.724   5.297  0.00  1.00      SYST H  
+ATOM    324  H11 DMC A  27      24.162  22.339   5.097  0.00  1.00      SYST H  
+ATOM    325  C00 DMC A  28      19.266  19.324   1.923  0.00  1.00      SYST C  
+ATOM    326  O01 DMC A  28      20.525  18.609   1.963  0.00  1.00      SYST O  
+ATOM    327  C02 DMC A  28      20.908  18.285   3.215  0.00  1.00      SYST C  
+ATOM    328  O03 DMC A  28      20.301  18.540   4.244  0.00  1.00      SYST O  
+ATOM    329  O04 DMC A  28      22.083  17.629   3.125  0.00  1.00      SYST O  
+ATOM    330  C05 DMC A  28      22.604  17.223   4.414  0.00  1.00      SYST C  
+ATOM    331  H06 DMC A  28      19.086  19.516   0.860  0.00  1.00      SYST H  
+ATOM    332  H07 DMC A  28      19.346  20.265   2.484  0.00  1.00      SYST H  
+ATOM    333  H08 DMC A  28      18.466  18.706   2.352  0.00  1.00      SYST H  
+ATOM    334  H09 DMC A  28      23.545  16.711   4.186  0.00  1.00      SYST H  
+ATOM    335  H10 DMC A  28      21.899  16.545   4.913  0.00  1.00      SYST H  
+ATOM    336  H11 DMC A  28      22.780  18.104   5.047  0.00  1.00      SYST H  
+ATOM    337  C00 DMC A  29      12.513   7.430   4.888  0.00  1.00      SYST C  
+ATOM    338  O01 DMC A  29      11.296   6.682   4.645  0.00  1.00      SYST O  
+ATOM    339  C02 DMC A  29      10.561   6.495   5.760  0.00  1.00      SYST C  
+ATOM    340  O03 DMC A  29      10.839   6.890   6.882  0.00  1.00      SYST O  
+ATOM    341  O04 DMC A  29       9.464   5.793   5.411  0.00  1.00      SYST O  
+ATOM    342  C05 DMC A  29       8.584   5.525   6.530  0.00  1.00      SYST C  
+ATOM    343  H06 DMC A  29      12.998   7.503   3.908  0.00  1.00      SYST H  
+ATOM    344  H07 DMC A  29      13.151   6.895   5.603  0.00  1.00      SYST H  
+ATOM    345  H08 DMC A  29      12.272   8.427   5.282  0.00  1.00      SYST H  
+ATOM    346  H09 DMC A  29       7.751   4.958   6.102  0.00  1.00      SYST H  
+ATOM    347  H10 DMC A  29       8.231   6.468   6.971  0.00  1.00      SYST H  
+ATOM    348  H11 DMC A  29       9.110   4.935   7.294  0.00  1.00      SYST H  
+ATOM    349  C00 DMC A  30      13.256   9.441  13.857  0.00  1.00      SYST C  
+ATOM    350  O01 DMC A  30      14.544   8.779  13.912  0.00  1.00      SYST O  
+ATOM    351  C02 DMC A  30      14.994   8.607  15.172  0.00  1.00      SYST C  
+ATOM    352  O03 DMC A  30      14.423   8.951  16.195  0.00  1.00      SYST O  
+ATOM    353  O04 DMC A  30      16.189   7.986  15.095  0.00  1.00      SYST O  
+ATOM    354  C05 DMC A  30      16.783   7.741  16.394  0.00  1.00      SYST C  
+ATOM    355  H06 DMC A  30      13.022   9.510  12.789  0.00  1.00      SYST H  
+ATOM    356  H07 DMC A  30      13.323  10.439  14.309  0.00  1.00      SYST H  
+ATOM    357  H08 DMC A  30      12.501   8.846  14.387  0.00  1.00      SYST H  
+ATOM    358  H09 DMC A  30      17.732   7.240  16.177  0.00  1.00      SYST H  
+ATOM    359  H10 DMC A  30      16.128   7.097  16.996  0.00  1.00      SYST H  
+ATOM    360  H11 DMC A  30      16.951   8.691  16.920  0.00  1.00      SYST H  
+ATOM    361  C00 DMC A  31      25.450  13.197  15.275  0.00  1.00      SYST C  
+ATOM    362  O01 DMC A  31      24.809  14.438  15.662  0.00  1.00      SYST O  
+ATOM    363  C02 DMC A  31      24.909  14.694  16.982  0.00  1.00      SYST C  
+ATOM    364  O03 DMC A  31      25.467  13.994  17.812  0.00  1.00      SYST O  
+ATOM    365  O04 DMC A  31      24.280  15.863  17.218  0.00  1.00      SYST O  
+ATOM    366  C05 DMC A  31      24.318  16.254  18.612  0.00  1.00      SYST C  
+ATOM    367  H06 DMC A  31      25.290  13.123  14.194  0.00  1.00      SYST H  
+ATOM    368  H07 DMC A  31      24.986  12.351  15.800  0.00  1.00      SYST H  
+ATOM    369  H08 DMC A  31      26.522  13.234  15.513  0.00  1.00      SYST H  
+ATOM    370  H09 DMC A  31      23.778  17.206  18.651  0.00  1.00      SYST H  
+ATOM    371  H10 DMC A  31      25.358  16.379  18.944  0.00  1.00      SYST H  
+ATOM    372  H11 DMC A  31      23.821  15.495  19.232  0.00  1.00      SYST H  
+ATOM    373  C00 DMC A  32      13.416   4.424  18.003  0.00  1.00      SYST C  
+ATOM    374  O01 DMC A  32      12.203   4.160  18.751  0.00  1.00      SYST O  
+ATOM    375  C02 DMC A  32      11.862   2.855  18.757  0.00  1.00      SYST C  
+ATOM    376  O03 DMC A  32      12.470   1.948  18.211  0.00  1.00      SYST O  
+ATOM    377  O04 DMC A  32      10.728   2.734  19.477  0.00  1.00      SYST O  
+ATOM    378  C05 DMC A  32      10.254   1.368  19.561  0.00  1.00      SYST C  
+ATOM    379  H06 DMC A  32      13.565   5.506  18.086  0.00  1.00      SYST H  
+ATOM    380  H07 DMC A  32      13.288   4.124  16.955  0.00  1.00      SYST H  
+ATOM    381  H08 DMC A  32      14.259   3.876  18.444  0.00  1.00      SYST H  
+ATOM    382  H09 DMC A  32       9.342   1.425  20.165  0.00  1.00      SYST H  
+ATOM    383  H10 DMC A  32      11.007   0.733  20.046  0.00  1.00      SYST H  
+ATOM    384  H11 DMC A  32      10.036   0.980  18.556  0.00  1.00      SYST H  
+ATOM    385  C00 DMC A  33      19.379  17.543  25.258  0.00  1.00      SYST C  
+ATOM    386  O01 DMC A  33      18.037  17.333  25.764  0.00  1.00      SYST O  
+ATOM    387  C02 DMC A  33      17.336  16.436  25.042  0.00  1.00      SYST C  
+ATOM    388  O03 DMC A  33      17.735  15.832  24.059  0.00  1.00      SYST O  
+ATOM    389  O04 DMC A  33      16.115  16.327  25.604  0.00  1.00      SYST O  
+ATOM    390  C05 DMC A  33      15.258  15.384  24.916  0.00  1.00      SYST C  
+ATOM    391  H06 DMC A  33      19.821  18.284  25.933  0.00  1.00      SYST H  
+ATOM    392  H07 DMC A  33      19.341  17.923  24.229  0.00  1.00      SYST H  
+ATOM    393  H08 DMC A  33      19.945  16.602  25.283  0.00  1.00      SYST H  
+ATOM    394  H09 DMC A  33      14.317  15.401  25.476  0.00  1.00      SYST H  
+ATOM    395  H10 DMC A  33      15.706  14.381  24.932  0.00  1.00      SYST H  
+ATOM    396  H11 DMC A  33      15.102  15.702  23.876  0.00  1.00      SYST H  
+ATOM    397  C00 DMC A  34       7.189  18.281  11.015  0.00  1.00      SYST C  
+ATOM    398  O01 DMC A  34       6.734  18.396  12.386  0.00  1.00      SYST O  
+ATOM    399  C02 DMC A  34       6.978  19.609  12.923  0.00  1.00      SYST C  
+ATOM    400  O03 DMC A  34       7.520  20.549  12.363  0.00  1.00      SYST O  
+ATOM    401  O04 DMC A  34       6.515  19.595  14.189  0.00  1.00      SYST O  
+ATOM    402  C05 DMC A  34       6.718  20.852  14.880  0.00  1.00      SYST C  
+ATOM    403  H06 DMC A  34       6.927  17.260  10.718  0.00  1.00      SYST H  
+ATOM    404  H07 DMC A  34       8.274  18.440  10.961  0.00  1.00      SYST H  
+ATOM    405  H08 DMC A  34       6.675  19.018  10.383  0.00  1.00      SYST H  
+ATOM    406  H09 DMC A  34       6.299  20.693  15.879  0.00  1.00      SYST H  
+ATOM    407  H10 DMC A  34       6.191  21.662  14.358  0.00  1.00      SYST H  
+ATOM    408  H11 DMC A  34       7.791  21.085  14.936  0.00  1.00      SYST H  
+ATOM    409  C00 DMC A  35       7.392  25.615  23.222  0.00  1.00      SYST C  
+ATOM    410  O01 DMC A  35       7.687  24.401  22.487  0.00  1.00      SYST O  
+ATOM    411  C02 DMC A  35       6.839  24.188  21.460  0.00  1.00      SYST C  
+ATOM    412  O03 DMC A  35       5.906  24.906  21.134  0.00  1.00      SYST O  
+ATOM    413  O04 DMC A  35       7.210  23.040  20.858  0.00  1.00      SYST O  
+ATOM    414  C05 DMC A  35       6.371  22.698  19.728  0.00  1.00      SYST C  
+ATOM    415  H06 DMC A  35       8.150  25.656  24.012  0.00  1.00      SYST H  
+ATOM    416  H07 DMC A  35       6.382  25.565  23.648  0.00  1.00      SYST H  
+ATOM    417  H08 DMC A  35       7.470  26.487  22.558  0.00  1.00      SYST H  
+ATOM    418  H09 DMC A  35       6.785  21.758  19.346  0.00  1.00      SYST H  
+ATOM    419  H10 DMC A  35       6.420  23.487  18.965  0.00  1.00      SYST H  
+ATOM    420  H11 DMC A  35       5.330  22.564  20.054  0.00  1.00      SYST H  
+ATOM    421  C00 DMC A  36       7.276  24.113   8.890  0.00  1.00      SYST C  
+ATOM    422  O01 DMC A  36       5.841  24.034   9.078  0.00  1.00      SYST O  
+ATOM    423  C02 DMC A  36       5.486  23.888  10.371  0.00  1.00      SYST C  
+ATOM    424  O03 DMC A  36       6.246  23.823  11.324  0.00  1.00      SYST O  
+ATOM    425  O04 DMC A  36       4.140  23.827  10.418  0.00  1.00      SYST O  
+ATOM    426  C05 DMC A  36       3.628  23.670  11.764  0.00  1.00      SYST C  
+ATOM    427  H06 DMC A  36       7.411  24.229   7.810  0.00  1.00      SYST H  
+ATOM    428  H07 DMC A  36       7.756  23.194   9.250  0.00  1.00      SYST H  
+ATOM    429  H08 DMC A  36       7.681  24.978   9.432  0.00  1.00      SYST H  
+ATOM    430  H09 DMC A  36       2.539  23.636  11.648  0.00  1.00      SYST H  
+ATOM    431  H10 DMC A  36       3.929  24.522  12.388  0.00  1.00      SYST H  
+ATOM    432  H11 DMC A  36       4.004  22.737  12.207  0.00  1.00      SYST H  
+ATOM    433  C00 DMC A  37      18.137  12.538  20.669  0.00  1.00      SYST C  
+ATOM    434  O01 DMC A  37      17.298  11.440  21.105  0.00  1.00      SYST O  
+ATOM    435  C02 DMC A  37      16.754  10.753  20.080  0.00  1.00      SYST C  
+ATOM    436  O03 DMC A  37      16.914  10.983  18.892  0.00  1.00      SYST O  
+ATOM    437  O04 DMC A  37      16.002   9.765  20.607  0.00  1.00      SYST O  
+ATOM    438  C05 DMC A  37      15.358   8.946  19.600  0.00  1.00      SYST C  
+ATOM    439  H06 DMC A  37      18.503  12.996  21.594  0.00  1.00      SYST H  
+ATOM    440  H07 DMC A  37      17.547  13.255  20.082  0.00  1.00      SYST H  
+ATOM    441  H08 DMC A  37      18.969  12.160  20.060  0.00  1.00      SYST H  
+ATOM    442  H09 DMC A  37      14.792   8.199  20.166  0.00  1.00      SYST H  
+ATOM    443  H10 DMC A  37      16.112   8.466  18.961  0.00  1.00      SYST H  
+ATOM    444  H11 DMC A  37      14.689   9.561  18.982  0.00  1.00      SYST H  
+ATOM    445  C00 DMC A  38       4.014  17.413  12.220  0.00  1.00      SYST C  
+ATOM    446  O01 DMC A  38       3.382  18.556  11.592  0.00  1.00      SYST O  
+ATOM    447  C02 DMC A  38       2.382  19.078  12.331  0.00  1.00      SYST C  
+ATOM    448  O03 DMC A  38       2.004  18.675  13.419  0.00  1.00      SYST O  
+ATOM    449  O04 DMC A  38       1.876  20.126  11.649  0.00  1.00      SYST O  
+ATOM    450  C05 DMC A  38       0.786  20.779  12.343  0.00  1.00      SYST C  
+ATOM    451  H06 DMC A  38       4.793  17.102  11.517  0.00  1.00      SYST H  
+ATOM    452  H07 DMC A  38       3.280  16.611  12.374  0.00  1.00      SYST H  
+ATOM    453  H08 DMC A  38       4.449  17.705  13.186  0.00  1.00      SYST H  
+ATOM    454  H09 DMC A  38       0.482  21.596  11.680  0.00  1.00      SYST H  
+ATOM    455  H10 DMC A  38       1.129  21.166  13.312  0.00  1.00      SYST H  
+ATOM    456  H11 DMC A  38      -0.042  20.073  12.500  0.00  1.00      SYST H  
+ATOM    457  C00 DMC A  39       5.331  17.244  17.334  0.00  1.00      SYST C  
+ATOM    458  O01 DMC A  39       5.880  16.007  17.851  0.00  1.00      SYST O  
+ATOM    459  C02 DMC A  39       7.158  15.799  17.474  0.00  1.00      SYST C  
+ATOM    460  O03 DMC A  39       7.833  16.539  16.775  0.00  1.00      SYST O  
+ATOM    461  O04 DMC A  39       7.556  14.628  18.011  0.00  1.00      SYST O  
+ATOM    462  C05 DMC A  39       8.924  14.288  17.678  0.00  1.00      SYST C  
+ATOM    463  H06 DMC A  39       4.305  17.277  17.716  0.00  1.00      SYST H  
+ATOM    464  H07 DMC A  39       5.342  17.235  16.236  0.00  1.00      SYST H  
+ATOM    465  H08 DMC A  39       5.915  18.100  17.701  0.00  1.00      SYST H  
+ATOM    466  H09 DMC A  39       9.103  13.329  18.175  0.00  1.00      SYST H  
+ATOM    467  H10 DMC A  39       9.610  15.059  18.055  0.00  1.00      SYST H  
+ATOM    468  H11 DMC A  39       9.038  14.194  16.589  0.00  1.00      SYST H  
+ATOM    469  C00 DMC A  40       9.557  20.019   1.015  0.00  1.00      SYST C  
+ATOM    470  O01 DMC A  40      10.372  19.185   1.875  0.00  1.00      SYST O  
+ATOM    471  C02 DMC A  40      10.362  17.886   1.513  0.00  1.00      SYST C  
+ATOM    472  O03 DMC A  40       9.752  17.405   0.570  0.00  1.00      SYST O  
+ATOM    473  O04 DMC A  40      11.148  17.216   2.379  0.00  1.00      SYST O  
+ATOM    474  C05 DMC A  40      11.222  15.797   2.095  0.00  1.00      SYST C  
+ATOM    475  H06 DMC A  40       9.661  21.030   1.424  0.00  1.00      SYST H  
+ATOM    476  H07 DMC A  40       8.511  19.688   1.046  0.00  1.00      SYST H  
+ATOM    477  H08 DMC A  40       9.928  19.973  -0.018  0.00  1.00      SYST H  
+ATOM    478  H09 DMC A  40      11.884  15.391   2.867  0.00  1.00      SYST H  
+ATOM    479  H10 DMC A  40      11.640  15.631   1.092  0.00  1.00      SYST H  
+ATOM    480  H11 DMC A  40      10.222  15.345   2.157  0.00  1.00      SYST H  
+ATOM    481  C00 DMC A  41      24.015  14.154  26.548  0.00  1.00      SYST C  
+ATOM    482  O01 DMC A  41      24.441  13.759  25.220  0.00  1.00      SYST O  
+ATOM    483  C02 DMC A  41      24.023  12.524  24.878  0.00  1.00      SYST C  
+ATOM    484  O03 DMC A  41      23.354  11.772  25.569  0.00  1.00      SYST O  
+ATOM    485  O04 DMC A  41      24.478  12.271  23.634  0.00  1.00      SYST O  
+ATOM    486  C05 DMC A  41      24.092  10.963  23.146  0.00  1.00      SYST C  
+ATOM    487  H06 DMC A  41      24.421  15.162  26.685  0.00  1.00      SYST H  
+ATOM    488  H07 DMC A  41      24.420  13.462  27.297  0.00  1.00      SYST H  
+ATOM    489  H08 DMC A  41      22.918  14.161  26.606  0.00  1.00      SYST H  
+ATOM    490  H09 DMC A  41      24.524  10.900  22.141  0.00  1.00      SYST H  
+ATOM    491  H10 DMC A  41      22.997  10.879  23.107  0.00  1.00      SYST H  
+ATOM    492  H11 DMC A  41      24.499  10.179  23.799  0.00  1.00      SYST H  
+ATOM    493  C00 DMC A  42       4.082  24.893  17.923  0.00  1.00      SYST C  
+ATOM    494  O01 DMC A  42       3.125  23.806  17.970  0.00  1.00      SYST O  
+ATOM    495  C02 DMC A  42       2.794  23.340  16.749  0.00  1.00      SYST C  
+ATOM    496  O03 DMC A  42       3.224  23.749  15.681  0.00  1.00      SYST O  
+ATOM    497  O04 DMC A  42       1.905  22.342  16.921  0.00  1.00      SYST O  
+ATOM    498  C05 DMC A  42       1.469  21.751  15.672  0.00  1.00      SYST C  
+ATOM    499  H06 DMC A  42       4.253  25.163  18.970  0.00  1.00      SYST H  
+ATOM    500  H07 DMC A  42       3.668  25.739  17.361  0.00  1.00      SYST H  
+ATOM    501  H08 DMC A  42       5.014  24.555  17.448  0.00  1.00      SYST H  
+ATOM    502  H09 DMC A  42       0.761  20.968  15.965  0.00  1.00      SYST H  
+ATOM    503  H10 DMC A  42       2.326  21.324  15.133  0.00  1.00      SYST H  
+ATOM    504  H11 DMC A  42       0.979  22.509  15.045  0.00  1.00      SYST H  
+ATOM    505  C00 DMC A  43       1.248  11.557   9.115  0.00  1.00      SYST C  
+ATOM    506  O01 DMC A  43       1.807  12.402  10.150  0.00  1.00      SYST O  
+ATOM    507  C02 DMC A  43       2.342  11.702  11.171  0.00  1.00      SYST C  
+ATOM    508  O03 DMC A  43       2.382  10.486  11.268  0.00  1.00      SYST O  
+ATOM    509  O04 DMC A  43       2.826  12.590  12.063  0.00  1.00      SYST O  
+ATOM    510  C05 DMC A  43       3.433  11.958  13.217  0.00  1.00      SYST C  
+ATOM    511  H06 DMC A  43       0.857  12.252   8.365  0.00  1.00      SYST H  
+ATOM    512  H07 DMC A  43       0.445  10.932   9.528  0.00  1.00      SYST H  
+ATOM    513  H08 DMC A  43       2.030  10.915   8.686  0.00  1.00      SYST H  
+ATOM    514  H09 DMC A  43       3.775  12.789  13.844  0.00  1.00      SYST H  
+ATOM    515  H10 DMC A  43       4.278  11.328  12.905  0.00  1.00      SYST H  
+ATOM    516  H11 DMC A  43       2.692  11.344  13.748  0.00  1.00      SYST H  
+ATOM    517  C00 DMC A  44      15.972   2.743   1.799  0.00  1.00      SYST C  
+ATOM    518  O01 DMC A  44      16.950   3.567   1.117  0.00  1.00      SYST O  
+ATOM    519  C02 DMC A  44      18.207   3.090   1.224  0.00  1.00      SYST C  
+ATOM    520  O03 DMC A  44      18.547   2.078   1.816  0.00  1.00      SYST O  
+ATOM    521  O04 DMC A  44      19.020   3.934   0.556  0.00  1.00      SYST O  
+ATOM    522  C05 DMC A  44      20.410   3.529   0.594  0.00  1.00      SYST C  
+ATOM    523  H06 DMC A  44      15.014   3.246   1.629  0.00  1.00      SYST H  
+ATOM    524  H07 DMC A  44      16.203   2.689   2.871  0.00  1.00      SYST H  
+ATOM    525  H08 DMC A  44      15.967   1.731   1.372  0.00  1.00      SYST H  
+ATOM    526  H09 DMC A  44      20.941   4.296   0.020  0.00  1.00      SYST H  
+ATOM    527  H10 DMC A  44      20.531   2.539   0.133  0.00  1.00      SYST H  
+ATOM    528  H11 DMC A  44      20.768   3.497   1.633  0.00  1.00      SYST H  
+ATOM    529  C00 DMC A  45      26.932  24.131   9.416  0.00  1.00      SYST C  
+ATOM    530  O01 DMC A  45      26.635  22.939   8.648  0.00  1.00      SYST O  
+ATOM    531  C02 DMC A  45      26.953  21.800   9.296  0.00  1.00      SYST C  
+ATOM    532  O03 DMC A  45      27.441  21.719  10.413  0.00  1.00      SYST O  
+ATOM    533  O04 DMC A  45      26.634  20.769   8.488  0.00  1.00      SYST O  
+ATOM    534  C05 DMC A  45      26.929  19.478   9.075  0.00  1.00      SYST C  
+ATOM    535  H06 DMC A  45      26.625  24.963   8.774  0.00  1.00      SYST H  
+ATOM    536  H07 DMC A  45      28.006  24.181   9.639  0.00  1.00      SYST H  
+ATOM    537  H08 DMC A  45      26.360  24.128  10.355  0.00  1.00      SYST H  
+ATOM    538  H09 DMC A  45      26.623  18.749   8.318  0.00  1.00      SYST H  
+ATOM    539  H10 DMC A  45      26.358  19.343  10.004  0.00  1.00      SYST H  
+ATOM    540  H11 DMC A  45      28.005  19.395   9.288  0.00  1.00      SYST H  
+ATOM    541  C00 DMC A  46      20.116   4.463  18.706  0.00  1.00      SYST C  
+ATOM    542  O01 DMC A  46      21.319   4.359  19.506  0.00  1.00      SYST O  
+ATOM    543  C02 DMC A  46      21.544   3.109  19.960  0.00  1.00      SYST C  
+ATOM    544  O03 DMC A  46      20.845   2.130  19.751  0.00  1.00      SYST O  
+ATOM    545  O04 DMC A  46      22.680   3.138  20.685  0.00  1.00      SYST O  
+ATOM    546  C05 DMC A  46      23.035   1.845  21.232  0.00  1.00      SYST C  
+ATOM    547  H06 DMC A  46      20.064   5.517  18.412  0.00  1.00      SYST H  
+ATOM    548  H07 DMC A  46      19.238   4.178  19.301  0.00  1.00      SYST H  
+ATOM    549  H08 DMC A  46      20.190   3.813  17.824  0.00  1.00      SYST H  
+ATOM    550  H09 DMC A  46      23.963   2.020  21.787  0.00  1.00      SYST H  
+ATOM    551  H10 DMC A  46      23.193   1.119  20.422  0.00  1.00      SYST H  
+ATOM    552  H11 DMC A  46      22.240   1.484  21.900  0.00  1.00      SYST H  
+ATOM    553  C00 DMC A  47      17.199   0.515   9.981  0.00  1.00      SYST C  
+ATOM    554  O01 DMC A  47      18.265   0.385  10.954  0.00  1.00      SYST O  
+ATOM    555  C02 DMC A  47      17.976   0.968  12.135  0.00  1.00      SYST C  
+ATOM    556  O03 DMC A  47      16.943   1.557  12.415  0.00  1.00      SYST O  
+ATOM    557  O04 DMC A  47      19.033   0.782  12.950  0.00  1.00      SYST O  
+ATOM    558  C05 DMC A  47      18.845   1.366  14.262  0.00  1.00      SYST C  
+ATOM    559  H06 DMC A  47      17.569   0.002   9.088  0.00  1.00      SYST H  
+ATOM    560  H07 DMC A  47      17.003   1.575   9.773  0.00  1.00      SYST H  
+ATOM    561  H08 DMC A  47      16.283   0.038  10.357  0.00  1.00      SYST H  
+ATOM    562  H09 DMC A  47      19.769   1.139  14.805  0.00  1.00      SYST H  
+ATOM    563  H10 DMC A  47      17.977   0.913  14.760  0.00  1.00      SYST H  
+ATOM    564  H11 DMC A  47      18.697   2.452  14.177  0.00  1.00      SYST H  
+ATOM    565  C00 DMC A  48      11.876  11.475   4.433  0.00  1.00      SYST C  
+ATOM    566  O01 DMC A  48      11.093  11.562   5.650  0.00  1.00      SYST O  
+ATOM    567  C02 DMC A  48      10.203  10.558   5.777  0.00  1.00      SYST C  
+ATOM    568  O03 DMC A  48      10.029   9.643   4.986  0.00  1.00      SYST O  
+ATOM    569  O04 DMC A  48       9.540  10.746   6.936  0.00  1.00      SYST O  
+ATOM    570  C05 DMC A  48       8.547   9.723   7.192  0.00  1.00      SYST C  
+ATOM    571  H06 DMC A  48      12.544  12.342   4.467  0.00  1.00      SYST H  
+ATOM    572  H07 DMC A  48      11.218  11.519   3.555  0.00  1.00      SYST H  
+ATOM    573  H08 DMC A  48      12.448  10.538   4.418  0.00  1.00      SYST H  
+ATOM    574  H09 DMC A  48       8.097  10.003   8.151  0.00  1.00      SYST H  
+ATOM    575  H10 DMC A  48       9.024   8.736   7.255  0.00  1.00      SYST H  
+ATOM    576  H11 DMC A  48       7.793   9.717   6.392  0.00  1.00      SYST H  
+ATOM    577  C00 DMC A  49       5.480  13.373  19.049  0.00  1.00      SYST C  
+ATOM    578  O01 DMC A  49       4.257  12.626  19.262  0.00  1.00      SYST O  
+ATOM    579  C02 DMC A  49       3.238  13.052  18.489  0.00  1.00      SYST C  
+ATOM    580  O03 DMC A  49       3.281  13.963  17.676  0.00  1.00      SYST O  
+ATOM    581  O04 DMC A  49       2.164  12.288  18.775  0.00  1.00      SYST O  
+ATOM    582  C05 DMC A  49       0.993  12.648  18.002  0.00  1.00      SYST C  
+ATOM    583  H06 DMC A  49       6.207  12.923  19.734  0.00  1.00      SYST H  
+ATOM    584  H07 DMC A  49       5.323  14.434  19.285  0.00  1.00      SYST H  
+ATOM    585  H08 DMC A  49       5.808  13.272  18.005  0.00  1.00      SYST H  
+ATOM    586  H09 DMC A  49       0.213  11.955  18.336  0.00  1.00      SYST H  
+ATOM    587  H10 DMC A  49       1.193  12.526  16.928  0.00  1.00      SYST H  
+ATOM    588  H11 DMC A  49       0.707  13.689  18.207  0.00  1.00      SYST H  
+ATOM    589  C00 DMC A  50      14.124  19.708  15.574  0.00  1.00      SYST C  
+ATOM    590  O01 DMC A  50      14.366  20.270  16.887  0.00  1.00      SYST O  
+ATOM    591  C02 DMC A  50      13.272  20.262  17.674  0.00  1.00      SYST C  
+ATOM    592  O03 DMC A  50      12.167  19.838  17.370  0.00  1.00      SYST O  
+ATOM    593  O04 DMC A  50      13.618  20.805  18.859  0.00  1.00      SYST O  
+ATOM    594  C05 DMC A  50      12.520  20.854  19.802  0.00  1.00      SYST C  
+ATOM    595  H06 DMC A  50      15.086  19.780  15.056  0.00  1.00      SYST H  
+ATOM    596  H07 DMC A  50      13.351  20.286  15.050  0.00  1.00      SYST H  
+ATOM    597  H08 DMC A  50      13.804  18.661  15.664  0.00  1.00      SYST H  
+ATOM    598  H09 DMC A  50      12.944  21.312  20.702  0.00  1.00      SYST H  
+ATOM    599  H10 DMC A  50      12.154  19.839  20.013  0.00  1.00      SYST H  
+ATOM    600  H11 DMC A  50      11.700  21.465  19.399  0.00  1.00      SYST H  
+ATOM    601  C00 DMC A  51      11.227  25.983  11.589  0.00  1.00      SYST C  
+ATOM    602  O01 DMC A  51      11.399  25.100  12.726  0.00  1.00      SYST O  
+ATOM    603  C02 DMC A  51      11.128  23.811  12.438  0.00  1.00      SYST C  
+ATOM    604  O03 DMC A  51      10.774  23.373  11.354  0.00  1.00      SYST O  
+ATOM    605  O04 DMC A  51      11.322  23.094  13.563  0.00  1.00      SYST O  
+ATOM    606  C05 DMC A  51      11.063  21.680  13.384  0.00  1.00      SYST C  
+ATOM    607  H06 DMC A  51      11.479  26.980  11.967  0.00  1.00      SYST H  
+ATOM    608  H07 DMC A  51      10.189  25.947  11.235  0.00  1.00      SYST H  
+ATOM    609  H08 DMC A  51      11.905  25.688  10.776  0.00  1.00      SYST H  
+ATOM    610  H09 DMC A  51      11.258  21.233  14.365  0.00  1.00      SYST H  
+ATOM    611  H10 DMC A  51      11.735  21.263  12.622  0.00  1.00      SYST H  
+ATOM    612  H11 DMC A  51      10.018  21.521  13.081  0.00  1.00      SYST H  
+ATOM    613  C00 DMC A  52       0.705  18.441  18.330  0.00  1.00      SYST C  
+ATOM    614  O01 DMC A  52       0.365  19.832  18.552  0.00  1.00      SYST O  
+ATOM    615  C02 DMC A  52       1.119  20.412  19.509  0.00  1.00      SYST C  
+ATOM    616  O03 DMC A  52       2.007  19.875  20.152  0.00  1.00      SYST O  
+ATOM    617  O04 DMC A  52       0.713  21.693  19.624  0.00  1.00      SYST O  
+ATOM    618  C05 DMC A  52       1.452  22.431  20.628  0.00  1.00      SYST C  
+ATOM    619  H06 DMC A  52       0.023  18.108  17.540  0.00  1.00      SYST H  
+ATOM    620  H07 DMC A  52       0.553  17.862  19.250  0.00  1.00      SYST H  
+ATOM    621  H08 DMC A  52       1.752  18.354  18.008  0.00  1.00      SYST H  
+ATOM    622  H09 DMC A  52       1.020  23.438  20.610  0.00  1.00      SYST H  
+ATOM    623  H10 DMC A  52       2.520  22.458  20.371  0.00  1.00      SYST H  
+ATOM    624  H11 DMC A  52       1.321  21.966  21.615  0.00  1.00      SYST H  
+ATOM    625  C00 DMC A  53       3.748  15.327   5.585  0.00  1.00      SYST C  
+ATOM    626  O01 DMC A  53       5.117  14.957   5.882  0.00  1.00      SYST O  
+ATOM    627  C02 DMC A  53       5.890  14.871   4.780  0.00  1.00      SYST C  
+ATOM    628  O03 DMC A  53       5.532  15.074   3.630  0.00  1.00      SYST O  
+ATOM    629  O04 DMC A  53       7.130  14.524   5.179  0.00  1.00      SYST O  
+ATOM    630  C05 DMC A  53       8.065  14.399   4.079  0.00  1.00      SYST C  
+ATOM    631  H06 DMC A  53       3.248  15.357   6.560  0.00  1.00      SYST H  
+ATOM    632  H07 DMC A  53       3.286  14.577   4.929  0.00  1.00      SYST H  
+ATOM    633  H08 DMC A  53       3.719  16.311   5.099  0.00  1.00      SYST H  
+ATOM    634  H09 DMC A  53       9.013  14.117   4.548  0.00  1.00      SYST H  
+ATOM    635  H10 DMC A  53       8.158  15.357   3.550  0.00  1.00      SYST H  
+ATOM    636  H11 DMC A  53       7.726  13.622   3.379  0.00  1.00      SYST H  
+ATOM    637  C00 DMC A  54      20.641  17.939  18.948  0.00  1.00      SYST C  
+ATOM    638  O01 DMC A  54      21.254  17.887  20.260  0.00  1.00      SYST O  
+ATOM    639  C02 DMC A  54      22.404  18.587  20.333  0.00  1.00      SYST C  
+ATOM    640  O03 DMC A  54      22.923  19.218  19.426  0.00  1.00      SYST O  
+ATOM    641  O04 DMC A  54      22.876  18.463  21.591  0.00  1.00      SYST O  
+ATOM    642  C05 DMC A  54      24.118  19.177  21.801  0.00  1.00      SYST C  
+ATOM    643  H06 DMC A  54      19.731  17.336  19.038  0.00  1.00      SYST H  
+ATOM    644  H07 DMC A  54      21.320  17.516  18.195  0.00  1.00      SYST H  
+ATOM    645  H08 DMC A  54      20.400  18.978  18.684  0.00  1.00      SYST H  
+ATOM    646  H09 DMC A  54      24.376  18.989  22.849  0.00  1.00      SYST H  
+ATOM    647  H10 DMC A  54      23.976  20.251  21.619  0.00  1.00      SYST H  
+ATOM    648  H11 DMC A  54      24.897  18.789  21.129  0.00  1.00      SYST H  
+ATOM    649  C00 DMC A  55      18.602  19.956  11.646  0.00  1.00      SYST C  
+ATOM    650  O01 DMC A  55      18.781  20.490  10.311  0.00  1.00      SYST O  
+ATOM    651  C02 DMC A  55      19.834  21.328  10.216  0.00  1.00      SYST C  
+ATOM    652  O03 DMC A  55      20.591  21.640  11.122  0.00  1.00      SYST O  
+ATOM    653  O04 DMC A  55      19.898  21.756   8.939  0.00  1.00      SYST O  
+ATOM    654  C05 DMC A  55      20.997  22.670   8.704  0.00  1.00      SYST C  
+ATOM    655  H06 DMC A  55      17.725  19.303  11.572  0.00  1.00      SYST H  
+ATOM    656  H07 DMC A  55      18.425  20.771  12.361  0.00  1.00      SYST H  
+ATOM    657  H08 DMC A  55      19.491  19.386  11.949  0.00  1.00      SYST H  
+ATOM    658  H09 DMC A  55      20.924  22.929   7.642  0.00  1.00      SYST H  
+ATOM    659  H10 DMC A  55      21.955  22.177   8.923  0.00  1.00      SYST H  
+ATOM    660  H11 DMC A  55      20.889  23.564   9.335  0.00  1.00      SYST H  
+ATOM    661  C00 DMC A  56       6.169   6.704  23.105  0.00  1.00      SYST C  
+ATOM    662  O01 DMC A  56       6.477   5.809  24.203  0.00  1.00      SYST O  
+ATOM    663  C02 DMC A  56       7.533   5.010  23.952  0.00  1.00      SYST C  
+ATOM    664  O03 DMC A  56       8.199   4.995  22.928  0.00  1.00      SYST O  
+ATOM    665  O04 DMC A  56       7.720   4.230  25.036  0.00  1.00      SYST O  
+ATOM    666  C05 DMC A  56       8.836   3.318  24.891  0.00  1.00      SYST C  
+ATOM    667  H06 DMC A  56       5.305   7.282  23.448  0.00  1.00      SYST H  
+ATOM    668  H07 DMC A  56       5.924   6.127  22.204  0.00  1.00      SYST H  
+ATOM    669  H08 DMC A  56       7.026   7.361  22.901  0.00  1.00      SYST H  
+ATOM    670  H09 DMC A  56       8.865   2.759  25.832  0.00  1.00      SYST H  
+ATOM    671  H10 DMC A  56       9.768   3.879  24.738  0.00  1.00      SYST H  
+ATOM    672  H11 DMC A  56       8.667   2.644  24.039  0.00  1.00      SYST H  
+ATOM    673  C00 DMC A  57      26.042  19.197  14.632  0.00  1.00      SYST C  
+ATOM    674  O01 DMC A  57      26.318  20.584  14.945  0.00  1.00      SYST O  
+ATOM    675  C02 DMC A  57      26.563  21.333  13.851  0.00  1.00      SYST C  
+ATOM    676  O03 DMC A  57      26.567  20.941  12.694  0.00  1.00      SYST O  
+ATOM    677  O04 DMC A  57      26.803  22.593  14.266  0.00  1.00      SYST O  
+ATOM    678  C05 DMC A  57      27.083  23.505  13.175  0.00  1.00      SYST C  
+ATOM    679  H06 DMC A  57      25.865  18.720  15.602  0.00  1.00      SYST H  
+ATOM    680  H07 DMC A  57      26.904  18.744  14.124  0.00  1.00      SYST H  
+ATOM    681  H08 DMC A  57      25.155  19.122  13.989  0.00  1.00      SYST H  
+ATOM    682  H09 DMC A  57      27.255  24.473  13.656  0.00  1.00      SYST H  
+ATOM    683  H10 DMC A  57      26.225  23.553  12.490  0.00  1.00      SYST H  
+ATOM    684  H11 DMC A  57      27.975  23.175  12.624  0.00  1.00      SYST H  
+ATOM    685  C00 DMC A  58      18.646   5.769  21.547  0.00  1.00      SYST C  
+ATOM    686  O01 DMC A  58      20.095   5.787  21.552  0.00  1.00      SYST O  
+ATOM    687  C02 DMC A  58      20.619   5.735  22.793  0.00  1.00      SYST C  
+ATOM    688  O03 DMC A  58      19.991   5.676  23.839  0.00  1.00      SYST O  
+ATOM    689  O04 DMC A  58      21.961   5.758  22.670  0.00  1.00      SYST O  
+ATOM    690  C05 DMC A  58      22.648   5.705  23.944  0.00  1.00      SYST C  
+ATOM    691  H06 DMC A  58      18.368   5.815  20.489  0.00  1.00      SYST H  
+ATOM    692  H07 DMC A  58      18.254   6.636  22.095  0.00  1.00      SYST H  
+ATOM    693  H08 DMC A  58      18.278   4.843  22.010  0.00  1.00      SYST H  
+ATOM    694  H09 DMC A  58      23.713   5.731  23.690  0.00  1.00      SYST H  
+ATOM    695  H10 DMC A  58      22.393   4.777  24.475  0.00  1.00      SYST H  
+ATOM    696  H11 DMC A  58      22.370   6.571  24.561  0.00  1.00      SYST H  
+ATOM    697  C00 DMC A  59      14.222   1.123   9.673  0.00  1.00      SYST C  
+ATOM    698  O01 DMC A  59      12.953   1.434   9.048  0.00  1.00      SYST O  
+ATOM    699  C02 DMC A  59      12.024   1.864   9.925  0.00  1.00      SYST C  
+ATOM    700  O03 DMC A  59      12.178   2.000  11.129  0.00  1.00      SYST O  
+ATOM    701  O04 DMC A  59      10.896   2.119   9.232  0.00  1.00      SYST O  
+ATOM    702  C05 DMC A  59       9.813   2.594  10.069  0.00  1.00      SYST C  
+ATOM    703  H06 DMC A  59      14.866   0.792   8.851  0.00  1.00      SYST H  
+ATOM    704  H07 DMC A  59      14.094   0.326  10.417  0.00  1.00      SYST H  
+ATOM    705  H08 DMC A  59      14.634   2.018  10.159  0.00  1.00      SYST H  
+ATOM    706  H09 DMC A  59       8.977   2.756   9.380  0.00  1.00      SYST H  
+ATOM    707  H10 DMC A  59      10.099   3.531  10.566  0.00  1.00      SYST H  
+ATOM    708  H11 DMC A  59       9.558   1.838  10.825  0.00  1.00      SYST H  
+ATOM    709  C00 DMC A  60      17.023   7.185  10.466  0.00  1.00      SYST C  
+ATOM    710  O01 DMC A  60      16.628   8.379   9.745  0.00  1.00      SYST O  
+ATOM    711  C02 DMC A  60      16.374   9.425  10.557  0.00  1.00      SYST C  
+ATOM    712  O03 DMC A  60      16.452   9.427  11.776  0.00  1.00      SYST O  
+ATOM    713  O04 DMC A  60      16.020  10.467   9.779  0.00  1.00      SYST O  
+ATOM    714  C05 DMC A  60      15.719  11.664  10.538  0.00  1.00      SYST C  
+ATOM    715  H06 DMC A  60      17.194   6.432   9.689  0.00  1.00      SYST H  
+ATOM    716  H07 DMC A  60      16.221   6.871  11.147  0.00  1.00      SYST H  
+ATOM    717  H08 DMC A  60      17.941   7.375  11.038  0.00  1.00      SYST H  
+ATOM    718  H09 DMC A  60      15.452  12.414   9.786  0.00  1.00      SYST H  
+ATOM    719  H10 DMC A  60      16.600  11.981  11.113  0.00  1.00      SYST H  
+ATOM    720  H11 DMC A  60      14.880  11.478  11.222  0.00  1.00      SYST H  
+ATOM    721  C00 DMC A  61      21.105  14.621  11.406  0.00  1.00      SYST C  
+ATOM    722  O01 DMC A  61      22.105  14.762  10.367  0.00  1.00      SYST O  
+ATOM    723  C02 DMC A  61      22.322  16.046  10.016  0.00  1.00      SYST C  
+ATOM    724  O03 DMC A  61      21.768  17.026  10.488  0.00  1.00      SYST O  
+ATOM    725  O04 DMC A  61      23.263  16.050   9.050  0.00  1.00      SYST O  
+ATOM    726  C05 DMC A  61      23.589  17.382   8.583  0.00  1.00      SYST C  
+ATOM    727  H06 DMC A  61      21.037  13.542  11.585  0.00  1.00      SYST H  
+ATOM    728  H07 DMC A  61      20.143  15.024  11.065  0.00  1.00      SYST H  
+ATOM    729  H08 DMC A  61      21.426  15.150  12.314  0.00  1.00      SYST H  
+ATOM    730  H09 DMC A  61      24.354  17.230   7.814  0.00  1.00      SYST H  
+ATOM    731  H10 DMC A  61      23.981  17.990   9.411  0.00  1.00      SYST H  
+ATOM    732  H11 DMC A  61      22.697  17.865   8.161  0.00  1.00      SYST H  
+ATOM    733  C00 DMC A  62      10.678  15.861  14.980  0.00  1.00      SYST C  
+ATOM    734  O01 DMC A  62       9.248  15.930  15.204  0.00  1.00      SYST O  
+ATOM    735  C02 DMC A  62       8.547  15.115  14.389  0.00  1.00      SYST C  
+ATOM    736  O03 DMC A  62       9.012  14.375  13.536  0.00  1.00      SYST O  
+ATOM    737  O04 DMC A  62       7.241  15.266  14.689  0.00  1.00      SYST O  
+ATOM    738  C05 DMC A  62       6.375  14.436  13.876  0.00  1.00      SYST C  
+ATOM    739  H06 DMC A  62      11.109  16.563  15.702  0.00  1.00      SYST H  
+ATOM    740  H07 DMC A  62      10.916  16.159  13.951  0.00  1.00      SYST H  
+ATOM    741  H08 DMC A  62      11.041  14.840  15.161  0.00  1.00      SYST H  
+ATOM    742  H09 DMC A  62       5.362  14.661  14.226  0.00  1.00      SYST H  
+ATOM    743  H10 DMC A  62       6.615  13.374  14.026  0.00  1.00      SYST H  
+ATOM    744  H11 DMC A  62       6.490  14.694  12.814  0.00  1.00      SYST H  
+ATOM    745  C00 DMC A  63      20.774   6.473   8.971  0.00  1.00      SYST C  
+ATOM    746  O01 DMC A  63      20.793   7.914   9.126  0.00  1.00      SYST O  
+ATOM    747  C02 DMC A  63      21.199   8.558   8.013  0.00  1.00      SYST C  
+ATOM    748  O03 DMC A  63      21.526   8.038   6.957  0.00  1.00      SYST O  
+ATOM    749  O04 DMC A  63      21.176   9.880   8.276  0.00  1.00      SYST O  
+ATOM    750  C05 DMC A  63      21.593  10.689   7.150  0.00  1.00      SYST C  
+ATOM    751  H06 DMC A  63      20.430   6.092   9.939  0.00  1.00      SYST H  
+ATOM    752  H07 DMC A  63      21.781   6.103   8.738  0.00  1.00      SYST H  
+ATOM    753  H08 DMC A  63      20.081   6.188   8.168  0.00  1.00      SYST H  
+ATOM    754  H09 DMC A  63      21.525  11.722   7.506  0.00  1.00      SYST H  
+ATOM    755  H10 DMC A  63      20.924  10.524   6.294  0.00  1.00      SYST H  
+ATOM    756  H11 DMC A  63      22.625  10.439   6.864  0.00  1.00      SYST H  
+ATOM    757  C00 DMC A  64       7.090  17.017  21.453  0.00  1.00      SYST C  
+ATOM    758  O01 DMC A  64       7.376  18.270  20.784  0.00  1.00      SYST O  
+ATOM    759  C02 DMC A  64       8.074  18.110  19.641  0.00  1.00      SYST C  
+ATOM    760  O03 DMC A  64       8.452  17.049  19.170  0.00  1.00      SYST O  
+ATOM    761  O04 DMC A  64       8.278  19.335  19.115  0.00  1.00      SYST O  
+ATOM    762  C05 DMC A  64       9.023  19.299  17.873  0.00  1.00      SYST C  
+ATOM    763  H06 DMC A  64       6.527  17.299  22.349  0.00  1.00      SYST H  
+ATOM    764  H07 DMC A  64       8.025  16.507  21.720  0.00  1.00      SYST H  
+ATOM    765  H08 DMC A  64       6.489  16.368  20.800  0.00  1.00      SYST H  
+ATOM    766  H09 DMC A  64       9.110  20.348  17.569  0.00  1.00      SYST H  
+ATOM    767  H10 DMC A  64       8.478  18.716  17.119  0.00  1.00      SYST H  
+ATOM    768  H11 DMC A  64      10.015  18.854  18.038  0.00  1.00      SYST H  
+ATOM    769  C00 DMC A  65       7.793   3.982  13.903  0.00  1.00      SYST C  
+ATOM    770  O01 DMC A  65       6.353   4.107  13.800  0.00  1.00      SYST O  
+ATOM    771  C02 DMC A  65       5.753   4.291  14.994  0.00  1.00      SYST C  
+ATOM    772  O03 DMC A  65       6.311   4.355  16.078  0.00  1.00      SYST O  
+ATOM    773  O04 DMC A  65       4.427   4.392  14.772  0.00  1.00      SYST O  
+ATOM    774  C05 DMC A  65       3.664   4.595  15.986  0.00  1.00      SYST C  
+ATOM    775  H06 DMC A  65       8.136   3.839  12.872  0.00  1.00      SYST H  
+ATOM    776  H07 DMC A  65       8.055   3.117  14.527  0.00  1.00      SYST H  
+ATOM    777  H08 DMC A  65       8.222   4.895  14.337  0.00  1.00      SYST H  
+ATOM    778  H09 DMC A  65       2.622   4.658  15.655  0.00  1.00      SYST H  
+ATOM    779  H10 DMC A  65       3.976   5.526  16.480  0.00  1.00      SYST H  
+ATOM    780  H11 DMC A  65       3.808   3.748  16.671  0.00  1.00      SYST H  
+ATOM    781  C00 DMC A  66      16.560  17.879  16.523  0.00  1.00      SYST C  
+ATOM    782  O01 DMC A  66      16.158  16.501  16.724  0.00  1.00      SYST O  
+ATOM    783  C02 DMC A  66      15.797  16.238  17.997  0.00  1.00      SYST C  
+ATOM    784  O03 DMC A  66      15.788  17.034  18.923  0.00  1.00      SYST O  
+ATOM    785  O04 DMC A  66      15.447  14.937  18.059  0.00  1.00      SYST O  
+ATOM    786  C05 DMC A  66      15.034  14.526  19.385  0.00  1.00      SYST C  
+ATOM    787  H06 DMC A  66      16.821  17.943  15.461  0.00  1.00      SYST H  
+ATOM    788  H07 DMC A  66      17.425  18.118  17.155  0.00  1.00      SYST H  
+ATOM    789  H08 DMC A  66      15.728  18.555  16.765  0.00  1.00      SYST H  
+ATOM    790  H09 DMC A  66      14.784  13.465  19.284  0.00  1.00      SYST H  
+ATOM    791  H10 DMC A  66      14.159  15.107  19.709  0.00  1.00      SYST H  
+ATOM    792  H11 DMC A  66      15.856  14.669  20.100  0.00  1.00      SYST H  
+ATOM    793  C00 DMC A  67       6.976  13.583  26.270  0.00  1.00      SYST C  
+ATOM    794  O01 DMC A  67       7.329  14.920  25.835  0.00  1.00      SYST O  
+ATOM    795  C02 DMC A  67       7.621  15.747  26.859  0.00  1.00      SYST C  
+ATOM    796  O03 DMC A  67       7.608  15.459  28.045  0.00  1.00      SYST O  
+ATOM    797  O04 DMC A  67       7.931  16.950  26.334  0.00  1.00      SYST O  
+ATOM    798  C05 DMC A  67       8.267  17.937  27.340  0.00  1.00      SYST C  
+ATOM    799  H06 DMC A  67       6.768  13.033  25.346  0.00  1.00      SYST H  
+ATOM    800  H07 DMC A  67       6.089  13.616  26.916  0.00  1.00      SYST H  
+ATOM    801  H08 DMC A  67       7.814  13.130  26.817  0.00  1.00      SYST H  
+ATOM    802  H09 DMC A  67       8.492  18.848  26.775  0.00  1.00      SYST H  
+ATOM    803  H10 DMC A  67       9.142  17.607  27.918  0.00  1.00      SYST H  
+ATOM    804  H11 DMC A  67       7.416  18.094  28.017  0.00  1.00      SYST H  
+ATOM    805  C00 DMC A  68      27.215  18.159   5.698  0.00  1.00      SYST C  
+ATOM    806  O01 DMC A  68      27.598  19.352   6.427  0.00  1.00      SYST O  
+ATOM    807  C02 DMC A  68      27.307  20.490   5.766  0.00  1.00      SYST C  
+ATOM    808  O03 DMC A  68      26.777  20.572   4.668  0.00  1.00      SYST O  
+ATOM    809  O04 DMC A  68      27.707  21.522   6.536  0.00  1.00      SYST O  
+ATOM    810  C05 DMC A  68      27.447  22.813   5.933  0.00  1.00      SYST C  
+ATOM    811  H06 DMC A  68      27.507  17.327   6.347  0.00  1.00      SYST H  
+ATOM    812  H07 DMC A  68      27.746  18.114   4.738  0.00  1.00      SYST H  
+ATOM    813  H08 DMC A  68      26.131  18.157   5.520  0.00  1.00      SYST H  
+ATOM    814  H09 DMC A  68      27.818  23.542   6.661  0.00  1.00      SYST H  
+ATOM    815  H10 DMC A  68      26.369  22.943   5.762  0.00  1.00      SYST H  
+ATOM    816  H11 DMC A  68      27.985  22.901   4.979  0.00  1.00      SYST H  
+ATOM    817  C00 DMC A  69       7.213  21.981   6.472  0.00  1.00      SYST C  
+ATOM    818  O01 DMC A  69       6.815  22.059   5.081  0.00  1.00      SYST O  
+ATOM    819  C02 DMC A  69       6.598  23.324   4.665  0.00  1.00      SYST C  
+ATOM    820  O03 DMC A  69       6.710  24.334   5.342  0.00  1.00      SYST O  
+ATOM    821  O04 DMC A  69       6.237  23.269   3.367  0.00  1.00      SYST O  
+ATOM    822  C05 DMC A  69       5.975  24.575   2.798  0.00  1.00      SYST C  
+ATOM    823  H06 DMC A  69       7.352  20.911   6.664  0.00  1.00      SYST H  
+ATOM    824  H07 DMC A  69       6.427  22.397   7.116  0.00  1.00      SYST H  
+ATOM    825  H08 DMC A  69       8.149  22.533   6.630  0.00  1.00      SYST H  
+ATOM    826  H09 DMC A  69       5.698  24.376   1.757  0.00  1.00      SYST H  
+ATOM    827  H10 DMC A  69       6.876  25.201   2.851  0.00  1.00      SYST H  
+ATOM    828  H11 DMC A  69       5.153  25.066   3.337  0.00  1.00      SYST H  
+ATOM    829  C00 DMC A  70      14.207  23.231   3.208  0.00  1.00      SYST C  
+ATOM    830  O01 DMC A  70      13.042  23.891   3.762  0.00  1.00      SYST O  
+ATOM    831  C02 DMC A  70      11.880  23.350   3.343  0.00  1.00      SYST C  
+ATOM    832  O03 DMC A  70      11.759  22.404   2.580  0.00  1.00      SYST O  
+ATOM    833  O04 DMC A  70      10.878  24.042   3.921  0.00  1.00      SYST O  
+ATOM    834  C05 DMC A  70       9.566  23.553   3.549  0.00  1.00      SYST C  
+ATOM    835  H06 DMC A  70      15.062  23.769   3.630  0.00  1.00      SYST H  
+ATOM    836  H07 DMC A  70      14.198  23.304   2.112  0.00  1.00      SYST H  
+ATOM    837  H08 DMC A  70      14.222  22.174   3.507  0.00  1.00      SYST H  
+ATOM    838  H09 DMC A  70       8.863  24.201   4.085  0.00  1.00      SYST H  
+ATOM    839  H10 DMC A  70       9.448  22.506   3.858  0.00  1.00      SYST H  
+ATOM    840  H11 DMC A  70       9.424  23.635   2.462  0.00  1.00      SYST H  
+ATOM    841  C00 DMC A  71       6.766  12.444  11.482  0.00  1.00      SYST C  
+ATOM    842  O01 DMC A  71       6.624  11.276  10.635  0.00  1.00      SYST O  
+ATOM    843  C02 DMC A  71       6.375  10.148  11.331  0.00  1.00      SYST C  
+ATOM    844  O03 DMC A  71       6.269  10.058  12.545  0.00  1.00      SYST O  
+ATOM    845  O04 DMC A  71       6.263   9.139  10.444  0.00  1.00      SYST O  
+ATOM    846  C05 DMC A  71       5.992   7.862  11.071  0.00  1.00      SYST C  
+ATOM    847  H06 DMC A  71       6.962  13.270  10.789  0.00  1.00      SYST H  
+ATOM    848  H07 DMC A  71       7.605  12.308  12.177  0.00  1.00      SYST H  
+ATOM    849  H08 DMC A  71       5.841  12.617  12.048  0.00  1.00      SYST H  
+ATOM    850  H09 DMC A  71       5.928   7.150  10.241  0.00  1.00      SYST H  
+ATOM    851  H10 DMC A  71       5.044   7.904  11.626  0.00  1.00      SYST H  
+ATOM    852  H11 DMC A  71       6.809   7.595  11.756  0.00  1.00      SYST H  
+ATOM    853  C00 DMC A  72      13.809   9.542   7.821  0.00  1.00      SYST C  
+ATOM    854  O01 DMC A  72      14.114   8.257   8.417  0.00  1.00      SYST O  
+ATOM    855  C02 DMC A  72      13.745   8.176   9.711  0.00  1.00      SYST C  
+ATOM    856  O03 DMC A  72      13.207   9.056  10.365  0.00  1.00      SYST O  
+ATOM    857  O04 DMC A  72      14.077   6.946  10.153  0.00  1.00      SYST O  
+ATOM    858  C05 DMC A  72      13.729   6.730  11.542  0.00  1.00      SYST C  
+ATOM    859  H06 DMC A  72      14.159   9.462   6.786  0.00  1.00      SYST H  
+ATOM    860  H07 DMC A  72      14.338  10.343   8.353  0.00  1.00      SYST H  
+ATOM    861  H08 DMC A  72      12.727   9.728   7.856  0.00  1.00      SYST H  
+ATOM    862  H09 DMC A  72      14.054   5.706  11.756  0.00  1.00      SYST H  
+ATOM    863  H10 DMC A  72      12.645   6.836  11.683  0.00  1.00      SYST H  
+ATOM    864  H11 DMC A  72      14.257   7.451  12.182  0.00  1.00      SYST H  
+ATOM    865  C00 DMC A  73      18.328  12.463   5.536  0.00  1.00      SYST C  
+ATOM    866  O01 DMC A  73      19.137  12.207   4.361  0.00  1.00      SYST O  
+ATOM    867  C02 DMC A  73      18.405  12.062   3.238  0.00  1.00      SYST C  
+ATOM    868  O03 DMC A  73      17.188  12.129   3.157  0.00  1.00      SYST O  
+ATOM    869  O04 DMC A  73      19.260  11.830   2.222  0.00  1.00      SYST O  
+ATOM    870  C05 DMC A  73      18.592  11.656   0.949  0.00  1.00      SYST C  
+ATOM    871  H06 DMC A  73      19.047  12.557   6.357  0.00  1.00      SYST H  
+ATOM    872  H07 DMC A  73      17.639  11.626   5.711  0.00  1.00      SYST H  
+ATOM    873  H08 DMC A  73      17.756  13.391   5.406  0.00  1.00      SYST H  
+ATOM    874  H09 DMC A  73      19.400  11.479   0.230  0.00  1.00      SYST H  
+ATOM    875  H10 DMC A  73      18.027  12.562   0.688  0.00  1.00      SYST H  
+ATOM    876  H11 DMC A  73      17.910  10.796   0.993  0.00  1.00      SYST H  
+ATOM    877  C00 DMC A  74      24.514   3.299  18.209  0.00  1.00      SYST C  
+ATOM    878  O01 DMC A  74      25.246   4.547  18.121  0.00  1.00      SYST O  
+ATOM    879  C02 DMC A  74      25.292   5.044  16.868  0.00  1.00      SYST C  
+ATOM    880  O03 DMC A  74      24.788   4.543  15.875  0.00  1.00      SYST O  
+ATOM    881  O04 DMC A  74      25.993   6.195  16.912  0.00  1.00      SYST O  
+ATOM    882  C05 DMC A  74      26.114   6.834  15.618  0.00  1.00      SYST C  
+ATOM    883  H06 DMC A  74      24.560   3.021  19.267  0.00  1.00      SYST H  
+ATOM    884  H07 DMC A  74      24.989   2.535  17.580  0.00  1.00      SYST H  
+ATOM    885  H08 DMC A  74      23.474   3.447  17.887  0.00  1.00      SYST H  
+ATOM    886  H09 DMC A  74      26.698   7.741  15.807  0.00  1.00      SYST H  
+ATOM    887  H10 DMC A  74      25.119   7.083  15.222  0.00  1.00      SYST H  
+ATOM    888  H11 DMC A  74      26.635   6.170  14.914  0.00  1.00      SYST H  
+ATOM    889  C00 DMC A  75      18.482  21.432  16.658  0.00  1.00      SYST C  
+ATOM    890  O01 DMC A  75      18.394  22.872  16.796  0.00  1.00      SYST O  
+ATOM    891  C02 DMC A  75      18.367  23.514  15.611  0.00  1.00      SYST C  
+ATOM    892  O03 DMC A  75      18.407  22.994  14.507  0.00  1.00      SYST O  
+ATOM    893  O04 DMC A  75      18.285  24.836  15.867  0.00  1.00      SYST O  
+ATOM    894  C05 DMC A  75      18.247  25.643  14.665  0.00  1.00      SYST C  
+ATOM    895  H06 DMC A  75      18.495  21.052  17.685  0.00  1.00      SYST H  
+ATOM    896  H07 DMC A  75      19.402  21.157  16.126  0.00  1.00      SYST H  
+ATOM    897  H08 DMC A  75      17.611  21.051  16.109  0.00  1.00      SYST H  
+ATOM    898  H09 DMC A  75      18.182  26.676  15.023  0.00  1.00      SYST H  
+ATOM    899  H10 DMC A  75      17.368  25.382  14.059  0.00  1.00      SYST H  
+ATOM    900  H11 DMC A  75      19.161  25.489  14.075  0.00  1.00      SYST H  
+ATOM    901  C00 DMC A  76       6.557   7.206  19.070  0.00  1.00      SYST C  
+ATOM    902  O01 DMC A  76       6.320   7.380  17.651  0.00  1.00      SYST O  
+ATOM    903  C02 DMC A  76       7.446   7.645  16.957  0.00  1.00      SYST C  
+ATOM    904  O03 DMC A  76       8.573   7.739  17.419  0.00  1.00      SYST O  
+ATOM    905  O04 DMC A  76       7.101   7.786  15.661  0.00  1.00      SYST O  
+ATOM    906  C05 DMC A  76       8.232   8.074  14.803  0.00  1.00      SYST C  
+ATOM    907  H06 DMC A  76       5.570   7.000  19.496  0.00  1.00      SYST H  
+ATOM    908  H07 DMC A  76       6.987   8.121  19.497  0.00  1.00      SYST H  
+ATOM    909  H08 DMC A  76       7.242   6.363  19.238  0.00  1.00      SYST H  
+ATOM    910  H09 DMC A  76       7.807   8.161  13.798  0.00  1.00      SYST H  
+ATOM    911  H10 DMC A  76       8.964   7.256  14.850  0.00  1.00      SYST H  
+ATOM    912  H11 DMC A  76       8.711   9.015  15.109  0.00  1.00      SYST H  
+ATOM    913  C00 DMC A  77      25.090  23.273  19.555  0.00  1.00      SYST C  
+ATOM    914  O01 DMC A  77      23.780  23.887  19.476  0.00  1.00      SYST O  
+ATOM    915  C02 DMC A  77      22.814  23.143  20.051  0.00  1.00      SYST C  
+ATOM    916  O03 DMC A  77      22.965  22.061  20.596  0.00  1.00      SYST O  
+ATOM    917  O04 DMC A  77      21.651  23.812  19.916  0.00  1.00      SYST O  
+ATOM    918  C05 DMC A  77      20.525  23.112  20.499  0.00  1.00      SYST C  
+ATOM    919  H06 DMC A  77      25.762  23.979  19.055  0.00  1.00      SYST H  
+ATOM    920  H07 DMC A  77      25.086  22.304  19.040  0.00  1.00      SYST H  
+ATOM    921  H08 DMC A  77      25.379  23.131  20.605  0.00  1.00      SYST H  
+ATOM    922  H09 DMC A  77      19.664  23.764  20.316  0.00  1.00      SYST H  
+ATOM    923  H10 DMC A  77      20.684  22.966  21.576  0.00  1.00      SYST H  
+ATOM    924  H11 DMC A  77      20.390  22.137  20.011  0.00  1.00      SYST H  
+ATOM    925  C00 DMC A  78      22.637  18.178  12.446  0.00  1.00      SYST C  
+ATOM    926  O01 DMC A  78      23.721  17.613  11.669  0.00  1.00      SYST O  
+ATOM    927  C02 DMC A  78      24.500  16.775  12.382  0.00  1.00      SYST C  
+ATOM    928  O03 DMC A  78      24.357  16.484  13.560  0.00  1.00      SYST O  
+ATOM    929  O04 DMC A  78      25.465  16.317  11.559  0.00  1.00      SYST O  
+ATOM    930  C05 DMC A  78      26.376  15.398  12.212  0.00  1.00      SYST C  
+ATOM    931  H06 DMC A  78      22.098  18.827  11.746  0.00  1.00      SYST H  
+ATOM    932  H07 DMC A  78      23.036  18.756  13.290  0.00  1.00      SYST H  
+ATOM    933  H08 DMC A  78      21.984  17.379  12.822  0.00  1.00      SYST H  
+ATOM    934  H09 DMC A  78      27.093  15.114  11.434  0.00  1.00      SYST H  
+ATOM    935  H10 DMC A  78      25.829  14.519  12.581  0.00  1.00      SYST H  
+ATOM    936  H11 DMC A  78      26.882  15.897  13.050  0.00  1.00      SYST H  
+ATOM    937  C00 DMC A  79       0.974  12.452   4.846  0.00  1.00      SYST C  
+ATOM    938  O01 DMC A  79       1.015  13.849   5.228  0.00  1.00      SYST O  
+ATOM    939  C02 DMC A  79       1.121  14.681   4.173  0.00  1.00      SYST C  
+ATOM    940  O03 DMC A  79       1.179  14.352   2.998  0.00  1.00      SYST O  
+ATOM    941  O04 DMC A  79       1.150  15.942   4.650  0.00  1.00      SYST O  
+ATOM    942  C05 DMC A  79       1.262  16.939   3.606  0.00  1.00      SYST C  
+ATOM    943  H06 DMC A  79       0.888  11.904   5.791  0.00  1.00      SYST H  
+ATOM    944  H07 DMC A  79       1.895  12.176   4.315  0.00  1.00      SYST H  
+ATOM    945  H08 DMC A  79       0.105  12.261   4.202  0.00  1.00      SYST H  
+ATOM    946  H09 DMC A  79       1.274  17.898   4.134  0.00  1.00      SYST H  
+ATOM    947  H10 DMC A  79       0.402  16.877   2.926  0.00  1.00      SYST H  
+ATOM    948  H11 DMC A  79       2.192  16.792   3.038  0.00  1.00      SYST H  
+ATOM    949  C00 DMC A  80       6.130  11.048   2.866  0.00  1.00      SYST C  
+ATOM    950  O01 DMC A  80       5.484   9.967   2.150  0.00  1.00      SYST O  
+ATOM    951  C02 DMC A  80       5.414   8.827   2.867  0.00  1.00      SYST C  
+ATOM    952  O03 DMC A  80       5.832   8.663   4.003  0.00  1.00      SYST O  
+ATOM    953  O04 DMC A  80       4.799   7.902   2.103  0.00  1.00      SYST O  
+ATOM    954  C05 DMC A  80       4.661   6.622   2.765  0.00  1.00      SYST C  
+ATOM    955  H06 DMC A  80       6.113  11.895   2.171  0.00  1.00      SYST H  
+ATOM    956  H07 DMC A  80       7.160  10.770   3.123  0.00  1.00      SYST H  
+ATOM    957  H08 DMC A  80       5.572  11.282   3.783  0.00  1.00      SYST H  
+ATOM    958  H09 DMC A  80       4.152   5.982   2.036  0.00  1.00      SYST H  
+ATOM    959  H10 DMC A  80       4.060   6.729   3.679  0.00  1.00      SYST H  
+ATOM    960  H11 DMC A  80       5.650   6.217   3.019  0.00  1.00      SYST H  
+ATOM    961  C00 DMC A  81      15.921  23.885  20.854  0.00  1.00      SYST C  
+ATOM    962  O01 DMC A  81      14.584  24.401  21.070  0.00  1.00      SYST O  
+ATOM    963  C02 DMC A  81      14.501  25.736  20.900  0.00  1.00      SYST C  
+ATOM    964  O03 DMC A  81      15.417  26.483  20.596  0.00  1.00      SYST O  
+ATOM    965  O04 DMC A  81      13.221  26.095  21.126  0.00  1.00      SYST O  
+ATOM    966  C05 DMC A  81      12.997  27.518  20.973  0.00  1.00      SYST C  
+ATOM    967  H06 DMC A  81      15.837  22.806  21.024  0.00  1.00      SYST H  
+ATOM    968  H07 DMC A  81      16.623  24.341  21.565  0.00  1.00      SYST H  
+ATOM    969  H08 DMC A  81      16.247  24.097  19.827  0.00  1.00      SYST H  
+ATOM    970  H09 DMC A  81      11.931  27.658  21.184  0.00  1.00      SYST H  
+ATOM    971  H10 DMC A  81      13.239  27.833  19.949  0.00  1.00      SYST H  
+ATOM    972  H11 DMC A  81      13.616  28.078  21.688  0.00  1.00      SYST H  
+ATOM    973  C00 DMC A  82       0.478   5.972   9.247  0.00  1.00      SYST C  
+ATOM    974  O01 DMC A  82       0.045   5.334   8.020  0.00  1.00      SYST O  
+ATOM    975  C02 DMC A  82       0.546   4.092   7.866  0.00  1.00      SYST C  
+ATOM    976  O03 DMC A  82       1.289   3.512   8.644  0.00  1.00      SYST O  
+ATOM    977  O04 DMC A  82       0.077   3.605   6.700  0.00  1.00      SYST O  
+ATOM    978  C05 DMC A  82       0.546   2.264   6.417  0.00  1.00      SYST C  
+ATOM    979  H06 DMC A  82       0.000   6.957   9.235  0.00  1.00      SYST H  
+ATOM    980  H07 DMC A  82       1.572   6.066   9.259  0.00  1.00      SYST H  
+ATOM    981  H08 DMC A  82       0.149   5.386  10.115  0.00  1.00      SYST H  
+ATOM    982  H09 DMC A  82       0.091   2.005   5.455  0.00  1.00      SYST H  
+ATOM    983  H10 DMC A  82       0.218   1.572   7.205  0.00  1.00      SYST H  
+ATOM    984  H11 DMC A  82       1.643   2.252   6.348  0.00  1.00      SYST H  
+ATOM    985  C00 DMC A  83      13.488  17.057   6.976  0.00  1.00      SYST C  
+ATOM    986  O01 DMC A  83      12.582  16.004   7.389  0.00  1.00      SYST O  
+ATOM    987  C02 DMC A  83      13.133  14.776   7.314  0.00  1.00      SYST C  
+ATOM    988  O03 DMC A  83      14.269  14.516   6.947  0.00  1.00      SYST O  
+ATOM    989  O04 DMC A  83      12.203  13.888   7.720  0.00  1.00      SYST O  
+ATOM    990  C05 DMC A  83      12.676  12.519   7.687  0.00  1.00      SYST C  
+ATOM    991  H06 DMC A  83      12.912  17.982   7.087  0.00  1.00      SYST H  
+ATOM    992  H07 DMC A  83      13.792  16.908   5.931  0.00  1.00      SYST H  
+ATOM    993  H08 DMC A  83      14.376  17.067   7.621  0.00  1.00      SYST H  
+ATOM    994  H09 DMC A  83      11.828  11.921   8.037  0.00  1.00      SYST H  
+ATOM    995  H10 DMC A  83      13.542  12.399   8.353  0.00  1.00      SYST H  
+ATOM    996  H11 DMC A  83      12.958  12.239   6.662  0.00  1.00      SYST H  
+ATOM    997  C00 DMC A  84      19.445  25.853  11.016  0.00  1.00      SYST C  
+ATOM    998  O01 DMC A  84      20.065  25.579   9.736  0.00  1.00      SYST O  
+ATOM    999  C02 DMC A  84      21.328  26.043   9.651  0.00  1.00      SYST C  
+ATOM   1000  O03 DMC A  84      21.938  26.638  10.526  0.00  1.00      SYST O  
+ATOM   1001  O04 DMC A  84      21.795  25.731   8.425  0.00  1.00      SYST O  
+ATOM   1002  C05 DMC A  84      23.155  26.178   8.207  0.00  1.00      SYST C  
+ATOM   1003  H06 DMC A  84      18.440  25.425  10.939  0.00  1.00      SYST H  
+ATOM   1004  H07 DMC A  84      19.398  26.936  11.190  0.00  1.00      SYST H  
+ATOM   1005  H08 DMC A  84      20.015  25.374  11.823  0.00  1.00      SYST H  
+ATOM   1006  H09 DMC A  84      23.395  25.859   7.187  0.00  1.00      SYST H  
+ATOM   1007  H10 DMC A  84      23.832  25.708   8.935  0.00  1.00      SYST H  
+ATOM   1008  H11 DMC A  84      23.215  27.271   8.302  0.00  1.00      SYST H  
+ATOM   1009  C00 DMC A  85      23.562   3.992   7.500  0.00  1.00      SYST C  
+ATOM   1010  O01 DMC A  85      22.138   3.883   7.253  0.00  1.00      SYST O  
+ATOM   1011  C02 DMC A  85      21.820   3.995   5.948  0.00  1.00      SYST C  
+ATOM   1012  O03 DMC A  85      22.602   4.168   5.027  0.00  1.00      SYST O  
+ATOM   1013  O04 DMC A  85      20.480   3.878   5.845  0.00  1.00      SYST O  
+ATOM   1014  C05 DMC A  85      20.007   3.980   4.480  0.00  1.00      SYST C  
+ATOM   1015  H06 DMC A  85      23.668   3.884   8.585  0.00  1.00      SYST H  
+ATOM   1016  H07 DMC A  85      23.932   4.970   7.164  0.00  1.00      SYST H  
+ATOM   1017  H08 DMC A  85      24.100   3.193   6.971  0.00  1.00      SYST H  
+ATOM   1018  H09 DMC A  85      18.919   3.869   4.551  0.00  1.00      SYST H  
+ATOM   1019  H10 DMC A  85      20.443   3.181   3.865  0.00  1.00      SYST H  
+ATOM   1020  H11 DMC A  85      20.275   4.959   4.057  0.00  1.00      SYST H  
+ATOM   1021  C00 DMC A  86       4.269  21.481  25.494  0.00  1.00      SYST C  
+ATOM   1022  O01 DMC A  86       4.452  20.383  24.565  0.00  1.00      SYST O  
+ATOM   1023  C02 DMC A  86       4.595  20.791  23.288  0.00  1.00      SYST C  
+ATOM   1024  O03 DMC A  86       4.582  21.947  22.894  0.00  1.00      SYST O  
+ATOM   1025  O04 DMC A  86       4.757  19.691  22.525  0.00  1.00      SYST O  
+ATOM   1026  C05 DMC A  86       4.923  19.997  21.119  0.00  1.00      SYST C  
+ATOM   1027  H06 DMC A  86       4.169  21.005  26.475  0.00  1.00      SYST H  
+ATOM   1028  H07 DMC A  86       3.364  22.048  25.237  0.00  1.00      SYST H  
+ATOM   1029  H08 DMC A  86       5.142  22.148  25.468  0.00  1.00      SYST H  
+ATOM   1030  H09 DMC A  86       5.041  19.023  20.633  0.00  1.00      SYST H  
+ATOM   1031  H10 DMC A  86       5.814  20.622  20.969  0.00  1.00      SYST H  
+ATOM   1032  H11 DMC A  86       4.036  20.522  20.738  0.00  1.00      SYST H  
+ATOM   1033  C00 DMC A  87       6.222  17.773  25.062  0.00  1.00      SYST C  
+ATOM   1034  O01 DMC A  87       5.197  18.335  24.204  0.00  1.00      SYST O  
+ATOM   1035  C02 DMC A  87       3.949  17.990  24.580  0.00  1.00      SYST C  
+ATOM   1036  O03 DMC A  87       3.651  17.285  25.531  0.00  1.00      SYST O  
+ATOM   1037  O04 DMC A  87       3.090  18.567  23.715  0.00  1.00      SYST O  
+ATOM   1038  C05 DMC A  87       1.704  18.272  24.012  0.00  1.00      SYST C  
+ATOM   1039  H06 DMC A  87       7.168  18.133  24.642  0.00  1.00      SYST H  
+ATOM   1040  H07 DMC A  87       6.175  16.676  25.040  0.00  1.00      SYST H  
+ATOM   1041  H08 DMC A  87       6.090  18.128  26.093  0.00  1.00      SYST H  
+ATOM   1042  H09 DMC A  87       1.133  18.798  23.240  0.00  1.00      SYST H  
+ATOM   1043  H10 DMC A  87       1.443  18.641  25.014  0.00  1.00      SYST H  
+ATOM   1044  H11 DMC A  87       1.527  17.188  23.961  0.00  1.00      SYST H  
+ATOM   1045  C00 DMC A  88      22.550  21.929  17.640  0.00  1.00      SYST C  
+ATOM   1046  O01 DMC A  88      22.601  21.215  16.380  0.00  1.00      SYST O  
+ATOM   1047  C02 DMC A  88      22.480  22.026  15.310  0.00  1.00      SYST C  
+ATOM   1048  O03 DMC A  88      22.341  23.239  15.336  0.00  1.00      SYST O  
+ATOM   1049  O04 DMC A  88      22.542  21.255  14.205  0.00  1.00      SYST O  
+ATOM   1050  C05 DMC A  88      22.424  22.014  12.977  0.00  1.00      SYST C  
+ATOM   1051  H06 DMC A  88      22.660  21.154  18.406  0.00  1.00      SYST H  
+ATOM   1052  H07 DMC A  88      21.589  22.449  17.742  0.00  1.00      SYST H  
+ATOM   1053  H08 DMC A  88      23.371  22.656  17.697  0.00  1.00      SYST H  
+ATOM   1054  H09 DMC A  88      22.490  21.267  12.179  0.00  1.00      SYST H  
+ATOM   1055  H10 DMC A  88      23.241  22.744  12.901  0.00  1.00      SYST H  
+ATOM   1056  H11 DMC A  88      21.458  22.537  12.946  0.00  1.00      SYST H  
+ATOM   1057  C00 DMC A  89      20.502   7.610  26.661  0.00  1.00      SYST C  
+ATOM   1058  O01 DMC A  89      20.452   8.348  25.415  0.00  1.00      SYST O  
+ATOM   1059  C02 DMC A  89      19.788   9.516  25.521  0.00  1.00      SYST C  
+ATOM   1060  O03 DMC A  89      19.264   9.959  26.531  0.00  1.00      SYST O  
+ATOM   1061  O04 DMC A  89      19.808  10.107  24.308  0.00  1.00      SYST O  
+ATOM   1062  C05 DMC A  89      19.122  11.382  24.289  0.00  1.00      SYST C  
+ATOM   1063  H06 DMC A  89      21.063   6.699  26.426  0.00  1.00      SYST H  
+ATOM   1064  H07 DMC A  89      19.486   7.369  27.000  0.00  1.00      SYST H  
+ATOM   1065  H08 DMC A  89      21.017   8.201  27.430  0.00  1.00      SYST H  
+ATOM   1066  H09 DMC A  89      19.219  11.737  23.258  0.00  1.00      SYST H  
+ATOM   1067  H10 DMC A  89      19.598  12.081  24.991  0.00  1.00      SYST H  
+ATOM   1068  H11 DMC A  89      18.065  11.249  24.561  0.00  1.00      SYST H  
+ATOM   1069  C00 DMC A  90      26.807  24.706  24.864  0.00  1.00      SYST C  
+ATOM   1070  O01 DMC A  90      27.247  23.362  24.550  0.00  1.00      SYST O  
+ATOM   1071  C02 DMC A  90      27.087  23.045  23.249  0.00  1.00      SYST C  
+ATOM   1072  O03 DMC A  90      26.627  23.771  22.381  0.00  1.00      SYST O  
+ATOM   1073  O04 DMC A  90      27.528  21.782  23.081  0.00  1.00      SYST O  
+ATOM   1074  C05 DMC A  90      27.410  21.319  21.713  0.00  1.00      SYST C  
+ATOM   1075  H06 DMC A  90      26.995  24.820  25.937  0.00  1.00      SYST H  
+ATOM   1076  H07 DMC A  90      25.738  24.818  24.638  0.00  1.00      SYST H  
+ATOM   1077  H08 DMC A  90      27.385  25.439  24.284  0.00  1.00      SYST H  
+ATOM   1078  H09 DMC A  90      27.799  20.295  21.729  0.00  1.00      SYST H  
+ATOM   1079  H10 DMC A  90      28.005  21.955  21.043  0.00  1.00      SYST H  
+ATOM   1080  H11 DMC A  90      26.357  21.333  21.397  0.00  1.00      SYST H  
+ATOM   1081  C00 DMC A  91      14.325   9.633  22.829  0.00  1.00      SYST C  
+ATOM   1082  O01 DMC A  91      15.698   9.175  22.903  0.00  1.00      SYST O  
+ATOM   1083  C02 DMC A  91      15.955   8.457  24.015  0.00  1.00      SYST C  
+ATOM   1084  O03 DMC A  91      15.157   8.188  24.900  0.00  1.00      SYST O  
+ATOM   1085  O04 DMC A  91      17.251   8.090  23.972  0.00  1.00      SYST O  
+ATOM   1086  C05 DMC A  91      17.656   7.305  25.120  0.00  1.00      SYST C  
+ATOM   1087  H06 DMC A  91      14.266  10.192  21.889  0.00  1.00      SYST H  
+ATOM   1088  H07 DMC A  91      14.094  10.280  23.686  0.00  1.00      SYST H  
+ATOM   1089  H08 DMC A  91      13.640   8.775  22.820  0.00  1.00      SYST H  
+ATOM   1090  H09 DMC A  91      18.714   7.083  24.950  0.00  1.00      SYST H  
+ATOM   1091  H10 DMC A  91      17.065   6.380  25.176  0.00  1.00      SYST H  
+ATOM   1092  H11 DMC A  91      17.520   7.886  26.044  0.00  1.00      SYST H  
+ATOM   1093  C00 DMC A  92      13.524   8.021   0.923  0.00  1.00      SYST C  
+ATOM   1094  O01 DMC A  92      14.524   7.373   1.747  0.00  1.00      SYST O  
+ATOM   1095  C02 DMC A  92      15.711   7.233   1.124  0.00  1.00      SYST C  
+ATOM   1096  O03 DMC A  92      15.976   7.594  -0.012  0.00  1.00      SYST O  
+ATOM   1097  O04 DMC A  92      16.552   6.623   1.983  0.00  1.00      SYST O  
+ATOM   1098  C05 DMC A  92      17.873   6.413   1.428  0.00  1.00      SYST C  
+ATOM   1099  H06 DMC A  92      12.627   8.066   1.551  0.00  1.00      SYST H  
+ATOM   1100  H07 DMC A  92      13.339   7.430   0.016  0.00  1.00      SYST H  
+ATOM   1101  H08 DMC A  92      13.858   9.030   0.644  0.00  1.00      SYST H  
+ATOM   1102  H09 DMC A  92      18.437   5.917   2.226  0.00  1.00      SYST H  
+ATOM   1103  H10 DMC A  92      18.332   7.376   1.164  0.00  1.00      SYST H  
+ATOM   1104  H11 DMC A  92      17.813   5.776   0.535  0.00  1.00      SYST H  
+ATOM   1105  C00 DMC A  93      13.248  22.840  23.306  0.00  1.00      SYST C  
+ATOM   1106  O01 DMC A  93      12.233  23.843  23.055  0.00  1.00      SYST O  
+ATOM   1107  C02 DMC A  93      12.001  24.042  21.742  0.00  1.00      SYST C  
+ATOM   1108  O03 DMC A  93      12.554  23.468  20.817  0.00  1.00      SYST O  
+ATOM   1109  O04 DMC A  93      11.046  24.989  21.637  0.00  1.00      SYST O  
+ATOM   1110  C05 DMC A  93      10.703  25.295  20.263  0.00  1.00      SYST C  
+ATOM   1111  H06 DMC A  93      13.328  22.787  24.397  0.00  1.00      SYST H  
+ATOM   1112  H07 DMC A  93      14.202  23.146  22.857  0.00  1.00      SYST H  
+ATOM   1113  H08 DMC A  93      12.936  21.874  22.887  0.00  1.00      SYST H  
+ATOM   1114  H09 DMC A  93       9.928  26.067  20.333  0.00  1.00      SYST H  
+ATOM   1115  H10 DMC A  93      10.318  24.398  19.758  0.00  1.00      SYST H  
+ATOM   1116  H11 DMC A  93      11.585  25.671  19.726  0.00  1.00      SYST H  
+ATOM   1117  C00 DMC A  94      21.860  14.292   6.292  0.00  1.00      SYST C  
+ATOM   1118  O01 DMC A  94      20.958  14.197   7.422  0.00  1.00      SYST O  
+ATOM   1119  C02 DMC A  94      20.230  15.317   7.611  0.00  1.00      SYST C  
+ATOM   1120  O03 DMC A  94      20.281  16.332   6.934  0.00  1.00      SYST O  
+ATOM   1121  O04 DMC A  94      19.436  15.110   8.680  0.00  1.00      SYST O  
+ATOM   1122  C05 DMC A  94      18.595  16.248   8.989  0.00  1.00      SYST C  
+ATOM   1123  H06 DMC A  94      22.376  13.326   6.263  0.00  1.00      SYST H  
+ATOM   1124  H07 DMC A  94      22.573  15.113   6.444  0.00  1.00      SYST H  
+ATOM   1125  H08 DMC A  94      21.292  14.462   5.368  0.00  1.00      SYST H  
+ATOM   1126  H09 DMC A  94      18.016  15.939   9.866  0.00  1.00      SYST H  
+ATOM   1127  H10 DMC A  94      17.934  16.474   8.141  0.00  1.00      SYST H  
+ATOM   1128  H11 DMC A  94      19.215  17.127   9.218  0.00  1.00      SYST H  
+ATOM   1129  C00 DMC A  95       9.998  11.110  23.736  0.00  1.00      SYST C  
+ATOM   1130  O01 DMC A  95      10.568  12.443  23.728  0.00  1.00      SYST O  
+ATOM   1131  C02 DMC A  95      10.806  12.921  24.966  0.00  1.00      SYST C  
+ATOM   1132  O03 DMC A  95      10.587  12.341  26.018  0.00  1.00      SYST O  
+ATOM   1133  O04 DMC A  95      11.330  14.156  24.832  0.00  1.00      SYST O  
+ATOM   1134  C05 DMC A  95      11.634  14.784  26.101  0.00  1.00      SYST C  
+ATOM   1135  H06 DMC A  95       9.862  10.857  22.679  0.00  1.00      SYST H  
+ATOM   1136  H07 DMC A  95       9.037  11.112  24.267  0.00  1.00      SYST H  
+ATOM   1137  H08 DMC A  95      10.688  10.407  24.222  0.00  1.00      SYST H  
+ATOM   1138  H09 DMC A  95      12.045  15.764  25.838  0.00  1.00      SYST H  
+ATOM   1139  H10 DMC A  95      12.370  14.185  26.655  0.00  1.00      SYST H  
+ATOM   1140  H11 DMC A  95      10.719  14.890  26.701  0.00  1.00      SYST H  
+ATOM   1141  C00 DMC A  96       3.783  14.177  21.941  0.00  1.00      SYST C  
+ATOM   1142  O01 DMC A  96       3.272  13.630  23.182  0.00  1.00      SYST O  
+ATOM   1143  C02 DMC A  96       3.490  14.434  24.242  0.00  1.00      SYST C  
+ATOM   1144  O03 DMC A  96       4.051  15.519  24.220  0.00  1.00      SYST O  
+ATOM   1145  O04 DMC A  96       2.976  13.824  25.328  0.00  1.00      SYST O  
+ATOM   1146  C05 DMC A  96       3.146  14.594  26.543  0.00  1.00      SYST C  
+ATOM   1147  H06 DMC A  96       3.537  13.427  21.181  0.00  1.00      SYST H  
+ATOM   1148  H07 DMC A  96       4.869  14.325  22.010  0.00  1.00      SYST H  
+ATOM   1149  H08 DMC A  96       3.293  15.135  21.720  0.00  1.00      SYST H  
+ATOM   1150  H09 DMC A  96       2.688  13.983  27.328  0.00  1.00      SYST H  
+ATOM   1151  H10 DMC A  96       2.638  15.564  26.453  0.00  1.00      SYST H  
+ATOM   1152  H11 DMC A  96       4.215  14.754  26.744  0.00  1.00      SYST H  
+ATOM   1153  C00 DMC A  97      11.259  10.070  19.339  0.00  1.00      SYST C  
+ATOM   1154  O01 DMC A  97      11.871  11.335  18.984  0.00  1.00      SYST O  
+ATOM   1155  C02 DMC A  97      12.756  11.226  17.972  0.00  1.00      SYST C  
+ATOM   1156  O03 DMC A  97      13.051  10.200  17.379  0.00  1.00      SYST O  
+ATOM   1157  O04 DMC A  97      13.255  12.456  17.735  0.00  1.00      SYST O  
+ATOM   1158  C05 DMC A  97      14.225  12.475  16.659  0.00  1.00      SYST C  
+ATOM   1159  H06 DMC A  97      10.575  10.310  20.160  0.00  1.00      SYST H  
+ATOM   1160  H07 DMC A  97      12.026   9.355  19.663  0.00  1.00      SYST H  
+ATOM   1161  H08 DMC A  97      10.712   9.660  18.479  0.00  1.00      SYST H  
+ATOM   1162  H09 DMC A  97      14.538  13.522  16.582  0.00  1.00      SYST H  
+ATOM   1163  H10 DMC A  97      13.763  12.133  15.723  0.00  1.00      SYST H  
+ATOM   1164  H11 DMC A  97      15.079  11.828  16.907  0.00  1.00      SYST H  
+ATOM   1165  C00 DMC A  98      12.904  18.954  27.569  0.00  1.00      SYST C  
+ATOM   1166  O01 DMC A  98      13.931  19.899  27.959  0.00  1.00      SYST O  
+ATOM   1167  C02 DMC A  98      13.680  21.155  27.536  0.00  1.00      SYST C  
+ATOM   1168  O03 DMC A  98      12.709  21.517  26.890  0.00  1.00      SYST O  
+ATOM   1169  O04 DMC A  98      14.696  21.936  27.955  0.00  1.00      SYST O  
+ATOM   1170  C05 DMC A  98      14.543  23.322  27.562  0.00  1.00      SYST C  
+ATOM   1171  H06 DMC A  98      13.238  17.993  27.976  0.00  1.00      SYST H  
+ATOM   1172  H07 DMC A  98      12.825  18.911  26.475  0.00  1.00      SYST H  
+ATOM   1173  H08 DMC A  98      11.937  19.248  27.998  0.00  1.00      SYST H  
+ATOM   1174  H09 DMC A  98      15.428  23.827  27.965  0.00  1.00      SYST H  
+ATOM   1175  H10 DMC A  98      13.622  23.740  27.991  0.00  1.00      SYST H  
+ATOM   1176  H11 DMC A  98      14.510  23.404  26.466  0.00  1.00      SYST H  
+ATOM   1177  C00 DMC A  99      25.767   7.737   6.306  0.00  1.00      SYST C  
+ATOM   1178  O01 DMC A  99      25.008   8.867   5.807  0.00  1.00      SYST O  
+ATOM   1179  C02 DMC A  99      25.567  10.055   6.115  0.00  1.00      SYST C  
+ATOM   1180  O03 DMC A  99      26.601  10.224   6.742  0.00  1.00      SYST O  
+ATOM   1181  O04 DMC A  99      24.778  11.020   5.602  0.00  1.00      SYST O  
+ATOM   1182  C05 DMC A  99      25.274  12.355   5.865  0.00  1.00      SYST C  
+ATOM   1183  H06 DMC A  99      25.201   6.856   5.986  0.00  1.00      SYST H  
+ATOM   1184  H07 DMC A  99      25.838   7.782   7.401  0.00  1.00      SYST H  
+ATOM   1185  H08 DMC A  99      26.775   7.737   5.871  0.00  1.00      SYST H  
+ATOM   1186  H09 DMC A  99      24.543  13.024   5.398  0.00  1.00      SYST H  
+ATOM   1187  H10 DMC A  99      26.269  12.487   5.417  0.00  1.00      SYST H  
+ATOM   1188  H11 DMC A  99      25.332  12.532   6.948  0.00  1.00      SYST H  
+ATOM   1189  C00 DMC A 100      10.424  10.255  10.525  0.00  1.00      SYST C  
+ATOM   1190  O01 DMC A 100      10.093  11.601  10.947  0.00  1.00      SYST O  
+ATOM   1191  C02 DMC A 100       9.648  12.375   9.937  0.00  1.00      SYST C  
+ATOM   1192  O03 DMC A 100       9.514  12.034   8.772  0.00  1.00      SYST O  
+ATOM   1193  O04 DMC A 100       9.375  13.593  10.447  0.00  1.00      SYST O  
+ATOM   1194  C05 DMC A 100       8.883  14.525   9.454  0.00  1.00      SYST C  
+ATOM   1195  H06 DMC A 100      10.765   9.751  11.436  0.00  1.00      SYST H  
+ATOM   1196  H07 DMC A 100      11.219  10.279   9.768  0.00  1.00      SYST H  
+ATOM   1197  H08 DMC A 100       9.535   9.759  10.112  0.00  1.00      SYST H  
+ATOM   1198  H09 DMC A 100       8.708  15.456  10.005  0.00  1.00      SYST H  
+ATOM   1199  H10 DMC A 100       7.950  14.151   9.010  0.00  1.00      SYST H  
+ATOM   1200  H11 DMC A 100       9.634  14.672   8.665  0.00  1.00      SYST H  
+CONECT    1    2    7    8    9
+CONECT    2    1    3
+CONECT    3    2    4    5
+CONECT    4    3
+CONECT    5    3    6
+CONECT    6    5   10   11   12
+CONECT    7    1
+CONECT    8    1
+CONECT    9    1
+CONECT   10    6
+CONECT   11    6
+CONECT   12    6
+CONECT   13   14   19   20   21
+CONECT   14   13   15
+CONECT   15   14   16   17
+CONECT   16   15
+CONECT   17   15   18
+CONECT   18   17   22   23   24
+CONECT   19   13
+CONECT   20   13
+CONECT   21   13
+CONECT   22   18
+CONECT   23   18
+CONECT   24   18
+CONECT   25   26   31   32   33
+CONECT   26   25   27
+CONECT   27   26   28   29
+CONECT   28   27
+CONECT   29   27   30
+CONECT   30   29   34   35   36
+CONECT   31   25
+CONECT   32   25
+CONECT   33   25
+CONECT   34   30
+CONECT   35   30
+CONECT   36   30
+CONECT   37   38   43   44   45
+CONECT   38   37   39
+CONECT   39   38   40   41
+CONECT   40   39
+CONECT   41   39   42
+CONECT   42   41   46   47   48
+CONECT   43   37
+CONECT   44   37
+CONECT   45   37
+CONECT   46   42
+CONECT   47   42
+CONECT   48   42
+CONECT   49   50   55   56   57
+CONECT   50   49   51
+CONECT   51   50   52   53
+CONECT   52   51
+CONECT   53   51   54
+CONECT   54   53   58   59   60
+CONECT   55   49
+CONECT   56   49
+CONECT   57   49
+CONECT   58   54
+CONECT   59   54
+CONECT   60   54
+CONECT   61   62   67   68   69
+CONECT   62   61   63
+CONECT   63   62   64   65
+CONECT   64   63
+CONECT   65   63   66
+CONECT   66   65   70   71   72
+CONECT   67   61
+CONECT   68   61
+CONECT   69   61
+CONECT   70   66
+CONECT   71   66
+CONECT   72   66
+CONECT   73   74   79   80   81
+CONECT   74   73   75
+CONECT   75   74   76   77
+CONECT   76   75
+CONECT   77   75   78
+CONECT   78   77   82   83   84
+CONECT   79   73
+CONECT   80   73
+CONECT   81   73
+CONECT   82   78
+CONECT   83   78
+CONECT   84   78
+CONECT   85   86   91   92   93
+CONECT   86   85   87
+CONECT   87   86   88   89
+CONECT   88   87
+CONECT   89   87   90
+CONECT   90   89   94   95   96
+CONECT   91   85
+CONECT   92   85
+CONECT   93   85
+CONECT   94   90
+CONECT   95   90
+CONECT   96   90
+CONECT   97   98  103  104  105
+CONECT   98   97   99
+CONECT   99   98  100  101
+CONECT  100   99
+CONECT  101   99  102
+CONECT  102  101  106  107  108
+CONECT  103   97
+CONECT  104   97
+CONECT  105   97
+CONECT  106  102
+CONECT  107  102
+CONECT  108  102
+CONECT  109  110  115  116  117
+CONECT  110  109  111
+CONECT  111  110  112  113
+CONECT  112  111
+CONECT  113  111  114
+CONECT  114  113  118  119  120
+CONECT  115  109
+CONECT  116  109
+CONECT  117  109
+CONECT  118  114
+CONECT  119  114
+CONECT  120  114
+CONECT  121  122  127  128  129
+CONECT  122  121  123
+CONECT  123  122  124  125
+CONECT  124  123
+CONECT  125  123  126
+CONECT  126  125  130  131  132
+CONECT  127  121
+CONECT  128  121
+CONECT  129  121
+CONECT  130  126
+CONECT  131  126
+CONECT  132  126
+CONECT  133  134  139  140  141
+CONECT  134  133  135
+CONECT  135  134  136  137
+CONECT  136  135
+CONECT  137  135  138
+CONECT  138  137  142  143  144
+CONECT  139  133
+CONECT  140  133
+CONECT  141  133
+CONECT  142  138
+CONECT  143  138
+CONECT  144  138
+CONECT  145  146  151  152  153
+CONECT  146  145  147
+CONECT  147  146  148  149
+CONECT  148  147
+CONECT  149  147  150
+CONECT  150  149  154  155  156
+CONECT  151  145
+CONECT  152  145
+CONECT  153  145
+CONECT  154  150
+CONECT  155  150
+CONECT  156  150
+CONECT  157  158  163  164  165
+CONECT  158  157  159
+CONECT  159  158  160  161
+CONECT  160  159
+CONECT  161  159  162
+CONECT  162  161  166  167  168
+CONECT  163  157
+CONECT  164  157
+CONECT  165  157
+CONECT  166  162
+CONECT  167  162
+CONECT  168  162
+CONECT  169  170  175  176  177
+CONECT  170  169  171
+CONECT  171  170  172  173
+CONECT  172  171
+CONECT  173  171  174
+CONECT  174  173  178  179  180
+CONECT  175  169
+CONECT  176  169
+CONECT  177  169
+CONECT  178  174
+CONECT  179  174
+CONECT  180  174
+CONECT  181  182  187  188  189
+CONECT  182  181  183
+CONECT  183  182  184  185
+CONECT  184  183
+CONECT  185  183  186
+CONECT  186  185  190  191  192
+CONECT  187  181
+CONECT  188  181
+CONECT  189  181
+CONECT  190  186
+CONECT  191  186
+CONECT  192  186
+CONECT  193  194  199  200  201
+CONECT  194  193  195
+CONECT  195  194  196  197
+CONECT  196  195
+CONECT  197  195  198
+CONECT  198  197  202  203  204
+CONECT  199  193
+CONECT  200  193
+CONECT  201  193
+CONECT  202  198
+CONECT  203  198
+CONECT  204  198
+CONECT  205  206  211  212  213
+CONECT  206  205  207
+CONECT  207  206  208  209
+CONECT  208  207
+CONECT  209  207  210
+CONECT  210  209  214  215  216
+CONECT  211  205
+CONECT  212  205
+CONECT  213  205
+CONECT  214  210
+CONECT  215  210
+CONECT  216  210
+CONECT  217  218  223  224  225
+CONECT  218  217  219
+CONECT  219  218  220  221
+CONECT  220  219
+CONECT  221  219  222
+CONECT  222  221  226  227  228
+CONECT  223  217
+CONECT  224  217
+CONECT  225  217
+CONECT  226  222
+CONECT  227  222
+CONECT  228  222
+CONECT  229  230  235  236  237
+CONECT  230  229  231
+CONECT  231  230  232  233
+CONECT  232  231
+CONECT  233  231  234
+CONECT  234  233  238  239  240
+CONECT  235  229
+CONECT  236  229
+CONECT  237  229
+CONECT  238  234
+CONECT  239  234
+CONECT  240  234
+CONECT  241  242  247  248  249
+CONECT  242  241  243
+CONECT  243  242  244  245
+CONECT  244  243
+CONECT  245  243  246
+CONECT  246  245  250  251  252
+CONECT  247  241
+CONECT  248  241
+CONECT  249  241
+CONECT  250  246
+CONECT  251  246
+CONECT  252  246
+CONECT  253  254  259  260  261
+CONECT  254  253  255
+CONECT  255  254  256  257
+CONECT  256  255
+CONECT  257  255  258
+CONECT  258  257  262  263  264
+CONECT  259  253
+CONECT  260  253
+CONECT  261  253
+CONECT  262  258
+CONECT  263  258
+CONECT  264  258
+CONECT  265  266  271  272  273
+CONECT  266  265  267
+CONECT  267  266  268  269
+CONECT  268  267
+CONECT  269  267  270
+CONECT  270  269  274  275  276
+CONECT  271  265
+CONECT  272  265
+CONECT  273  265
+CONECT  274  270
+CONECT  275  270
+CONECT  276  270
+CONECT  277  278  283  284  285
+CONECT  278  277  279
+CONECT  279  278  280  281
+CONECT  280  279
+CONECT  281  279  282
+CONECT  282  281  286  287  288
+CONECT  283  277
+CONECT  284  277
+CONECT  285  277
+CONECT  286  282
+CONECT  287  282
+CONECT  288  282
+CONECT  289  290  295  296  297
+CONECT  290  289  291
+CONECT  291  290  292  293
+CONECT  292  291
+CONECT  293  291  294
+CONECT  294  293  298  299  300
+CONECT  295  289
+CONECT  296  289
+CONECT  297  289
+CONECT  298  294
+CONECT  299  294
+CONECT  300  294
+CONECT  301  302  307  308  309
+CONECT  302  301  303
+CONECT  303  302  304  305
+CONECT  304  303
+CONECT  305  303  306
+CONECT  306  305  310  311  312
+CONECT  307  301
+CONECT  308  301
+CONECT  309  301
+CONECT  310  306
+CONECT  311  306
+CONECT  312  306
+CONECT  313  314  319  320  321
+CONECT  314  313  315
+CONECT  315  314  316  317
+CONECT  316  315
+CONECT  317  315  318
+CONECT  318  317  322  323  324
+CONECT  319  313
+CONECT  320  313
+CONECT  321  313
+CONECT  322  318
+CONECT  323  318
+CONECT  324  318
+CONECT  325  326  331  332  333
+CONECT  326  325  327
+CONECT  327  326  328  329
+CONECT  328  327
+CONECT  329  327  330
+CONECT  330  329  334  335  336
+CONECT  331  325
+CONECT  332  325
+CONECT  333  325
+CONECT  334  330
+CONECT  335  330
+CONECT  336  330
+CONECT  337  338  343  344  345
+CONECT  338  337  339
+CONECT  339  338  340  341
+CONECT  340  339
+CONECT  341  339  342
+CONECT  342  341  346  347  348
+CONECT  343  337
+CONECT  344  337
+CONECT  345  337
+CONECT  346  342
+CONECT  347  342
+CONECT  348  342
+CONECT  349  350  355  356  357
+CONECT  350  349  351
+CONECT  351  350  352  353
+CONECT  352  351
+CONECT  353  351  354
+CONECT  354  353  358  359  360
+CONECT  355  349
+CONECT  356  349
+CONECT  357  349
+CONECT  358  354
+CONECT  359  354
+CONECT  360  354
+CONECT  361  362  367  368  369
+CONECT  362  361  363
+CONECT  363  362  364  365
+CONECT  364  363
+CONECT  365  363  366
+CONECT  366  365  370  371  372
+CONECT  367  361
+CONECT  368  361
+CONECT  369  361
+CONECT  370  366
+CONECT  371  366
+CONECT  372  366
+CONECT  373  374  379  380  381
+CONECT  374  373  375
+CONECT  375  374  376  377
+CONECT  376  375
+CONECT  377  375  378
+CONECT  378  377  382  383  384
+CONECT  379  373
+CONECT  380  373
+CONECT  381  373
+CONECT  382  378
+CONECT  383  378
+CONECT  384  378
+CONECT  385  386  391  392  393
+CONECT  386  385  387
+CONECT  387  386  388  389
+CONECT  388  387
+CONECT  389  387  390
+CONECT  390  389  394  395  396
+CONECT  391  385
+CONECT  392  385
+CONECT  393  385
+CONECT  394  390
+CONECT  395  390
+CONECT  396  390
+CONECT  397  398  403  404  405
+CONECT  398  397  399
+CONECT  399  398  400  401
+CONECT  400  399
+CONECT  401  399  402
+CONECT  402  401  406  407  408
+CONECT  403  397
+CONECT  404  397
+CONECT  405  397
+CONECT  406  402
+CONECT  407  402
+CONECT  408  402
+CONECT  409  410  415  416  417
+CONECT  410  409  411
+CONECT  411  410  412  413
+CONECT  412  411
+CONECT  413  411  414
+CONECT  414  413  418  419  420
+CONECT  415  409
+CONECT  416  409
+CONECT  417  409
+CONECT  418  414
+CONECT  419  414
+CONECT  420  414
+CONECT  421  422  427  428  429
+CONECT  422  421  423
+CONECT  423  422  424  425
+CONECT  424  423
+CONECT  425  423  426
+CONECT  426  425  430  431  432
+CONECT  427  421
+CONECT  428  421
+CONECT  429  421
+CONECT  430  426
+CONECT  431  426
+CONECT  432  426
+CONECT  433  434  439  440  441
+CONECT  434  433  435
+CONECT  435  434  436  437
+CONECT  436  435
+CONECT  437  435  438
+CONECT  438  437  442  443  444
+CONECT  439  433
+CONECT  440  433
+CONECT  441  433
+CONECT  442  438
+CONECT  443  438
+CONECT  444  438
+CONECT  445  446  451  452  453
+CONECT  446  445  447
+CONECT  447  446  448  449
+CONECT  448  447
+CONECT  449  447  450
+CONECT  450  449  454  455  456
+CONECT  451  445
+CONECT  452  445
+CONECT  453  445
+CONECT  454  450
+CONECT  455  450
+CONECT  456  450
+CONECT  457  458  463  464  465
+CONECT  458  457  459
+CONECT  459  458  460  461
+CONECT  460  459
+CONECT  461  459  462
+CONECT  462  461  466  467  468
+CONECT  463  457
+CONECT  464  457
+CONECT  465  457
+CONECT  466  462
+CONECT  467  462
+CONECT  468  462
+CONECT  469  470  475  476  477
+CONECT  470  469  471
+CONECT  471  470  472  473
+CONECT  472  471
+CONECT  473  471  474
+CONECT  474  473  478  479  480
+CONECT  475  469
+CONECT  476  469
+CONECT  477  469
+CONECT  478  474
+CONECT  479  474
+CONECT  480  474
+CONECT  481  482  487  488  489
+CONECT  482  481  483
+CONECT  483  482  484  485
+CONECT  484  483
+CONECT  485  483  486
+CONECT  486  485  490  491  492
+CONECT  487  481
+CONECT  488  481
+CONECT  489  481
+CONECT  490  486
+CONECT  491  486
+CONECT  492  486
+CONECT  493  494  499  500  501
+CONECT  494  493  495
+CONECT  495  494  496  497
+CONECT  496  495
+CONECT  497  495  498
+CONECT  498  497  502  503  504
+CONECT  499  493
+CONECT  500  493
+CONECT  501  493
+CONECT  502  498
+CONECT  503  498
+CONECT  504  498
+CONECT  505  506  511  512  513
+CONECT  506  505  507
+CONECT  507  506  508  509
+CONECT  508  507
+CONECT  509  507  510
+CONECT  510  509  514  515  516
+CONECT  511  505
+CONECT  512  505
+CONECT  513  505
+CONECT  514  510
+CONECT  515  510
+CONECT  516  510
+CONECT  517  518  523  524  525
+CONECT  518  517  519
+CONECT  519  518  520  521
+CONECT  520  519
+CONECT  521  519  522
+CONECT  522  521  526  527  528
+CONECT  523  517
+CONECT  524  517
+CONECT  525  517
+CONECT  526  522
+CONECT  527  522
+CONECT  528  522
+CONECT  529  530  535  536  537
+CONECT  530  529  531
+CONECT  531  530  532  533
+CONECT  532  531
+CONECT  533  531  534
+CONECT  534  533  538  539  540
+CONECT  535  529
+CONECT  536  529
+CONECT  537  529
+CONECT  538  534
+CONECT  539  534
+CONECT  540  534
+CONECT  541  542  547  548  549
+CONECT  542  541  543
+CONECT  543  542  544  545
+CONECT  544  543
+CONECT  545  543  546
+CONECT  546  545  550  551  552
+CONECT  547  541
+CONECT  548  541
+CONECT  549  541
+CONECT  550  546
+CONECT  551  546
+CONECT  552  546
+CONECT  553  554  559  560  561
+CONECT  554  553  555
+CONECT  555  554  556  557
+CONECT  556  555
+CONECT  557  555  558
+CONECT  558  557  562  563  564
+CONECT  559  553
+CONECT  560  553
+CONECT  561  553
+CONECT  562  558
+CONECT  563  558
+CONECT  564  558
+CONECT  565  566  571  572  573
+CONECT  566  565  567
+CONECT  567  566  568  569
+CONECT  568  567
+CONECT  569  567  570
+CONECT  570  569  574  575  576
+CONECT  571  565
+CONECT  572  565
+CONECT  573  565
+CONECT  574  570
+CONECT  575  570
+CONECT  576  570
+CONECT  577  578  583  584  585
+CONECT  578  577  579
+CONECT  579  578  580  581
+CONECT  580  579
+CONECT  581  579  582
+CONECT  582  581  586  587  588
+CONECT  583  577
+CONECT  584  577
+CONECT  585  577
+CONECT  586  582
+CONECT  587  582
+CONECT  588  582
+CONECT  589  590  595  596  597
+CONECT  590  589  591
+CONECT  591  590  592  593
+CONECT  592  591
+CONECT  593  591  594
+CONECT  594  593  598  599  600
+CONECT  595  589
+CONECT  596  589
+CONECT  597  589
+CONECT  598  594
+CONECT  599  594
+CONECT  600  594
+CONECT  601  602  607  608  609
+CONECT  602  601  603
+CONECT  603  602  604  605
+CONECT  604  603
+CONECT  605  603  606
+CONECT  606  605  610  611  612
+CONECT  607  601
+CONECT  608  601
+CONECT  609  601
+CONECT  610  606
+CONECT  611  606
+CONECT  612  606
+CONECT  613  614  619  620  621
+CONECT  614  613  615
+CONECT  615  614  616  617
+CONECT  616  615
+CONECT  617  615  618
+CONECT  618  617  622  623  624
+CONECT  619  613
+CONECT  620  613
+CONECT  621  613
+CONECT  622  618
+CONECT  623  618
+CONECT  624  618
+CONECT  625  626  631  632  633
+CONECT  626  625  627
+CONECT  627  626  628  629
+CONECT  628  627
+CONECT  629  627  630
+CONECT  630  629  634  635  636
+CONECT  631  625
+CONECT  632  625
+CONECT  633  625
+CONECT  634  630
+CONECT  635  630
+CONECT  636  630
+CONECT  637  638  643  644  645
+CONECT  638  637  639
+CONECT  639  638  640  641
+CONECT  640  639
+CONECT  641  639  642
+CONECT  642  641  646  647  648
+CONECT  643  637
+CONECT  644  637
+CONECT  645  637
+CONECT  646  642
+CONECT  647  642
+CONECT  648  642
+CONECT  649  650  655  656  657
+CONECT  650  649  651
+CONECT  651  650  652  653
+CONECT  652  651
+CONECT  653  651  654
+CONECT  654  653  658  659  660
+CONECT  655  649
+CONECT  656  649
+CONECT  657  649
+CONECT  658  654
+CONECT  659  654
+CONECT  660  654
+CONECT  661  662  667  668  669
+CONECT  662  661  663
+CONECT  663  662  664  665
+CONECT  664  663
+CONECT  665  663  666
+CONECT  666  665  670  671  672
+CONECT  667  661
+CONECT  668  661
+CONECT  669  661
+CONECT  670  666
+CONECT  671  666
+CONECT  672  666
+CONECT  673  674  679  680  681
+CONECT  674  673  675
+CONECT  675  674  676  677
+CONECT  676  675
+CONECT  677  675  678
+CONECT  678  677  682  683  684
+CONECT  679  673
+CONECT  680  673
+CONECT  681  673
+CONECT  682  678
+CONECT  683  678
+CONECT  684  678
+CONECT  685  686  691  692  693
+CONECT  686  685  687
+CONECT  687  686  688  689
+CONECT  688  687
+CONECT  689  687  690
+CONECT  690  689  694  695  696
+CONECT  691  685
+CONECT  692  685
+CONECT  693  685
+CONECT  694  690
+CONECT  695  690
+CONECT  696  690
+CONECT  697  698  703  704  705
+CONECT  698  697  699
+CONECT  699  698  700  701
+CONECT  700  699
+CONECT  701  699  702
+CONECT  702  701  706  707  708
+CONECT  703  697
+CONECT  704  697
+CONECT  705  697
+CONECT  706  702
+CONECT  707  702
+CONECT  708  702
+CONECT  709  710  715  716  717
+CONECT  710  709  711
+CONECT  711  710  712  713
+CONECT  712  711
+CONECT  713  711  714
+CONECT  714  713  718  719  720
+CONECT  715  709
+CONECT  716  709
+CONECT  717  709
+CONECT  718  714
+CONECT  719  714
+CONECT  720  714
+CONECT  721  722  727  728  729
+CONECT  722  721  723
+CONECT  723  722  724  725
+CONECT  724  723
+CONECT  725  723  726
+CONECT  726  725  730  731  732
+CONECT  727  721
+CONECT  728  721
+CONECT  729  721
+CONECT  730  726
+CONECT  731  726
+CONECT  732  726
+CONECT  733  734  739  740  741
+CONECT  734  733  735
+CONECT  735  734  736  737
+CONECT  736  735
+CONECT  737  735  738
+CONECT  738  737  742  743  744
+CONECT  739  733
+CONECT  740  733
+CONECT  741  733
+CONECT  742  738
+CONECT  743  738
+CONECT  744  738
+CONECT  745  746  751  752  753
+CONECT  746  745  747
+CONECT  747  746  748  749
+CONECT  748  747
+CONECT  749  747  750
+CONECT  750  749  754  755  756
+CONECT  751  745
+CONECT  752  745
+CONECT  753  745
+CONECT  754  750
+CONECT  755  750
+CONECT  756  750
+CONECT  757  758  763  764  765
+CONECT  758  757  759
+CONECT  759  758  760  761
+CONECT  760  759
+CONECT  761  759  762
+CONECT  762  761  766  767  768
+CONECT  763  757
+CONECT  764  757
+CONECT  765  757
+CONECT  766  762
+CONECT  767  762
+CONECT  768  762
+CONECT  769  770  775  776  777
+CONECT  770  769  771
+CONECT  771  770  772  773
+CONECT  772  771
+CONECT  773  771  774
+CONECT  774  773  778  779  780
+CONECT  775  769
+CONECT  776  769
+CONECT  777  769
+CONECT  778  774
+CONECT  779  774
+CONECT  780  774
+CONECT  781  782  787  788  789
+CONECT  782  781  783
+CONECT  783  782  784  785
+CONECT  784  783
+CONECT  785  783  786
+CONECT  786  785  790  791  792
+CONECT  787  781
+CONECT  788  781
+CONECT  789  781
+CONECT  790  786
+CONECT  791  786
+CONECT  792  786
+CONECT  793  794  799  800  801
+CONECT  794  793  795
+CONECT  795  794  796  797
+CONECT  796  795
+CONECT  797  795  798
+CONECT  798  797  802  803  804
+CONECT  799  793
+CONECT  800  793
+CONECT  801  793
+CONECT  802  798
+CONECT  803  798
+CONECT  804  798
+CONECT  805  806  811  812  813
+CONECT  806  805  807
+CONECT  807  806  808  809
+CONECT  808  807
+CONECT  809  807  810
+CONECT  810  809  814  815  816
+CONECT  811  805
+CONECT  812  805
+CONECT  813  805
+CONECT  814  810
+CONECT  815  810
+CONECT  816  810
+CONECT  817  818  823  824  825
+CONECT  818  817  819
+CONECT  819  818  820  821
+CONECT  820  819
+CONECT  821  819  822
+CONECT  822  821  826  827  828
+CONECT  823  817
+CONECT  824  817
+CONECT  825  817
+CONECT  826  822
+CONECT  827  822
+CONECT  828  822
+CONECT  829  830  835  836  837
+CONECT  830  829  831
+CONECT  831  830  832  833
+CONECT  832  831
+CONECT  833  831  834
+CONECT  834  833  838  839  840
+CONECT  835  829
+CONECT  836  829
+CONECT  837  829
+CONECT  838  834
+CONECT  839  834
+CONECT  840  834
+CONECT  841  842  847  848  849
+CONECT  842  841  843
+CONECT  843  842  844  845
+CONECT  844  843
+CONECT  845  843  846
+CONECT  846  845  850  851  852
+CONECT  847  841
+CONECT  848  841
+CONECT  849  841
+CONECT  850  846
+CONECT  851  846
+CONECT  852  846
+CONECT  853  854  859  860  861
+CONECT  854  853  855
+CONECT  855  854  856  857
+CONECT  856  855
+CONECT  857  855  858
+CONECT  858  857  862  863  864
+CONECT  859  853
+CONECT  860  853
+CONECT  861  853
+CONECT  862  858
+CONECT  863  858
+CONECT  864  858
+CONECT  865  866  871  872  873
+CONECT  866  865  867
+CONECT  867  866  868  869
+CONECT  868  867
+CONECT  869  867  870
+CONECT  870  869  874  875  876
+CONECT  871  865
+CONECT  872  865
+CONECT  873  865
+CONECT  874  870
+CONECT  875  870
+CONECT  876  870
+CONECT  877  878  883  884  885
+CONECT  878  877  879
+CONECT  879  878  880  881
+CONECT  880  879
+CONECT  881  879  882
+CONECT  882  881  886  887  888
+CONECT  883  877
+CONECT  884  877
+CONECT  885  877
+CONECT  886  882
+CONECT  887  882
+CONECT  888  882
+CONECT  889  890  895  896  897
+CONECT  890  889  891
+CONECT  891  890  892  893
+CONECT  892  891
+CONECT  893  891  894
+CONECT  894  893  898  899  900
+CONECT  895  889
+CONECT  896  889
+CONECT  897  889
+CONECT  898  894
+CONECT  899  894
+CONECT  900  894
+CONECT  901  902  907  908  909
+CONECT  902  901  903
+CONECT  903  902  904  905
+CONECT  904  903
+CONECT  905  903  906
+CONECT  906  905  910  911  912
+CONECT  907  901
+CONECT  908  901
+CONECT  909  901
+CONECT  910  906
+CONECT  911  906
+CONECT  912  906
+CONECT  913  914  919  920  921
+CONECT  914  913  915
+CONECT  915  914  916  917
+CONECT  916  915
+CONECT  917  915  918
+CONECT  918  917  922  923  924
+CONECT  919  913
+CONECT  920  913
+CONECT  921  913
+CONECT  922  918
+CONECT  923  918
+CONECT  924  918
+CONECT  925  926  931  932  933
+CONECT  926  925  927
+CONECT  927  926  928  929
+CONECT  928  927
+CONECT  929  927  930
+CONECT  930  929  934  935  936
+CONECT  931  925
+CONECT  932  925
+CONECT  933  925
+CONECT  934  930
+CONECT  935  930
+CONECT  936  930
+CONECT  937  938  943  944  945
+CONECT  938  937  939
+CONECT  939  938  940  941
+CONECT  940  939
+CONECT  941  939  942
+CONECT  942  941  946  947  948
+CONECT  943  937
+CONECT  944  937
+CONECT  945  937
+CONECT  946  942
+CONECT  947  942
+CONECT  948  942
+CONECT  949  950  955  956  957
+CONECT  950  949  951
+CONECT  951  950  952  953
+CONECT  952  951
+CONECT  953  951  954
+CONECT  954  953  958  959  960
+CONECT  955  949
+CONECT  956  949
+CONECT  957  949
+CONECT  958  954
+CONECT  959  954
+CONECT  960  954
+CONECT  961  962  967  968  969
+CONECT  962  961  963
+CONECT  963  962  964  965
+CONECT  964  963
+CONECT  965  963  966
+CONECT  966  965  970  971  972
+CONECT  967  961
+CONECT  968  961
+CONECT  969  961
+CONECT  970  966
+CONECT  971  966
+CONECT  972  966
+CONECT  973  974  979  980  981
+CONECT  974  973  975
+CONECT  975  974  976  977
+CONECT  976  975
+CONECT  977  975  978
+CONECT  978  977  982  983  984
+CONECT  979  973
+CONECT  980  973
+CONECT  981  973
+CONECT  982  978
+CONECT  983  978
+CONECT  984  978
+CONECT  985  986  991  992  993
+CONECT  986  985  987
+CONECT  987  986  988  989
+CONECT  988  987
+CONECT  989  987  990
+CONECT  990  989  994  995  996
+CONECT  991  985
+CONECT  992  985
+CONECT  993  985
+CONECT  994  990
+CONECT  995  990
+CONECT  996  990
+CONECT  997  998 1003 1004 1005
+CONECT  998  997  999
+CONECT  999  998 1000 1001
+CONECT 1000  999
+CONECT 1001  999 1002
+CONECT 1002 1001 1006 1007 1008
+CONECT 1003  997
+CONECT 1004  997
+CONECT 1005  997
+CONECT 1006 1002
+CONECT 1007 1002
+CONECT 1008 1002
+CONECT 1009 1010 1015 1016 1017
+CONECT 1010 1009 1011
+CONECT 1011 1010 1012 1013
+CONECT 1012 1011
+CONECT 1013 1011 1014
+CONECT 1014 1013 1018 1019 1020
+CONECT 1015 1009
+CONECT 1016 1009
+CONECT 1017 1009
+CONECT 1018 1014
+CONECT 1019 1014
+CONECT 1020 1014
+CONECT 1021 1022 1027 1028 1029
+CONECT 1022 1021 1023
+CONECT 1023 1022 1024 1025
+CONECT 1024 1023
+CONECT 1025 1023 1026
+CONECT 1026 1025 1030 1031 1032
+CONECT 1027 1021
+CONECT 1028 1021
+CONECT 1029 1021
+CONECT 1030 1026
+CONECT 1031 1026
+CONECT 1032 1026
+CONECT 1033 1034 1039 1040 1041
+CONECT 1034 1033 1035
+CONECT 1035 1034 1036 1037
+CONECT 1036 1035
+CONECT 1037 1035 1038
+CONECT 1038 1037 1042 1043 1044
+CONECT 1039 1033
+CONECT 1040 1033
+CONECT 1041 1033
+CONECT 1042 1038
+CONECT 1043 1038
+CONECT 1044 1038
+CONECT 1045 1046 1051 1052 1053
+CONECT 1046 1045 1047
+CONECT 1047 1046 1048 1049
+CONECT 1048 1047
+CONECT 1049 1047 1050
+CONECT 1050 1049 1054 1055 1056
+CONECT 1051 1045
+CONECT 1052 1045
+CONECT 1053 1045
+CONECT 1054 1050
+CONECT 1055 1050
+CONECT 1056 1050
+CONECT 1057 1058 1063 1064 1065
+CONECT 1058 1057 1059
+CONECT 1059 1058 1060 1061
+CONECT 1060 1059
+CONECT 1061 1059 1062
+CONECT 1062 1061 1066 1067 1068
+CONECT 1063 1057
+CONECT 1064 1057
+CONECT 1065 1057
+CONECT 1066 1062
+CONECT 1067 1062
+CONECT 1068 1062
+CONECT 1069 1070 1075 1076 1077
+CONECT 1070 1069 1071
+CONECT 1071 1070 1072 1073
+CONECT 1072 1071
+CONECT 1073 1071 1074
+CONECT 1074 1073 1078 1079 1080
+CONECT 1075 1069
+CONECT 1076 1069
+CONECT 1077 1069
+CONECT 1078 1074
+CONECT 1079 1074
+CONECT 1080 1074
+CONECT 1081 1082 1087 1088 1089
+CONECT 1082 1081 1083
+CONECT 1083 1082 1084 1085
+CONECT 1084 1083
+CONECT 1085 1083 1086
+CONECT 1086 1085 1090 1091 1092
+CONECT 1087 1081
+CONECT 1088 1081
+CONECT 1089 1081
+CONECT 1090 1086
+CONECT 1091 1086
+CONECT 1092 1086
+CONECT 1093 1094 1099 1100 1101
+CONECT 1094 1093 1095
+CONECT 1095 1094 1096 1097
+CONECT 1096 1095
+CONECT 1097 1095 1098
+CONECT 1098 1097 1102 1103 1104
+CONECT 1099 1093
+CONECT 1100 1093
+CONECT 1101 1093
+CONECT 1102 1098
+CONECT 1103 1098
+CONECT 1104 1098
+CONECT 1105 1106 1111 1112 1113
+CONECT 1106 1105 1107
+CONECT 1107 1106 1108 1109
+CONECT 1108 1107
+CONECT 1109 1107 1110
+CONECT 1110 1109 1114 1115 1116
+CONECT 1111 1105
+CONECT 1112 1105
+CONECT 1113 1105
+CONECT 1114 1110
+CONECT 1115 1110
+CONECT 1116 1110
+CONECT 1117 1118 1123 1124 1125
+CONECT 1118 1117 1119
+CONECT 1119 1118 1120 1121
+CONECT 1120 1119
+CONECT 1121 1119 1122
+CONECT 1122 1121 1126 1127 1128
+CONECT 1123 1117
+CONECT 1124 1117
+CONECT 1125 1117
+CONECT 1126 1122
+CONECT 1127 1122
+CONECT 1128 1122
+CONECT 1129 1130 1135 1136 1137
+CONECT 1130 1129 1131
+CONECT 1131 1130 1132 1133
+CONECT 1132 1131
+CONECT 1133 1131 1134
+CONECT 1134 1133 1138 1139 1140
+CONECT 1135 1129
+CONECT 1136 1129
+CONECT 1137 1129
+CONECT 1138 1134
+CONECT 1139 1134
+CONECT 1140 1134
+CONECT 1141 1142 1147 1148 1149
+CONECT 1142 1141 1143
+CONECT 1143 1142 1144 1145
+CONECT 1144 1143
+CONECT 1145 1143 1146
+CONECT 1146 1145 1150 1151 1152
+CONECT 1147 1141
+CONECT 1148 1141
+CONECT 1149 1141
+CONECT 1150 1146
+CONECT 1151 1146
+CONECT 1152 1146
+CONECT 1153 1154 1159 1160 1161
+CONECT 1154 1153 1155
+CONECT 1155 1154 1156 1157
+CONECT 1156 1155
+CONECT 1157 1155 1158
+CONECT 1158 1157 1162 1163 1164
+CONECT 1159 1153
+CONECT 1160 1153
+CONECT 1161 1153
+CONECT 1162 1158
+CONECT 1163 1158
+CONECT 1164 1158
+CONECT 1165 1166 1171 1172 1173
+CONECT 1166 1165 1167
+CONECT 1167 1166 1168 1169
+CONECT 1168 1167
+CONECT 1169 1167 1170
+CONECT 1170 1169 1174 1175 1176
+CONECT 1171 1165
+CONECT 1172 1165
+CONECT 1173 1165
+CONECT 1174 1170
+CONECT 1175 1170
+CONECT 1176 1170
+CONECT 1177 1178 1183 1184 1185
+CONECT 1178 1177 1179
+CONECT 1179 1178 1180 1181
+CONECT 1180 1179
+CONECT 1181 1179 1182
+CONECT 1182 1181 1186 1187 1188
+CONECT 1183 1177
+CONECT 1184 1177
+CONECT 1185 1177
+CONECT 1186 1182
+CONECT 1187 1182
+CONECT 1188 1182
+CONECT 1189 1190 1195 1196 1197
+CONECT 1190 1189 1191
+CONECT 1191 1190 1192 1193
+CONECT 1192 1191
+CONECT 1193 1191 1194
+CONECT 1194 1193 1198 1199 1200
+CONECT 1195 1189
+CONECT 1196 1189
+CONECT 1197 1189
+CONECT 1198 1194
+CONECT 1199 1194
+CONECT 1200 1194
+END

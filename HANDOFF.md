@@ -19,9 +19,12 @@ Completed work:
   - short-range custom-force assembly
   - optional intra-builder integration
   - term dumps and short MD smoke
+  - `dispersion_mode="lrc"` and `dispersion_mode="native_pme"`
 - inter/intra shell semantics have been unified to `1-2 ... 1-6`
 - `Reference` and `CUDA` source code were aligned to the current six-slot
   electrostatic scaling semantics in source
+- `Reference` native dispersion PME was implemented and now matches DMFF PME
+  closely on the maintained `100 DMC` bulk example
 
 Canonical example:
 
@@ -42,10 +45,12 @@ Validated scripts in the current workspace:
 - `OpenCL` backend does not exist for this plugin
 - `CUDA` source changes are in place, but this machine has not completed a full
   CUDA build/run validation
-- native dispersion PME is still not the default validated simulation path
+- native dispersion PME is still not the default builder path
 - the main builder currently uses `DampedDispersionForce +
   setUseLongRangeCorrection(True)` as the transitional long-range dispersion
   treatment
+- `CPU` is still not a plugin backend for native dispersion PME; use
+  `Reference` for energy validation
 - local Python extension builds may still carry stale `rpath` entries after the
   repo rename; local imports were previously repaired with `install_name_tool`
 - `Reference` still has an existing finite-difference test issue in the older
@@ -55,15 +60,17 @@ Validated scripts in the current workspace:
 ## Next Priorities
 
 1. Dispersion PME
-   - decide on the production path:
-     - re-enable native CUDA dispersion PME and fix unit conventions, or
-     - continue validating through the DMFF bridge and promote a supported path
-   - once chosen, add a maintained example and backend validation around it
+   - keep `Reference` as the current energy-validation backend
+   - perform real CUDA build/run validation for the now-updated native PME
+     coefficient semantics
+   - once CUDA is validated, decide whether native PME should replace `LRC` as
+     the default builder path
 
 2. CUDA validation
-   - build the CUDA plugin on a machine with `nvcc`
-   - run CUDA vs `Reference` energy/force comparisons on the Li-DMC fixture
+  - build the CUDA plugin on a machine with `nvcc`
+  - run CUDA vs `Reference` energy/force comparisons on the Li-DMC fixture
    - verify the new six-slot scale semantics on real CUDA kernels
+   - verify native dispersion PME against both `Reference` and DMFF PME
 
 3. Documentation follow-up
    - sync `docs/source/index.md`
@@ -103,7 +110,8 @@ PYTHONPATH=../../build-reference-check/python python check_reference_install.py
 - `examples/li_dmc_compare` is the smallest maintained validation fixture and
   should remain the primary smoke path
 - current long-range dispersion in the validated builder is a transitional
-  `LRC` path, not native PME
+  `LRC` path by default, even though `Reference` now supports native dispersion
+  PME for energy validation
 - short-range and electrostatic shell semantics are now unified to
   `1-2 / 1-3 / 1-4 / 1-5 / 1-6`
 - intra support in the current builder is intentionally optional and layered on

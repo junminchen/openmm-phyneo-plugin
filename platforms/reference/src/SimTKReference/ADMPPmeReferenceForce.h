@@ -1462,7 +1462,38 @@ public:
      *
      * @param vectors    the vectors defining the periodic box
      */
-     void setPeriodicBoxSize(OpenMM::Vec3* vectors);
+    void setPeriodicBoxSize(OpenMM::Vec3* vectors);
+
+    /**
+     * Enable or disable native dispersion PME for the reference PME helper.
+     */
+    void setUseDispersionPME(bool use);
+
+    /**
+     * Configure dispersion PME parameters.
+     */
+    void setDispersionPmax(int pmax);
+    void setAlphaDispersionEwald(double alpha);
+    void setDispersionMScales(const std::vector<double>& scales);
+    void setDispersionParameters(const std::vector<Vec3>& params);
+
+    /**
+     * Compute the dispersion PME energy contribution for the current positions.
+     * This currently evaluates energy only; force support is handled elsewhere.
+     */
+    double calculateDispersionEnergy(const std::vector<OpenMM::Vec3>& particlePositions,
+                                     const std::vector<double>& charges,
+                                     const std::vector<double>& dipoles,
+                                     const std::vector<double>& quadrupoles,
+                                     const std::vector<double>& octopoles,
+                                     const std::vector<double>& tholes,
+                                     const std::vector<double>& dampingFactors,
+                                     const std::vector<std::vector<double> >& polarity,
+                                     const std::vector<int>& axisTypes,
+                                     const std::vector<int>& multipoleAtomZs,
+                                     const std::vector<int>& multipoleAtomXs,
+                                     const std::vector<int>& multipoleAtomYs,
+                                     const std::vector< std::vector< std::vector<int> > >& multipoleAtomCovalentInfo);
 
 private:
 
@@ -1489,8 +1520,14 @@ private:
     std::vector<IntVec> _iGrid;
     std::vector<double> _phi;
     std::vector<double> _phidp;
+    std::vector<double> _dispersionPhi;
     std::vector<double4> _pmeBsplineTheta;
     std::vector<double4> _pmeBsplineDtheta;
+    bool _useDispersionPme;
+    double _alphaDispersionEwald;
+    int _dispersionPmax;
+    std::vector<double> _dispersionMScales;
+    std::vector<Vec3> _dispersionParameters;
 
     /**
      * Resize PME arrays.
@@ -1599,6 +1636,31 @@ private:
      * 
      */
     void computeInducedPotentialFromGrid();
+
+    /**
+     * Spread scalar dispersion coefficients onto the PME grid.
+     */
+    void spreadDispersionOnGrid(int component);
+
+    /**
+     * Apply reciprocal-space dispersion convolution to the current grid.
+     */
+    void performDispersionReciprocalConvolution(int component);
+
+    /**
+     * Interpolate scalar dispersion potential from grid to particles.
+     */
+    void computeDispersionPotentialFromGrid(std::vector<double>& potential);
+
+    /**
+     * Compute direct-space and reciprocal-space dispersion energies.
+     */
+    double calculateDirectDispersionEnergy(const std::vector<MultipoleParticleData>& particleData,
+                                           const std::vector< std::vector< std::vector<int> > >& multipoleAtomCovalentInfo) const;
+    double calculateReciprocalDispersionEnergy(const std::vector<MultipoleParticleData>& particleData);
+    double calculateDispersionSelfEnergy() const;
+    double getDispersionScaleFactor(unsigned int particleI, unsigned int particleJ,
+                                    const std::vector< std::vector< std::vector<int> > >& multipoleAtomCovalentInfo) const;
 
     /**
      * Calculate reciprocal space energy and force due to fixed multipoles.

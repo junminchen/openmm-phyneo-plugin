@@ -74,7 +74,8 @@ static Vec3* extractBoxVectors(ContextImpl& context) {
 
 ReferenceCalcADMPPmeForceKernel::ReferenceCalcADMPPmeForceKernel(std::string name, const Platform& platform, const System& system) : 
          CalcADMPPmeForceKernel(name, platform), system(system), numMultipoles(0), mutualInducedMaxIterations(60), mutualInducedTargetEpsilon(1.0e-03),
-                                                         usePme(false),alphaEwald(0.0), cutoffDistance(1.0) {  
+                                                         usePme(false),alphaEwald(0.0), useDispersionPme(false), dispersionPmax(10),
+                                                         alphaDispersionEwald(0.0), cutoffDistance(1.0) {  
 
 }
 
@@ -168,8 +169,38 @@ void ReferenceCalcADMPPmeForceKernel::initialize(const System& system, const ADM
             pmeGridDimension[1] = gridSizeY;
             pmeGridDimension[2] = gridSizeZ;
         }    
+        useDispersionPme = force.getUseDispersionPME();
+        if (useDispersionPme) {
+            int dnx, dny, dnz;
+            force.getDPMEParameters(alphaDispersionEwald, dnx, dny, dnz);
+            if (alphaDispersionEwald == 0.0)
+                alphaDispersionEwald = sqrt(-log(2.0*force.getEwaldErrorTolerance()))/force.getCutoffDistance();
+            if ((dnx != 0 && dnx != pmeGridDimension[0]) || (dny != 0 && dny != pmeGridDimension[1]) || (dnz != 0 && dnz != pmeGridDimension[2]))
+                throw OpenMMException("Reference ADMPPmeForce currently requires dispersion PME grid to match electrostatic PME grid.");
+            dispersionPmax = force.getDispersionPmax();
+            if (dispersionPmax != 6 && dispersionPmax != 8 && dispersionPmax != 10)
+                throw OpenMMException("Reference ADMPPmeForce currently supports dispersionPmax = 6, 8, or 10.");
+            force.getDispMScales(dispMScales);
+            dispersionParams.resize(numMultipoles);
+            for (int ii = 0; ii < numMultipoles; ii++) {
+                double c6, c8, c10;
+                force.getDispersionParameters(ii, c6, c8, c10);
+                dispersionParams[ii] = Vec3(c6, c8, c10);
+            }
+        }
+        else {
+            dispMScales.clear();
+            dispersionParams.clear();
+            alphaDispersionEwald = 0.0;
+            dispersionPmax = 10;
+        }
     } else {
         usePme = false;
+        useDispersionPme = false;
+        dispMScales.clear();
+        dispersionParams.clear();
+        alphaDispersionEwald = 0.0;
+        dispersionPmax = 10;
     }
     force.getMScales(mScales);
     force.getPScales(pScales);
@@ -192,6 +223,13 @@ ADMPPmeReferenceForce* ReferenceCalcADMPPmeForceKernel::setupADMPPmeReferenceFor
         mpidReferencePmeForce->setAlphaEwald(alphaEwald);
         mpidReferencePmeForce->setCutoffDistance(cutoffDistance);
         mpidReferencePmeForce->setPmeGridDimensions(pmeGridDimension);
+        mpidReferencePmeForce->setUseDispersionPME(useDispersionPme);
+        if (useDispersionPme) {
+            mpidReferencePmeForce->setDispersionPmax(dispersionPmax);
+            mpidReferencePmeForce->setAlphaDispersionEwald(alphaDispersionEwald);
+            mpidReferencePmeForce->setDispersionMScales(dispMScales);
+            mpidReferencePmeForce->setDispersionParameters(dispersionParams);
+        }
         Vec3* boxVectors = extractBoxVectors(context);
         double minAllowedSize = 1.999999*cutoffDistance;
         if (boxVectors[0][0] < minAllowedSize || boxVectors[1][1] < minAllowedSize || boxVectors[2][2] < minAllowedSize) {
@@ -236,6 +274,16 @@ double ReferenceCalcADMPPmeForceKernel::execute(ContextImpl& context, bool inclu
                                                                            dampingFactors, polarity, axisTypes, 
                                                                            multipoleAtomZs, multipoleAtomXs, multipoleAtomYs,
                                                                            multipoleAtomCovalentInfo, forceData);
+    if (useDispersionPme) {
+        ADMPPmeReferencePmeForce* pmeForce = dynamic_cast<ADMPPmeReferencePmeForce*>(ADMPPmeReferenceForce);
+        if (pmeForce == NULL) {
+            delete ADMPPmeReferenceForce;
+            throw OpenMMException("Reference ADMPPmeForce native dispersion PME requires PME mode.");
+        }
+        energy += pmeForce->calculateDispersionEnergy(posData, charges, dipoles, quadrupoles, octopoles, tholes,
+                                                      dampingFactors, polarity, axisTypes, multipoleAtomZs,
+                                                      multipoleAtomXs, multipoleAtomYs, multipoleAtomCovalentInfo);
+    }
 
     delete ADMPPmeReferenceForce;
 

@@ -25,6 +25,7 @@
 #include "ADMPPmeReferenceForce.h"
 #include "jama_svd.h"
 #include <algorithm>
+#include <cstdlib>
 
 // In case we're using some primitive version of Visual Studio this will
 // make sure that erf() and erfc() are defined.
@@ -2597,7 +2598,8 @@ const double ADMPPmeReferencePmeForce::SQRT_PI = 1.77245385091;
 ADMPPmeReferencePmeForce::ADMPPmeReferencePmeForce() :
                ADMPPmeReferenceForce(PME),
                _cutoffDistance(1.0), _cutoffDistanceSquared(1.0),
-               _pmeGridSize(0), _totalGridSize(0), _alphaEwald(0.0)
+               _pmeGridSize(0), _totalGridSize(0), _alphaEwald(0.0),
+               _useDispersionPme(false), _alphaDispersionEwald(0.0), _dispersionPmax(10)
 {
 
     _fftplan = NULL;
@@ -2685,6 +2687,341 @@ void ADMPPmeReferencePmeForce::setPeriodicBoxSize(OpenMM::Vec3* vectors)
     _recipBoxVectors[1] = Vec3(-vectors[1][0]*vectors[2][2], vectors[0][0]*vectors[2][2], 0)*scale;
     _recipBoxVectors[2] = Vec3(vectors[1][0]*vectors[2][1]-vectors[1][1]*vectors[2][0], -vectors[0][0]*vectors[2][1], vectors[0][0]*vectors[1][1])*scale;
 };
+
+void ADMPPmeReferencePmeForce::setUseDispersionPME(bool use) {
+    _useDispersionPme = use;
+}
+
+void ADMPPmeReferencePmeForce::setDispersionPmax(int pmax) {
+    _dispersionPmax = pmax;
+}
+
+void ADMPPmeReferencePmeForce::setAlphaDispersionEwald(double alpha) {
+    _alphaDispersionEwald = alpha;
+}
+
+void ADMPPmeReferencePmeForce::setDispersionMScales(const std::vector<double>& scales) {
+    if (scales.size() != 5 && scales.size() != 6)
+        throw OpenMMException("ADMPPmeReferencePmeForce: dispersion m-scales must have 5 values (12/13/14/15/16) or 6 values with trailing default.");
+    _dispersionMScales.assign(scales.begin(), scales.begin()+5);
+}
+
+void ADMPPmeReferencePmeForce::setDispersionParameters(const std::vector<Vec3>& params) {
+    _dispersionParameters = params;
+}
+
+double ADMPPmeReferencePmeForce::calculateDispersionEnergy(const std::vector<OpenMM::Vec3>& particlePositions,
+                                                           const std::vector<double>& charges,
+                                                           const std::vector<double>& dipoles,
+                                                           const std::vector<double>& quadrupoles,
+                                                           const std::vector<double>& octopoles,
+                                                           const std::vector<double>& tholes,
+                                                           const std::vector<double>& dampingFactors,
+                                                           const std::vector<std::vector<double> >& polarity,
+                                                           const std::vector<int>& axisTypes,
+                                                           const std::vector<int>& multipoleAtomZs,
+                                                           const std::vector<int>& multipoleAtomXs,
+                                                           const std::vector<int>& multipoleAtomYs,
+                                                           const std::vector< std::vector< std::vector<int> > >& multipoleAtomCovalentInfo) {
+    if (!_useDispersionPme)
+        return 0.0;
+    _numParticles = particlePositions.size();
+    if (_dispersionParameters.size() != _numParticles)
+        throw OpenMMException("ADMPPmeReferencePmeForce: native dispersion PME requires per-particle dispersion parameters.");
+
+    vector<MultipoleParticleData> particleData;
+    loadParticleData(particlePositions, charges, dipoles, quadrupoles, octopoles, tholes, dampingFactors, polarity, particleData);
+    const double direct = calculateDirectDispersionEnergy(particleData, multipoleAtomCovalentInfo);
+    const double reciprocal = calculateReciprocalDispersionEnergy(particleData);
+    const double self = calculateDispersionSelfEnergy();
+    const double scalarTotal = direct + reciprocal + self;
+    const double total = -scalarTotal;
+    if (getenv("PHYNEO_DEBUG_DISP_PME") != NULL) {
+        std::cerr << "Reference dispersion PME components:"
+                  << " direct=" << direct
+                  << " reciprocal=" << reciprocal
+                  << " self=" << self
+                  << " scalarTotal=" << scalarTotal
+                  << " pluginEnergy=" << total
+                  << std::endl;
+    }
+    return total;
+}
+
+double ADMPPmeReferencePmeForce::getDispersionScaleFactor(unsigned int particleI, unsigned int particleJ,
+                                                          const std::vector< std::vector< std::vector<int> > >& multipoleAtomCovalentInfo) const {
+    if (_dispersionMScales.empty() || particleI >= multipoleAtomCovalentInfo.size())
+        return 1.0;
+    const std::vector<std::vector<int> >& covalentInfo = multipoleAtomCovalentInfo[particleI];
+    const int maxShell = std::min<int>(5, std::min<int>(_dispersionMScales.size(), covalentInfo.size()));
+    for (int shell = 0; shell < maxShell; shell++) {
+        const std::vector<int>& partners = covalentInfo[shell];
+        if (std::find(partners.begin(), partners.end(), static_cast<int>(particleJ)) != partners.end())
+            return _dispersionMScales[shell];
+    }
+    return 1.0;
+}
+
+double ADMPPmeReferencePmeForce::calculateDirectDispersionEnergy(
+        const std::vector<MultipoleParticleData>& particleData,
+        const std::vector< std::vector< std::vector<int> > >& multipoleAtomCovalentInfo) const {
+    double energy = 0.0;
+    const double alpha2 = _alphaDispersionEwald*_alphaDispersionEwald;
+    for (unsigned int ii = 0; ii < particleData.size(); ii++) {
+        for (unsigned int jj = ii+1; jj < particleData.size(); jj++) {
+            Vec3 deltaR = particleData[jj].position-particleData[ii].position;
+            getPeriodicDelta(deltaR);
+            const double r2 = deltaR.dot(deltaR);
+            if (r2 > _cutoffDistanceSquared)
+                continue;
+            const double r = sqrt(r2);
+            const double rInv = 1.0/r;
+            const double invR2 = rInv*rInv;
+            const double invR6 = invR2*invR2*invR2;
+            const double x2 = alpha2*r2;
+            const double x4 = x2*x2;
+            const double expx = exp(-x2);
+            const double mScale = getDispersionScaleFactor(ii, jj, multipoleAtomCovalentInfo);
+            const Vec3& dispI = _dispersionParameters[ii];
+            const Vec3& dispJ = _dispersionParameters[jj];
+
+            if (_dispersionPmax >= 6) {
+                const double cprod = sqrt(dispI[0]*dispJ[0]);
+                if (cprod != 0.0) {
+                    const double g = (1.0+x2+0.5*x4)*expx;
+                    energy += cprod*(mScale + g - 1.0)*invR6;
+                }
+            }
+            if (_dispersionPmax >= 8) {
+                const double cprod = sqrt(dispI[1]*dispJ[1]);
+                if (cprod != 0.0) {
+                    const double x6 = x4*x2;
+                    const double g = (1.0+x2+0.5*x4+x6/6.0)*expx;
+                    energy += cprod*(mScale + g - 1.0)*(invR6*invR2);
+                }
+            }
+            if (_dispersionPmax >= 10) {
+                const double cprod = sqrt(dispI[2]*dispJ[2]);
+                if (cprod != 0.0) {
+                    const double x6 = x4*x2;
+                    const double x8 = x4*x4;
+                    const double g = (1.0+x2+0.5*x4+x6/6.0+x8/24.0)*expx;
+                    energy += cprod*(mScale + g - 1.0)*(invR6*invR2*invR2);
+                }
+            }
+        }
+    }
+    return energy;
+}
+
+void ADMPPmeReferencePmeForce::spreadDispersionOnGrid(int component) {
+    for (int atomIndex = 0; atomIndex < _numParticles; atomIndex++) {
+        const double rawCoeff = _dispersionParameters[atomIndex][component];
+        if (rawCoeff == 0.0)
+            continue;
+        const double coeff = sqrt(rawCoeff);
+        IntVec& gridPoint = _iGrid[atomIndex];
+        for (int ix = 0; ix < MPID_PME_ORDER; ix++) {
+            const int x = (gridPoint[0]+ix) % _pmeGridDimensions[0];
+            for (int iy = 0; iy < MPID_PME_ORDER; iy++) {
+                const int y = (gridPoint[1]+iy) % _pmeGridDimensions[1];
+                for (int iz = 0; iz < MPID_PME_ORDER; iz++) {
+                    const int z = (gridPoint[2]+iz) % _pmeGridDimensions[2];
+                    const double5& t = _thetai[0][atomIndex*MPID_PME_ORDER+ix];
+                    const double5& u = _thetai[1][atomIndex*MPID_PME_ORDER+iy];
+                    const double5& v = _thetai[2][atomIndex*MPID_PME_ORDER+iz];
+                    t_complex& gridValue = _pmeGrid[x*_pmeGridDimensions[1]*_pmeGridDimensions[2]+y*_pmeGridDimensions[2]+z];
+                    gridValue.re += coeff*t[0]*u[0]*v[0];
+                }
+            }
+        }
+    }
+}
+
+void ADMPPmeReferencePmeForce::performDispersionReciprocalConvolution(int component) {
+    const double alpha2 = _alphaDispersionEwald*_alphaDispersionEwald;
+    const double volume = _periodicBoxVectors[0][0]*_periodicBoxVectors[1][1]*_periodicBoxVectors[2][2];
+    for (int index = 0; index < _totalGridSize; index++) {
+        int kx = index/(_pmeGridDimensions[1]*_pmeGridDimensions[2]);
+        int remainder = index-kx*_pmeGridDimensions[1]*_pmeGridDimensions[2];
+        int ky = remainder/_pmeGridDimensions[2];
+        int kz = remainder-ky*_pmeGridDimensions[2];
+
+        if (kx == 0 && ky == 0 && kz == 0) {
+            _pmeGrid[index].re = _pmeGrid[index].im = 0.0;
+            continue;
+        }
+
+        int mx = (kx < (_pmeGridDimensions[0]+1)/2) ? kx : (kx-_pmeGridDimensions[0]);
+        int my = (ky < (_pmeGridDimensions[1]+1)/2) ? ky : (ky-_pmeGridDimensions[1]);
+        int mz = (kz < (_pmeGridDimensions[2]+1)/2) ? kz : (kz-_pmeGridDimensions[2]);
+
+        double mhx = mx*_recipBoxVectors[0][0];
+        double mhy = mx*_recipBoxVectors[1][0]+my*_recipBoxVectors[1][1];
+        double mhz = mx*_recipBoxVectors[2][0]+my*_recipBoxVectors[2][1]+mz*_recipBoxVectors[2][2];
+
+        const double bx = _pmeBsplineModuli[0][kx];
+        const double by = _pmeBsplineModuli[1][ky];
+        const double bz = _pmeBsplineModuli[2][kz];
+        const double denom = bx*by*bz;
+        if (denom == 0.0 || volume == 0.0) {
+            _pmeGrid[index].re = _pmeGrid[index].im = 0.0;
+            continue;
+        }
+
+        const double m2 = mhx*mhx+mhy*mhy+mhz*mhz;
+        if (m2 == 0.0) {
+            _pmeGrid[index].re = _pmeGrid[index].im = 0.0;
+            continue;
+        }
+
+        const double x2 = (M_PI*M_PI*m2)/alpha2;
+        const double x = sqrt(x2);
+        const double expx = exp(-x2);
+        double ck = 0.0;
+        if (component == 0) {
+            const double x3 = x2*x;
+            const double f = ((1.0-2.0*x2)*expx) + 2.0*x3*SQRT_PI*erfc(x);
+            ck = SQRT_PI*M_PI*_alphaDispersionEwald*_alphaDispersionEwald*_alphaDispersionEwald*f/(6.0*volume);
+        }
+        else if (component == 1) {
+            const double x4 = x2*x2;
+            const double x5 = x4*x;
+            const double alpha5 = pow(_alphaDispersionEwald, 5);
+            const double f = ((3.0-2.0*x2+4.0*x4)*expx) - 4.0*x5*SQRT_PI*erfc(x);
+            ck = SQRT_PI*M_PI*alpha5*f/(90.0*volume);
+        }
+        else {
+            const double x4 = x2*x2;
+            const double x6 = x4*x2;
+            const double x7 = x6*x;
+            const double alpha7 = pow(_alphaDispersionEwald, 7);
+            const double f = ((15.0-6.0*x2+4.0*x4-8.0*x6)*expx) + 8.0*x7*SQRT_PI*erfc(x);
+            ck = SQRT_PI*M_PI*alpha7*f/(2520.0*volume);
+        }
+        const double eterm = ck/denom;
+        _pmeGrid[index].re *= eterm;
+        _pmeGrid[index].im *= eterm;
+    }
+}
+
+void ADMPPmeReferencePmeForce::computeDispersionPotentialFromGrid(std::vector<double>& potential) {
+    potential.resize(_numParticles);
+    for (int m = 0; m < _numParticles; m++) {
+        const IntVec& gridPoint = _iGrid[m];
+        double tuv000 = 0.0;
+        for (int ix = 0; ix < MPID_PME_ORDER; ix++) {
+            const int i = (gridPoint[0]+ix) % _pmeGridDimensions[0];
+            const double5& t = _thetai[0][m*MPID_PME_ORDER+ix];
+            double uv00 = 0.0;
+            for (int iy = 0; iy < MPID_PME_ORDER; iy++) {
+                const int j = (gridPoint[1]+iy) % _pmeGridDimensions[1];
+                const double5& u = _thetai[1][m*MPID_PME_ORDER+iy];
+                double v0 = 0.0;
+                for (int iz = 0; iz < MPID_PME_ORDER; iz++) {
+                    const int k = (gridPoint[2]+iz) % _pmeGridDimensions[2];
+                    const int gridIndex = i*_pmeGridDimensions[1]*_pmeGridDimensions[2]+j*_pmeGridDimensions[2]+k;
+                    const double tq = _pmeGrid[gridIndex].re;
+                    const double5& v = _thetai[2][m*MPID_PME_ORDER+iz];
+                    v0 += tq*v[0];
+                }
+                uv00 += u[0]*v0;
+            }
+            tuv000 += t[0]*uv00;
+        }
+        potential[m] = tuv000*_totalGridSize;
+    }
+}
+
+double ADMPPmeReferencePmeForce::calculateReciprocalDispersionEnergy(const std::vector<MultipoleParticleData>& particleData) {
+    resizePmeArrays();
+    computeMPIDBsplines(particleData);
+    const int maxComponent = (_dispersionPmax >= 10 ? 3 : (_dispersionPmax >= 8 ? 2 : 1));
+    double energy = 0.0;
+    for (int component = 0; component < maxComponent; component++) {
+        initializePmeGrid();
+        spreadDispersionOnGrid(component);
+        fftpack_exec_3d(_fftplan, FFTPACK_FORWARD, _pmeGrid, _pmeGrid);
+        const double alpha2 = _alphaDispersionEwald*_alphaDispersionEwald;
+        const double volume = _periodicBoxVectors[0][0]*_periodicBoxVectors[1][1]*_periodicBoxVectors[2][2];
+        for (int index = 0; index < _totalGridSize; index++) {
+            int kx = index/(_pmeGridDimensions[1]*_pmeGridDimensions[2]);
+            int remainder = index-kx*_pmeGridDimensions[1]*_pmeGridDimensions[2];
+            int ky = remainder/_pmeGridDimensions[2];
+            int kz = remainder-ky*_pmeGridDimensions[2];
+
+            int mx = (kx < (_pmeGridDimensions[0]+1)/2) ? kx : (kx-_pmeGridDimensions[0]);
+            int my = (ky < (_pmeGridDimensions[1]+1)/2) ? ky : (ky-_pmeGridDimensions[1]);
+            int mz = (kz < (_pmeGridDimensions[2]+1)/2) ? kz : (kz-_pmeGridDimensions[2]);
+
+            const double mhx = mx*_recipBoxVectors[0][0];
+            const double mhy = mx*_recipBoxVectors[1][0]+my*_recipBoxVectors[1][1];
+            const double mhz = mx*_recipBoxVectors[2][0]+my*_recipBoxVectors[2][1]+mz*_recipBoxVectors[2][2];
+
+            const double bx = _pmeBsplineModuli[0][kx];
+            const double by = _pmeBsplineModuli[1][ky];
+            const double bz = _pmeBsplineModuli[2][kz];
+            const double denom = bx*by*bz;
+            if (denom == 0.0 || volume == 0.0)
+                continue;
+
+            double m2 = mhx*mhx+mhy*mhy+mhz*mhz;
+            if (m2 < 1.0e-16)
+                m2 = 1.0e-16;
+
+            const double x2 = (M_PI*M_PI*m2)/alpha2;
+            const double x = sqrt(x2);
+            const double expx = exp(-x2);
+            double ck = 0.0;
+            if (component == 0) {
+                const double x3 = x2*x;
+                const double f = ((1.0-2.0*x2)*expx) + 2.0*x3*SQRT_PI*erfc(x);
+                ck = SQRT_PI*M_PI*_alphaDispersionEwald*_alphaDispersionEwald*_alphaDispersionEwald*f/(6.0*volume);
+            }
+            else if (component == 1) {
+                const double x4 = x2*x2;
+                const double x5 = x4*x;
+                const double alpha5 = pow(_alphaDispersionEwald, 5);
+                const double f = ((3.0-2.0*x2+4.0*x4)*expx) - 4.0*x5*SQRT_PI*erfc(x);
+                ck = SQRT_PI*M_PI*alpha5*f/(90.0*volume);
+            }
+            else {
+                const double x4 = x2*x2;
+                const double x6 = x4*x2;
+                const double x7 = x6*x;
+                const double alpha7 = pow(_alphaDispersionEwald, 7);
+                const double f = ((15.0-6.0*x2+4.0*x4-8.0*x6)*expx) + 8.0*x7*SQRT_PI*erfc(x);
+                ck = SQRT_PI*M_PI*alpha7*f/(2520.0*volume);
+            }
+            const double re = _pmeGrid[index].re;
+            const double im = _pmeGrid[index].im;
+            energy += ck*(re*re+im*im)/denom;
+        }
+    }
+    return energy;
+}
+
+double ADMPPmeReferencePmeForce::calculateDispersionSelfEnergy() const {
+    const double alpha2 = _alphaDispersionEwald*_alphaDispersionEwald;
+    const double alpha4 = alpha2*alpha2;
+    const double alpha6 = alpha4*alpha2;
+    const double alpha8 = alpha4*alpha4;
+    const double alpha10 = alpha8*alpha2;
+    double sumC6 = 0.0;
+    double sumC8 = 0.0;
+    double sumC10 = 0.0;
+    for (int atomIndex = 0; atomIndex < _numParticles; atomIndex++) {
+        sumC6 += _dispersionParameters[atomIndex][0];
+        sumC8 += _dispersionParameters[atomIndex][1];
+        sumC10 += _dispersionParameters[atomIndex][2];
+    }
+    double energy = -(alpha6/12.0)*sumC6;
+    if (_dispersionPmax >= 8)
+        energy -= (alpha8/48.0)*sumC8;
+    if (_dispersionPmax >= 10)
+        energy -= (alpha10/240.0)*sumC10;
+    return energy;
+}
 
 int compareInt2(const int2& v1, const int2& v2)
 {
