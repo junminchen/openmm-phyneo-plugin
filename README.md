@@ -6,6 +6,7 @@ polarizable multipole electrostatics in OpenMM. It provides:
 - `ADMPPmeForce` for long-range electrostatics and polarization
 - DMFF-style short-range `Slater/QqTt` custom nonbonded terms
 - Python bindings and XML parsing for PhyNEO/DMFF parameter files
+- [`openmmtool.py`](./openmmtool.py) as the current lightweight builder entry
 
 This README describes the plugin as it exists today in this workspace. It is
 intentionally status-oriented: the current main validation path is the
@@ -19,8 +20,7 @@ What is working and actively validated:
 - `Reference` platform builds and runs
 - `examples/li_dmc_compare` is self-contained and serves as the canonical
   validation fixture
-- the current builder workflow in this workspace uses the project-level
-  `openmmtool.py` together with this plugin
+- the current builder workflow uses the repo-root [`openmmtool.py`](./openmmtool.py)
 - short-range custom forces, intra-builder smoke tests, and short MD smoke
   tests are all wired up on the local Li-DMC fixture
 
@@ -208,7 +208,7 @@ For most users of the current workspace, start with:
 ## Notes For This Workspace
 
 - This plugin directory has been renamed locally to `OpenMMPhyNEOPlugin`.
-- The current workspace also contains a project-level `openmmtool.py` builder
-  that consumes this plugin and the self-contained Li-DMC fixture.
+- The current lightweight builder now lives in the repo root as
+  [`openmmtool.py`](./openmmtool.py).
 - Some local builds may need Python extension `rpath` cleanup after the rename;
   see [`HANDOFF.md`](./HANDOFF.md) for current engineering notes and next steps.

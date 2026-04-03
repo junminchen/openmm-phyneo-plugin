@@ -36,6 +36,11 @@ def add_local_python_paths(include_dmff: bool = False, include_workspace: bool =
         if workspace_str not in sys.path:
             sys.path.insert(0, workspace_str)
 
+    repo_str = str(REPO_ROOT)
+    if repo_str in sys.path:
+        sys.path.remove(repo_str)
+    sys.path.insert(0, repo_str)
+
     candidates = [REPO_ROOT / "python"]
     candidates.extend(
         build_dir / "python"

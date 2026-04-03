@@ -14,7 +14,7 @@ Completed work:
   fixture under `examples/li_dmc_compare/fixtures`
 - root smoke scripts were moved into `examples/li_dmc_compare`; root-level
   versions are now thin wrappers
-- `openmmtool.py` in the parent workspace now supports:
+- repo-root [`openmmtool.py`](./openmmtool.py) now supports:
   - current plugin parsing
   - short-range custom-force assembly
   - optional intra-builder integration
