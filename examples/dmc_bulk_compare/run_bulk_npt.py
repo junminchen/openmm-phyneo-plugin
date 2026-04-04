@@ -17,10 +17,41 @@ import openmm.unit as unit
 HERE = Path(__file__).resolve().parent
 REPO_ROOT = HERE.parent.parent
 PYTHON_DIR = REPO_ROOT / "python"
-for candidate in (REPO_ROOT, PYTHON_DIR):
-    candidate_str = str(candidate)
-    if candidate_str not in sys.path:
-        sys.path.insert(0, candidate_str)
+
+
+def add_local_python_paths() -> None:
+    repo_str = str(REPO_ROOT)
+    if repo_str in sys.path:
+        sys.path.remove(repo_str)
+    sys.path.insert(0, repo_str)
+
+    candidates = [PYTHON_DIR]
+    candidates.extend(
+        build_dir / "python"
+        for build_dir in sorted(REPO_ROOT.glob("build*/"))
+        if (build_dir / "python" / "phyneoforceplugin.py").exists()
+    )
+    for candidate in reversed(candidates):
+        candidate_str = str(candidate)
+        if candidate_str not in sys.path:
+            sys.path.insert(0, candidate_str)
+
+
+def load_local_plugins() -> None:
+    for build_dir in sorted(REPO_ROOT.glob("build*/")):
+        candidate = build_dir.resolve()
+        reference_plugin = candidate / "platforms" / "reference" / "libOpenMMPhyNEOForceReference.dylib"
+        cuda_plugin = candidate / "platforms" / "cuda" / "libOpenMMPhyNEOForceCuda.dylib"
+        for plugin_path in (reference_plugin, cuda_plugin):
+            if plugin_path.exists():
+                try:
+                    mm.Platform.loadPluginLibrary(str(plugin_path))
+                except Exception:
+                    pass
+
+
+add_local_python_paths()
+load_local_plugins()
 
 import phyneoforceplugin  # noqa: E402,F401
 from dmff_sr_custom_forces import (  # noqa: E402
