@@ -1380,14 +1380,14 @@ void testWaterDimerEnergyAndForcesNoCutDirect() {
     Context context(system, integrator, Platform::getPlatformByName("Reference"));
     context.setPositions(positions);
 
-    double refenergy = -2.073633103;
+    double refenergy = -1.94990245313;
     vector<Vec3> refforces(6);
-    refforces[0] = Vec3(    -126.2421899,    -170.3099203,     22.63601754);
-    refforces[1] = Vec3(     33.98504411,     -4.37681676,     4.291620303);
-    refforces[2] = Vec3(     37.03663388,     110.6991014,     27.96613186);
-    refforces[3] = Vec3(    -110.0081926,    -92.00335026,    -23.47154091);
-    refforces[4] = Vec3(     118.7163185,     152.7153107,    -10.61293965);
-    refforces[5] = Vec3(     46.51238604,      3.27567523,    -20.80928914);
+    refforces[0] = Vec3(   -138.731081192,   -182.970983809,    35.7096161821);
+    refforces[1] = Vec3(    37.1153441025,   -5.54849070212,    5.04277194992);
+    refforces[2] = Vec3(    41.1386076416,    118.827072715,    31.4727904591);
+    refforces[3] = Vec3(   -116.429792537,   -100.864176983,   -27.6151796492);
+    refforces[4] = Vec3(    126.637020524,    165.896615786,   -19.3337325847);
+    refforces[5] = Vec3(    50.2699014617,    4.65996299331,   -25.2762663572);
 
     State state = context.getState(State::Forces | State::Energy);
     double energy = state.getPotentialEnergy();
@@ -1430,14 +1430,14 @@ void testWaterDimerEnergyAndForcesPMEDirect() {
     Context context(system, integrator, Platform::getPlatformByName("Reference"));
     context.setPositions(positions);
 
-    double refenergy = -2.593578072;
+    double refenergy = -2.52331886181;
     vector<Vec3> refforces(6);
-    refforces[0] = Vec3(     -126.476901,    -170.6718902,      18.4334079);
-    refforces[1] = Vec3(     33.70162805,    -4.401505515,     6.606266937);
-    refforces[2] = Vec3(     37.35010585,       110.86086,     30.40609305);
-    refforces[3] = Vec3(    -110.1369597,    -92.11869278,    -28.18843269);
-    refforces[4] = Vec3(     118.7291566,      153.020133,    -8.544414786);
-    refforces[5] = Vec3(     46.83302308,     3.311091841,    -18.71304382);
+    refforces[0] = Vec3(   -138.957838269,    -183.31872123,    31.0599629177);
+    refforces[1] = Vec3(    36.7888313795,   -5.59108065228,    7.60199989891);
+    refforces[2] = Vec3(    41.4640304498,    118.969332544,    34.1613784881);
+    refforces[3] = Vec3(    -116.5222458,    -100.94800584,    -32.825019784);
+    refforces[4] = Vec3(     126.62268661,    166.196623892,    -17.038390816);
+    refforces[5] = Vec3(    50.6045890975,    4.69184517283,   -22.9600863716);
 
     State state = context.getState(State::Forces | State::Energy);
     double energy = state.getPotentialEnergy();
@@ -1477,14 +1477,14 @@ void testWaterDimerEnergyAndForcesNoCutMutual() {
     Context context(system, integrator, Platform::getPlatformByName("Reference"));
     context.setPositions(positions);
 
-    double refenergy = -1.965371802;
+    double refenergy = -1.952917117;
     vector<Vec3> refforces(6);
-    refforces[0] = Vec3(    -125.4673273,    -169.7612375,     24.25064653);
-    refforces[1] = Vec3(      34.3859015,    -4.214154739,     4.636189005);
-    refforces[2] = Vec3(     37.22855308,     111.4136633,      28.6721405);
-    refforces[3] = Vec3(    -110.7797799,    -92.68393408,    -24.28822342);
-    refforces[4] = Vec3(     118.9019091,     152.4722218,     -12.1953762);
-    refforces[5] = Vec3(     45.73074353,     2.773441157,    -21.07537641);
+    refforces[0] = Vec3(    -139.7835608,    -184.4337529,     35.62953533);
+    refforces[1] = Vec3(       37.434981,     -5.52290294,     5.116814051);
+    refforces[2] = Vec3(     41.23101208,     119.3674074,     31.61700973);
+    refforces[3] = Vec3(    -116.9476192,    -101.4714619,    -27.86430036);
+    refforces[4] = Vec3(     127.7709383,     167.4188741,    -19.23010497);
+    refforces[5] = Vec3(     50.29424862,     4.641836196,    -25.26895377);
     State state = context.getState(State::Forces | State::Energy);
     double energy = state.getPotentialEnergy();
     const vector<Vec3>& forces = state.getForces();
@@ -1527,14 +1527,14 @@ void testWaterDimerEnergyAndForcesPMEMutual() {
     Context context(system, integrator, Platform::getPlatformByName("Reference"));
     context.setPositions(positions);
 
-    double refenergy = -2.494550603;
+    double refenergy = -2.53308253945;
     vector<Vec3> refforces(6);
-    refforces[0] = Vec3(    -125.7254312,    -170.1399622,     19.93483365);
-    refforces[1] = Vec3(     34.08498339,    -4.254746864,      6.96508036);
-    refforces[2] = Vec3(     37.53360198,     111.5528495,     31.11710019);
-    refforces[3] = Vec3(    -110.8779674,    -92.76509963,     -29.0297361);
-    refforces[4] = Vec3(      118.917062,     152.7959246,    -10.04265804);
-    refforces[5] = Vec3(     46.06780487,     2.811029535,    -18.94474791);
+    refforces[0] = Vec3(    -140.0801113,    -184.8502938,     30.90206228);
+    refforces[1] = Vec3(     37.10990648,    -5.575145043,      7.69265982);
+    refforces[2] = Vec3(     41.55181663,     119.5042199,     34.31895915);
+    refforces[3] = Vec3(    -117.0338412,    -101.5516429,    -33.10846733);
+    refforces[4] = Vec3(     127.7947382,     167.7834207,    -16.87461724);
+    refforces[5] = Vec3(     50.65754477,     4.689434342,    -22.93075376);
 
     State state = context.getState(State::Forces | State::Energy);
     double energy = state.getPotentialEnergy();
@@ -1578,14 +1578,14 @@ void testWaterDimerEnergyAndForcesPMEExtrapolated() {
     Context context(system, integrator, Platform::getPlatformByName("Reference"));
     context.setPositions(positions);
 
-    double refenergy = -2.473259335;
+    double refenergy = -2.527846018;
     vector<Vec3> refforces(6);
-    refforces[0] = Vec3(    -125.6040844,    -170.0476758,     20.29311169);
-    refforces[1] = Vec3(     34.14506341,    -4.228896409,     7.005583542);
-    refforces[2] = Vec3(     37.58510292,     111.6827893,     31.21170204);
-    refforces[3] = Vec3(    -111.0100086,    -92.89578434,    -29.13494357);
-    refforces[4] = Vec3(     118.9344233,     152.7564162,    -10.35481734);
-    refforces[5] = Vec3(     45.94955714,     2.733145684,    -19.02076503);
+    refforces[0] = Vec3(     -140.156749,    -184.9802098,     30.95576142);
+    refforces[1] = Vec3(     37.14821556,    -5.561204369,     7.691990976);
+    refforces[2] = Vec3(     41.56730743,     119.5695275,     34.32030003);
+    refforces[3] = Vec3(    -117.1007878,    -101.6308286,    -33.11577527);
+    refforces[4] = Vec3(     127.9092349,      167.929753,    -16.90691988);
+    refforces[5] = Vec3(     50.63283256,     4.672955505,    -22.94551458);
 
     State state = context.getState(State::Forces | State::Energy);
     double energy = state.getPotentialEnergy();
@@ -1624,14 +1624,14 @@ void testWaterDimerEnergyAndForcesNoCutExtrapolated() {
     Context context(system, integrator, Platform::getPlatformByName("Reference"));
     context.setPositions(positions);
 
-    double refenergy = -1.942470194;
+    double refenergy = -1.94668563;
     vector<Vec3> refforces(6);
-    refforces[0] = Vec3(    -125.3457791,     -169.670022,     24.62896503);
-    refforces[1] = Vec3(     34.44933583,    -4.185570495,     4.673066895);
-    refforces[2] = Vec3(     37.28225481,     111.5484283,     28.76451931);
-    refforces[3] = Vec3(    -110.9181152,    -92.82180476,    -24.38697782);
-    refforces[4] = Vec3(     118.9207695,      152.432673,    -12.52147701);
-    refforces[5] = Vec3(     45.61153409,     2.696295966,     -21.1580964);
+    refforces[0] = Vec3(    -139.8529084,    -184.5568497,     35.69566243);
+    refforces[1] = Vec3(     37.47391144,    -5.507167568,     5.113662284);
+    refforces[2] = Vec3(     41.24807762,     119.4349691,     31.61668322);
+    refforces[3] = Vec3(    -117.0172298,    -101.5532625,    -27.86681578);
+    refforces[4] = Vec3(     127.8817331,     167.5584812,    -19.27180201);
+    refforces[5] = Vec3(     50.26641605,     4.623829403,    -25.28739015);
 
     State state = context.getState(State::Forces | State::Energy);
     double energy = state.getPotentialEnergy();

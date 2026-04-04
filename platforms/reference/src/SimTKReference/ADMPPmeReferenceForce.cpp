@@ -932,7 +932,7 @@ void ADMPPmeReferenceForce::calculateFixedMultipoleFieldPairIxn(const MultipoleP
 
     Vec3 field                              = deltaR*factor + particleJ.dipole*rr3 - qDotDelta*rr5_2 + oJ*rr7_3;
     unsigned int particleIndex              = particleI.particleIndex;
-    _fixedMultipoleField[particleIndex]    -= field*dScale;
+    _fixedMultipoleField[particleIndex]    -= field*pScale;
 
     // field at particle J due multipoles at particle I
 
@@ -957,7 +957,7 @@ void ADMPPmeReferenceForce::calculateFixedMultipoleFieldPairIxn(const MultipoleP
     field                                     = deltaR*factor - particleI.dipole*rr3 - qDotDelta*rr5_2 - oI*rr7_3;
     particleIndex                             = particleJ.particleIndex;
 
-    _fixedMultipoleField[particleIndex]      += field*dScale;
+    _fixedMultipoleField[particleIndex]      += field*pScale;
 }
 
 void ADMPPmeReferenceForce::calculateFixedMultipoleField(const vector<MultipoleParticleData>& particleData)
@@ -3248,10 +3248,13 @@ void ADMPPmeReferencePmeForce::calculateFixedMultipoleFieldPairIxn(const Multipo
     std::vector<double> dampedPInverseDistances;
     getDampedInverseDistances(particleI, particleJ, dscale, pscale, r, dampedDInverseDistances, dampedPInverseDistances);
 
-    double drr3        = dampedDInverseDistances[0];
-    double drr5        = dampedDInverseDistances[1];
-    double drr7        = dampedDInverseDistances[2];
-    double drr9        = dampedDInverseDistances[3];
+    // The fixed multipole field drives the direct induced dipoles, so it must
+    // use the permanent-induced (pScale) damping branch rather than the
+    // induced-induced (dScale) branch.
+    double drr3        = dampedPInverseDistances[0];
+    double drr5        = dampedPInverseDistances[1];
+    double drr7        = dampedPInverseDistances[2];
+    double drr9        = dampedPInverseDistances[3];
 
     double dir         = particleI.dipole.dot(deltaR);
 
