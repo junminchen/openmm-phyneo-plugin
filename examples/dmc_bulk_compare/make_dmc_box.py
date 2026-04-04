@@ -9,7 +9,7 @@ import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-FIXTURE_ROOT = HERE.parent / "li_dmc_compare" / "fixtures"
+INPUT_ROOT = HERE / "inputs"
 
 DEFAULT_N_MOL = 100
 DEFAULT_BOX_A = 28.0
@@ -17,7 +17,7 @@ DEFAULT_SEED = 12345
 DEFAULT_TOLERANCE = 2.0
 DEFAULT_BOX_SIDE_PADDING_A = 1.5
 
-SINGLE_PDB = FIXTURE_ROOT / "pdb_bank" / "DMC.pdb"
+SINGLE_PDB = INPUT_ROOT / "pdb_bank" / "DMC.pdb"
 OUT_PDB = HERE / "dmc_100mol_box.pdb"
 INP_FILE = HERE / "_packmol_dmc.inp"
 

@@ -1,0 +1,9 @@
+; ITP file created by ByteFF-ML, 2026-04-02 22:17:54.690078
+
+[ moleculetype ]
+;name             nrexcl
+ Li                    3
+
+[ atoms ]
+;       nr            type      resi   res      atom      cgnr      charge          mass ; qtot
+         1           li0bf         1   UNL       li0         1     1.00000        6.9410 ; qtot    1.000

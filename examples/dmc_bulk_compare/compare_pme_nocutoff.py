@@ -18,10 +18,10 @@ import openmm.unit as unit
 
 HERE = Path(__file__).resolve().parent
 REPO_ROOT = HERE.parent.parent
-FIXTURE_ROOT = HERE.parent / "li_dmc_compare" / "fixtures"
+INPUT_ROOT = HERE / "inputs"
 BOX_PDB = HERE / "dmc_100mol_box.pdb"
-FF_XML = FIXTURE_ROOT / "phyneo_ecl.xml"
-PARAMS_DIR = FIXTURE_ROOT / "params_results"
+FF_XML = INPUT_ROOT / "phyneo_ecl.xml"
+PARAMS_DIR = INPUT_ROOT / "params_results"
 
 import sys
 

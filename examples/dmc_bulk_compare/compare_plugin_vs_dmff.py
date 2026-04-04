@@ -29,10 +29,10 @@ if "jax.config" not in sys.modules:
 HERE = Path(__file__).resolve().parent
 REPO_ROOT = HERE.parent.parent
 WORKSPACE_ROOT = REPO_ROOT.parent
-FIXTURE_ROOT = HERE.parent / "li_dmc_compare" / "fixtures"
+INPUT_ROOT = HERE / "inputs"
 
 BOX_PDB = HERE / "dmc_100mol_box.pdb"
-FF_XML = FIXTURE_ROOT / "phyneo_ecl.xml"
+FF_XML = INPUT_ROOT / "phyneo_ecl.xml"
 CUTOFF_NM = 1.2
 
 for candidate in (REPO_ROOT, REPO_ROOT / "python", WORKSPACE_ROOT / "DMFF"):

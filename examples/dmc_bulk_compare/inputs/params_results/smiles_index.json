@@ -1,0 +1,65 @@
+{
+  "DMC": {
+    "atom_count": 12,
+    "output_files": {
+      "atp": "DMC.atp",
+      "gro": "DMC.gro",
+      "itp": "DMC.itp",
+      "json": "DMC.json",
+      "nb_params": "DMC_nb_params.json"
+    },
+    "residue_names": [
+      "DMC"
+    ],
+    "smiles": "[C:1]([O:2][C:3](=[O:4])[O:5][C:6]([H:10])([H:11])[H:12])([H:7])([H:8])[H:9]",
+    "source": "inventory_fallback",
+    "status": "ok"
+  },
+  "EC": {
+    "atom_count": 10,
+    "output_files": {
+      "atp": "EC.atp",
+      "gro": "EC.gro",
+      "itp": "EC.itp",
+      "json": "EC.json",
+      "nb_params": "EC_nb_params.json"
+    },
+    "residue_names": [
+      "EC",
+      "ECA"
+    ],
+    "source": "project_na_electrolyte_2_comparison",
+    "status": "ok"
+  },
+  "FSI": {
+    "atom_count": 9,
+    "output_files": {
+      "atp": "FSI.atp",
+      "gro": "FSI.gro",
+      "itp": "FSI.itp",
+      "json": "FSI.json",
+      "nb_params": "FSI_nb_params.json"
+    },
+    "residue_names": [
+      "FSI"
+    ],
+    "source": "project_na_electrolyte_2_comparison",
+    "status": "ok"
+  },
+  "Li": {
+    "atom_count": 1,
+    "output_files": {
+      "atp": "Li.atp",
+      "gro": "Li.gro",
+      "itp": "Li.itp",
+      "json": "Li.json",
+      "nb_params": "Li_nb_params.json"
+    },
+    "residue_names": [
+      "LiA"
+    ],
+    "smiles": "[Li+:1]",
+    "source": "inventory_fallback",
+    "status": "ok"
+  }
+}

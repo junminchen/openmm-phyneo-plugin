@@ -1,26 +1,34 @@
-100 DMC Bulk Compare
-====================
+100 DMC Bulk
+============
 
-This example builds a periodic cubic box containing 100 DMC molecules and uses
-it as a bulk-style diagnostic system for the current plugin.
+This example is now self-contained. The required force-field inputs have been
+copied into [inputs](/home/am3-peichenzhong-group/Documents/project/test_MPID_DMFF/openmm-phyneo-plugin/examples/dmc_bulk_compare/inputs):
 
-It currently supports three related checks:
+- [phyneo_ecl.xml](/home/am3-peichenzhong-group/Documents/project/test_MPID_DMFF/openmm-phyneo-plugin/examples/dmc_bulk_compare/inputs/phyneo_ecl.xml)
+- [params_results](/home/am3-peichenzhong-group/Documents/project/test_MPID_DMFF/openmm-phyneo-plugin/examples/dmc_bulk_compare/inputs/params_results)
+  containing `DMC`, `Li`, `EC`, and `FSI` parameter files plus `smiles_index.json`
+- [pdb_bank](/home/am3-peichenzhong-group/Documents/project/test_MPID_DMFF/openmm-phyneo-plugin/examples/dmc_bulk_compare/inputs/pdb_bank)
 
-- plugin `PME` vs plugin `NoCutoff` on the same geometry
-- plugin vs DMFF term-by-term comparison under `PME`
-- dispersion-only comparison between:
-  - plugin `LRC`
-  - plugin native dispersion `PME`
-  - DMFF dispersion `PME`
+For intra matching, the local index also maps `EC` onto the XML residue name `ECA`.
 
-This is a diagnostic example, not an equilibrated liquid benchmark. The packed
-box is meant to be a clean periodic test geometry for term comparisons.
+The maintained MD path in this folder is:
+
+- plugin `ADMPPmeForce`
+- plugin short-range custom forces
+- plugin dispersion force
+- intra bonded terms from local `inputs/params_results`
+- `protocol=bff`
+- `polar_thole_override=0.39`
+
+This is the configuration that was verified to run `100 ps` CUDA NPT stably for
+the `100`-molecule DMC box.
 
 Inputs
 ------
-- monomer geometry and XML come from `../li_dmc_compare/fixtures`
-- the bulk box is generated locally as `dmc_100mol_box.pdb`
-- optional intra terms reuse the same local `params_results` subset when needed
+
+- [dmc_100mol_box.pdb](/home/am3-peichenzhong-group/Documents/project/test_MPID_DMFF/openmm-phyneo-plugin/examples/dmc_bulk_compare/dmc_100mol_box.pdb)
+- [inputs/phyneo_ecl.xml](/home/am3-peichenzhong-group/Documents/project/test_MPID_DMFF/openmm-phyneo-plugin/examples/dmc_bulk_compare/inputs/phyneo_ecl.xml)
+- [inputs/params_results](/home/am3-peichenzhong-group/Documents/project/test_MPID_DMFF/openmm-phyneo-plugin/examples/dmc_bulk_compare/inputs/params_results)
 
 Typical usage
 -------------
@@ -30,36 +38,33 @@ python make_dmc_box.py
 python compare_pme_nocutoff.py
 python compare_plugin_vs_dmff.py --platform Reference
 python compare_dispersion_plugin_dmff.py --platform Reference
+python run_bulk_npt.py --platform CUDA
 ```
 
-The default cutoff is `1.2 nm`, which is safely below half of the default
-`28 A` cubic box length used here for periodic PME.
+The default `run_bulk_npt.py` settings are the stable MD settings:
 
-Current dispersion result
--------------------------
-
-The maintained `Reference` comparison for the current box gives:
-
-- plugin `LRC`: `-4705.87098529 kJ/mol`
-- plugin native dispersion `PME`: `-4711.24201959 kJ/mol`
-- DMFF dispersion `PME`: `-4711.37449396 kJ/mol`
-
-So on this `100 DMC` periodic box:
-
-- plugin native dispersion `PME` is within about `0.13 kJ/mol` of DMFF PME
-- plugin `LRC` is within about `5.50 kJ/mol` of DMFF PME
-
-This makes the example a useful bulk regression target for future dispersion
-PME work, especially when validating `Reference` and later `CUDA`.
+- `protocol = bff`
+- `short_range_model = plugin`
+- `bonded_model = intra`
+- `polar_thole_override = 0.39`
+- `cutoff = 1.0 nm`
+- `dt = 2.0 fs`
+- `friction = 0.1 / ps`
+- `nvt_steps = 0`
+- `npt_steps = 50000` (`100 ps`)
 
 Outputs
 -------
-- `dmc_100mol_box.pdb`
-- `output/dmc_100mol_pme_vs_nocutoff.json`
-- `output/dmc_100mol_pme_vs_nocutoff.csv`
-- `output/dmc_100mol_pme_vs_nocutoff.png`
-- `output/dmc_100mol_plugin_vs_dmff.json`
-- `output/dmc_100mol_plugin_vs_dmff.csv`
-- `output/dmc_100mol_plugin_vs_dmff.png`
-- `output/dmc_100mol_dispersion_modes.json`
-- `output/dmc_100mol_dispersion_modes.png`
+
+Generated files are written under [output](/home/am3-peichenzhong-group/Documents/project/test_MPID_DMFF/openmm-phyneo-plugin/examples/dmc_bulk_compare/output).
+`run_bulk_npt.py` writes:
+
+- state CSV
+- DCD trajectory
+- final PDB
+- final state XML
+- checkpoint
+- JSON summary with:
+  - force list
+  - PME scale configuration
+  - initial / minimized / final state payloads
