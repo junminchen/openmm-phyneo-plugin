@@ -140,7 +140,7 @@ private:
     int fixedFieldThreads, inducedFieldThreads, electrostaticsThreads;
     int gridSizeX, gridSizeY, gridSizeZ;
     double alpha, inducedEpsilon;
-    double alphaDispersionEwald, dispersionSelfEnergy;
+    double alphaDispersionEwald, dispersionSelfEnergy, dispersionZeroModeSums[3];
     int dispersionPmax;
     bool usePME, useDispersionPme, hasQuadrupoles, hasOctopoles, hasInitializedScaleFactors, hasInitializedFFT, multipolesAreValid, hasCreatedEvent;
     ADMPPmeForce::PolarizationType polarizationType;

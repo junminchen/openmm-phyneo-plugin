@@ -54,6 +54,44 @@ using namespace std;
         throw OpenMMException(m.str());\
     }
 
+namespace {
+
+void accumulateDispersionZeroModeSums(const ADMPPmeForce& force, double sums[3]) {
+    sums[0] = 0.0;
+    sums[1] = 0.0;
+    sums[2] = 0.0;
+    for (int i = 0; i < force.getNumMultipoles(); i++) {
+        double c6, c8, c10;
+        force.getDispersionParameters(i, c6, c8, c10);
+        if (c6 > 0.0)
+            sums[0] += sqrt(c6);
+        if (c8 > 0.0)
+            sums[1] += sqrt(c8);
+        if (c10 > 0.0)
+            sums[2] += sqrt(c10);
+    }
+}
+
+double computeDispersionZeroModeEnergy(const double sums[3], double alphaDispersionEwald, int dispersionPmax, double volume) {
+    if (volume == 0.0)
+        return 0.0;
+    const double sqrtPi = sqrt(M_PI);
+    const double alpha2 = alphaDispersionEwald*alphaDispersionEwald;
+    const double alpha3 = alphaDispersionEwald*alpha2;
+    double energy = sqrtPi*M_PI*alpha3*sums[0]*sums[0]/(6.0*volume);
+    if (dispersionPmax >= 8) {
+        const double alpha5 = alpha3*alpha2;
+        energy += sqrtPi*M_PI*alpha5*sums[1]*sums[1]/(30.0*volume);
+    }
+    if (dispersionPmax >= 10) {
+        const double alpha7 = alpha3*alpha2*alpha2;
+        energy += sqrtPi*M_PI*alpha7*sums[2]*sums[2]/(168.0*volume);
+    }
+    return energy;
+}
+
+} // namespace
+
 /* -------------------------------------------------------------------------- *
  *                             MPIDMultipole                                *
  * -------------------------------------------------------------------------- */
@@ -117,6 +155,9 @@ CudaCalcADMPPmeForceKernel::CudaCalcADMPPmeForceKernel(std::string name, const P
     alphaDispersionEwald = 0.0;
     dispersionPmax = 10;
     dispersionSelfEnergy = 0.0;
+    dispersionZeroModeSums[0] = 0.0;
+    dispersionZeroModeSums[1] = 0.0;
+    dispersionZeroModeSums[2] = 0.0;
 }
 
 CudaCalcADMPPmeForceKernel::~CudaCalcADMPPmeForceKernel() {
@@ -217,6 +258,7 @@ CudaCalcADMPPmeForceKernel::~CudaCalcADMPPmeForceKernel() {
 
 void CudaCalcADMPPmeForceKernel::initialize(const System& system, const ADMPPmeForce& force) {
     cu.setAsCurrent();
+    accumulateDispersionZeroModeSums(force, dispersionZeroModeSums);
 
     // Initialize multipole parameters.
 
@@ -1045,8 +1087,12 @@ double CudaCalcADMPPmeForceKernel::execute(ContextImpl& context, bool includeFor
                     &dispersionParams->getDevicePointer(), &comp, recipBoxVectorPointer[0], recipBoxVectorPointer[1], recipBoxVectorPointer[2]};
                 cu.executeKernel(pmeDispersionForceKernel, pmeDispForceArgs, cu.getNumAtoms());
             }
-            if (includeEnergy)
+            if (includeEnergy) {
                 extraEnergy += dispersionSelfEnergy;
+                double4 periodicBoxSize = cu.getPeriodicBoxSize();
+                double volume = periodicBoxSize.x*periodicBoxSize.y*periodicBoxSize.z;
+                extraEnergy -= computeDispersionZeroModeEnergy(dispersionZeroModeSums, alphaDispersionEwald, dispersionPmax, volume);
+            }
         }
     }
 
@@ -1503,6 +1549,7 @@ void CudaCalcADMPPmeForceKernel::copyParametersToContext(ContextImpl& context, c
     cu.setAsCurrent();
     if (force.getNumMultipoles() != cu.getNumAtoms())
         throw OpenMMException("updateParametersInContext: The number of multipoles has changed");
+    accumulateDispersionZeroModeSums(force, dispersionZeroModeSums);
     
     // Record the per-multipole parameters.
     
