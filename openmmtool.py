@@ -72,10 +72,13 @@ def _add_local_python_paths() -> None:
         for build_dir in sorted(PLUGIN_ROOT.glob("build*/"))
         if (build_dir / "python" / "phyneoforceplugin.py").exists()
     )
-    for candidate in reversed(candidates):
+    # Preserve caller-provided sys.path precedence and keep source helpers ahead
+    # of generated build trees.  The build/python tree is still appended as a
+    # fallback for local wrapper imports.
+    for candidate in candidates:
         candidate_str = str(candidate)
         if candidate_str not in sys.path:
-            sys.path.insert(0, candidate_str)
+            sys.path.append(candidate_str)
 
 
 _add_local_python_paths()
@@ -468,7 +471,7 @@ def add_long_range_dispersion_force(
     atom_types: T.Optional[list[str]] = None,
     bonds: T.Optional[list[tuple[int, int]]] = None,
 ) -> omm.CustomNonbondedForce | None:
-    """Add undamped C6/C8/C10 dispersion with 1-4/1-5 corrections and LRC."""
+    """Add undamped C6/C8/C10 dispersion with covalent-shell corrections and LRC."""
 
     root = ET.parse(str(xml_path)).getroot()
     disp_node = root.find("ADMPDispPmeForce")
@@ -491,7 +494,9 @@ def add_long_range_dispersion_force(
         float(disp_node.attrib.get(f"mScale1{i}", default))
         for i, default in zip(range(2, 7), [0.0, 0.0, 0.0, 1.0, 1.0])
     ]
-    nb_pairs = shortest_bond_separations(len(atom_types), bonds, max_sep=3)
+    # Keep the dispersion CustomNonbondedForce exclusions identical to the
+    # ADMPPmeForce CUDA exclusion set (Covalent12..16).
+    nb_pairs = shortest_bond_separations(len(atom_types), bonds, max_sep=5)
     all_intra = shortest_bond_separations(len(atom_types), bonds, max_sep=5)
     corr_pairs = {k: v for k, v in all_intra.items() if k not in nb_pairs}
 

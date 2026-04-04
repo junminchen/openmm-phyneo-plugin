@@ -119,15 +119,13 @@ def shortest_bond_separations(num_atoms, bonds, max_sep=5):
 
     out = {}
     for component in components:
-        component_set = set(component)
         for start in component:
             visited = {start: 0}
             queue = deque([start])
-            all_neighbors = {start}
             while queue:
                 src = queue.popleft()
                 dist = visited[src]
-                if dist >= 4:
+                if dist >= max_sep:
                     continue
                 for dst in graph[src]:
                     if dst not in visited:
@@ -136,13 +134,8 @@ def shortest_bond_separations(num_atoms, bonds, max_sep=5):
             for stop, dist in visited.items():
                 if start == stop:
                     continue
-                all_neighbors.add(stop)
-                if start < stop and 1 <= dist <= 4 and dist <= max_sep:
+                if start < stop and 1 <= dist <= max_sep:
                     out[(start, stop)] = dist
-            if max_sep >= 5:
-                for stop in component_set - all_neighbors:
-                    if start < stop:
-                        out[(start, stop)] = 5
     return out
 
 
@@ -338,14 +331,14 @@ def pair_params(force_name, force_section, type_i, type_j, scale):
 
 def add_dmff_short_range_term(system, atom_types, bonds, force_name, force_section, start_group=0, s12=0.169):
     """Add one DMFF short-range term as CustomNonbondedForce + CustomBondForce."""
-    # ADMPPmeForce only exposes Covalent12/13/14 (path length ≤ 3 = 1-2/1-3/1-4 pairs).
-    # CUDA requires all CustomNonbondedForce exclusion lists to exactly match
-    # ADMPPmeForce's covalent-pair set, so exclusions are limited to max_sep=3.
-    nb_pairs = shortest_bond_separations(len(atom_types), bonds, max_sep=3)
+    # CUDA shares one exclusion topology across ADMPPmeForce and all
+    # CustomNonbondedForce instances.  The plugin kernel records Covalent12..16
+    # as exclusions, so the custom short-range forces must exclude through 1-6
+    # as well to build a CUDA context.
+    nb_pairs = shortest_bond_separations(len(atom_types), bonds, max_sep=5)
 
-    # 1-5 and 1-6 pairs remain in the CustomNonbondedForce (CUDA constraint).
-    # Add a bond-force correction with corr_scale = mScale - 1 so the net
-    # interaction matches the requested intramolecular shell scale.
+    # Pairs beyond 1-6 remain in the CustomNonbondedForce.  For those shells we
+    # rescale the full nonbonded contribution via a bond correction term.
     all_intra = shortest_bond_separations(len(atom_types), bonds, max_sep=5)
     corr_pairs = {k: v for k, v in all_intra.items() if k not in nb_pairs}
 
@@ -366,7 +359,8 @@ def add_dmff_short_range_term(system, atom_types, bonds, force_name, force_secti
         if abs(scale) > 1e-15:
             bond_force.addBond(i, j, pair_params(force_name, force_section, atom_types[i], atom_types[j], scale))
 
-    # sep 4/5 (1-5/1-6): not excluded; correction bond rescales the nonbonded contribution.
+    # Pairs beyond the excluded covalent shells are corrected without removing
+    # the parent nonbonded interaction.
     for (i, j), separation in corr_pairs.items():
         mscale = scale_for_bond_separation(force_section["mscales"], separation)
         corr_scale = mscale - 1.0
@@ -470,11 +464,8 @@ def add_damped_dispersion_force(system, topology, xml_path, cutoff_nm=0.6, force
         ]
 
     atom_types, bonds = infer_atom_types_and_bonds_from_topology(topology, xml_path)
-    # Use max_sep=3 (1-2, 1-3, 1-4 pairs) to match ADMPPmeForce's Covalent12/13/14
-    # exclusion set — required by the CUDA platform for neighbor-list sharing.
-    nb_pairs   = shortest_bond_separations(len(atom_types), bonds, max_sep=3)
-    # sep=4/5 (1-5/1-6) pairs: not excluded (CUDA constraint); corrected via bond
-    # force with corr_scale = mScale - 1 so net interaction = mScale × full.
+    # Match the ADMPPmeForce CUDA exclusion set, which covers Covalent12..16.
+    nb_pairs   = shortest_bond_separations(len(atom_types), bonds, max_sep=5)
     all_intra  = shortest_bond_separations(len(atom_types), bonds, max_sep=5)
     corr_pairs = {k: v for k, v in all_intra.items() if k not in nb_pairs}
 

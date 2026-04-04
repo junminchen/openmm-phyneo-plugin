@@ -21,19 +21,19 @@
     "phyneo_dispersion_split": "PhyNEO currently evaluates merged damped dispersion as DampedDispersionForce on the OpenMM side."
   },
   "ADMPPmeForce": {
-    "ADMPPmeForce_mean": 1.6249515115961704,
-    "ADMPPmeForce_max_abs": 12.052207366504376,
-    "ADMPPmeForce_rmse": 3.7069771522840607
+    "ADMPPmeForce_mean": 1.6521573307735,
+    "ADMPPmeForce_max_abs": 12.348067134606481,
+    "ADMPPmeForce_rmse": 3.789770244291483
   },
   "QqTtDampingForce": {
-    "QqTtDampingForce_mean": -8.176195601329396e-15,
+    "QqTtDampingForce_mean": -8.192386368661098e-15,
     "QqTtDampingForce_max_abs": 5.861977570020827e-14,
-    "QqTtDampingForce_rmse": 1.8481866953715873e-14
+    "QqTtDampingForce_rmse": 1.8482286379961288e-14
   },
   "SlaterExForce": {
-    "SlaterExForce_mean": 2.1199547443208777,
-    "SlaterExForce_max_abs": 20.96698077177456,
-    "SlaterExForce_rmse": 6.139957129630305
+    "SlaterExForce_mean": -5.073569063131004,
+    "SlaterExForce_max_abs": 54.1967048241965,
+    "SlaterExForce_rmse": 15.735811194637138
   },
   "SlaterSrEsForce": {
     "SlaterSrEsForce_mean": 0.0,
@@ -46,9 +46,9 @@
     "SlaterSrPolForce_rmse": 0.0
   },
   "SlaterSrDispForce": {
-    "SlaterSrDispForce_mean": 1.7681879689536353e-14,
+    "SlaterSrDispForce_mean": 1.7829909708497356e-14,
     "SlaterSrDispForce_max_abs": 9.947598300641403e-14,
-    "SlaterSrDispForce_rmse": 3.471323954031705e-14
+    "SlaterSrDispForce_rmse": 3.472465129556437e-14
   },
   "SlaterDhfForce": {
     "SlaterDhfForce_mean": 0.0,
@@ -56,30 +56,30 @@
     "SlaterDhfForce_rmse": 0.0
   },
   "DampedDispersionForce": {
-    "DampedDispersionForce_mean": 1.4698528852385984e-15,
+    "DampedDispersionForce_mean": 1.543867753546942e-15,
     "DampedDispersionForce_max_abs": 1.1546319456101628e-14,
-    "DampedDispersionForce_rmse": 3.6908761839160345e-15
+    "DampedDispersionForce_rmse": 3.7276027007266446e-15
   },
   "ShortRangeTotal": {
-    "ShortRangeTotal_mean": 2.119954744320888,
-    "ShortRangeTotal_max_abs": 20.966980771774615,
-    "ShortRangeTotal_rmse": 6.139957129630323
+    "ShortRangeTotal_mean": -5.073569063130994,
+    "ShortRangeTotal_max_abs": 54.196704824196445,
+    "ShortRangeTotal_rmse": 15.735811194637119
   },
   "PhyNEOTotalComparable": {
-    "PhyNEOTotalComparable_mean": 3.744906255917059,
-    "PhyNEOTotalComparable_max_abs": 33.01918813827899,
-    "PhyNEOTotalComparable_rmse": 9.803345633719902
+    "PhyNEOTotalComparable_mean": -3.4214117323574946,
+    "PhyNEOTotalComparable_max_abs": 41.848637689589964,
+    "PhyNEOTotalComparable_rmse": 12.097525605800362
   },
   "SAPTComparisons": {
     "dmff_espol_vs_sapt": {
-      "dmff_espol_vs_sapt_mean": -32.83509817224194,
-      "dmff_espol_vs_sapt_max_abs": 218.4187598902039,
-      "dmff_espol_vs_sapt_rmse": 70.67375548852989
+      "dmff_espol_vs_sapt_mean": -32.8623039914193,
+      "dmff_espol_vs_sapt_max_abs": 218.714619658306,
+      "dmff_espol_vs_sapt_rmse": 70.75331138159815
     },
     "phyneo_espol_vs_sapt": {
-      "phyneo_espol_vs_sapt_mean": -31.21014666064579,
+      "phyneo_espol_vs_sapt_mean": -31.210146660645815,
       "phyneo_espol_vs_sapt_max_abs": 206.36655252369962,
-      "phyneo_espol_vs_sapt_rmse": 66.9940796985376
+      "phyneo_espol_vs_sapt_rmse": 66.99407969853762
     },
     "dmff_disp_vs_sapt": {
       "dmff_disp_vs_sapt_mean": -3.770675231204562,
@@ -87,7 +87,7 @@
       "dmff_disp_vs_sapt_rmse": 7.501808945165509
     },
     "phyneo_disp_vs_sapt": {
-      "phyneo_disp_vs_sapt_mean": -3.7706752312045437,
+      "phyneo_disp_vs_sapt_mean": -3.7706752312045424,
       "phyneo_disp_vs_sapt_max_abs": 21.853934506140774,
       "phyneo_disp_vs_sapt_rmse": 7.501808945165471
     }
