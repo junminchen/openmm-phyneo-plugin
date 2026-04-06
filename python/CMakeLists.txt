@@ -7,6 +7,7 @@ add_custom_command(
     OUTPUT "${WRAP_FILE}"
     COMMAND "${SWIG_EXECUTABLE}"
         -python -c++
+        -DSWIG_TYPE_TABLE=openmm
         -o "${WRAP_FILE}"
         "-I${OPENMM_DIR}/include"
         "-I${OPENMM_DIR}/include/swig"
