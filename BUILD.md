@@ -35,6 +35,10 @@ cmake .. \
   -DBUILD_TESTING=ON
 
 make -j$(nproc)
+make test
+make install
+make PythonInstall
+
 ```
 
 编译产物：
@@ -43,14 +47,14 @@ make -j$(nproc)
 |------|------|
 | `libPhyNEOForcePlugin.dylib` | `build/libPhyNEOForcePlugin.dylib` |
 | `platforms/reference/libOpenMMPhyNEOForceReference.dylib` | `build/platforms/reference/` |
-| Python wrapper | `build/python/`（需 `pip install build/python/`）|
+| Python wrapper | `build/python/`（`make PythonInstall` 已自动安装）|
 
 ### Reference 平台 + CUDA（GPU 支持）
 
 ```bash
 mkdir -p build-cuda && cd build-cuda
 
-cmake ../.. \
+cmake .. \
   -DOPENMM_DIR=$CONDA_PREFIX \
   -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX \
   -DPHYNEOFORCE_BUILD_CUDA_LIB=ON \
@@ -58,6 +62,9 @@ cmake ../.. \
   -DBUILD_TESTING=ON
 
 make -j$(nproc)
+make test
+make install
+make PythonInstall
 ```
 
 编译产物：
@@ -65,19 +72,9 @@ make -j$(nproc)
 | 文件 | 位置 |
 |------|------|
 | `libOpenMMPhyNEOForceCUDA.so` | `build-cuda/platforms/cuda/` |
-| Python wrapper | `build-cuda/python/` |
+| Python wrapper | `build-cuda/python/`（`make PythonInstall` 已自动安装）|
 
-### 安装 Python Wrapper（推荐）
-
-```bash
-# Reference build
-pip install build/python/
-
-# 或 CUDA build
-pip install build-cuda/python/
-```
-
-安装后 `import phyneoforceplugin` 即可使用，不再依赖 `PYTHONPATH`。
+`make PythonInstall` 会将 wrapper 安装到 conda 环境的 site-packages，无需手动 `pip install`。
 
 ### 或不安装，通过 `PYTHONPATH` 引用
 
