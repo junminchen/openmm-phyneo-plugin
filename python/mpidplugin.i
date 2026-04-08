@@ -689,6 +689,7 @@ class MPIDGenerator(object):
         self.mScales = mScales
         self.pScales = pScales
         self.dScales = dScales
+        self.lmax = None  # lmax for multipole order (0=charge, 1=dipole, 2=quadrupole, 3=octopole)
         self.typeMap = {}
         # Dispersion PME state
         self.useDispersionPME = False
@@ -781,10 +782,16 @@ class MPIDGenerator(object):
         pScales = parse_scales("p")
         dScales = parse_scales("d")
 
+        # Parse lmax attribute (for ADMPPmeForce and ADMPDispPMEForce compatibility)
+        lmax = element.get('lmax', None)
+        if lmax is not None:
+            lmax = int(lmax)
+
         existing = [f for f in forceField._forces if isinstance(f, MPIDGenerator)]
         if len(existing) == 0:
             generator = MPIDGenerator(forceField, element.get('coulomb14scale', None), element.get('defaultTholeWidth', None),
                                       mScales, pScales, dScales)
+            generator.lmax = lmax
             forceField.registerGenerator(generator)
         else:
             # Multiple <MPIDForce> tags were found, probably in different files.  Simply add more types to the existing one.
@@ -807,6 +814,7 @@ class MPIDGenerator(object):
             merge_or_check("mScales", mScales)
             merge_or_check("pScales", pScales)
             merge_or_check("dScales", dScales)
+            merge_or_check("lmax", lmax)
 
         # Dispersion PME attributes on <MPIDForce>
         useDispPME = element.get('useDispersionPME', None)
