@@ -1,14 +1,14 @@
 #!/bin/bash
 #=============================================================================
-# MPID OpenMM Plugin Installation Script
-# This script builds and installs the MPID OpenMM plugin with CUDA support
+# PhyNEO OpenMM Plugin Installation Script
+# This script builds and installs the PhyNEO OpenMM plugin with CUDA support
 #=============================================================================
 
 set -e  # Exit on error
 
 # Configuration
 CONDA_PREFIX=${CONDA_PREFIX:-$HOME/miniconda3}
-ENV_NAME=${ENV_NAME:-mpid-env}
+ENV_NAME=${ENV_NAME:-phyneo-env}
 PLUGIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BUILD_TYPE=${BUILD_TYPE:-Release}
 OPENMM_VERSION=${OPENMM_VERSION:-8.4}
@@ -50,8 +50,8 @@ check_cuda() {
 # Check CMake version
 check_cmake() {
     if ! command -v cmake &> /dev/null; then
-        log_error "CMake not found. Installing via conda..."
-        conda install -y cmake
+        log_error "CMake not found. Please install CMake first."
+        exit 1
     fi
     local cmake_version=$(cmake --version 2>/dev/null | head -1)
     log_info "CMake version: $cmake_version"
@@ -72,10 +72,10 @@ create_environment() {
 
     if ! conda info --envs | grep -q "^$ENV_NAME "; then
         log_info "Creating new environment: $ENV_NAME"
-        conda create -n "$ENV_NAME" python=3.12 -y
+        conda create -n "$ENV_NAME" python=3.10 -y
     else
         log_info "Environment $ENV_NAME already exists, updating..."
-        conda install -n "$ENV_NAME" -y python=3.12
+        conda install -n "$ENV_NAME" -y python=3.10
     fi
 
     # Activate environment
@@ -84,7 +84,7 @@ create_environment() {
 
     # Install build tools and OpenMM
     log_info "Installing build tools and OpenMM $OPENMM_VERSION..."
-    conda install -y cmake ninja swig gcc_linux-64 gxx_linux-64 libcufft-dev
+    conda install -y cmake ninja swig "gcc_linux-64=13.4.0" "gxx_linux-64=13.4.0" libcufft-dev
     conda install -y -c conda-forge openmm=$OPENMM_VERSION "cuda-nvcc=12.6" "cuda-cudart-dev=12.6"
 
     check_cuda
@@ -94,7 +94,7 @@ create_environment() {
 
 # Build the plugin
 build_plugin() {
-    log_info "Building MPID plugin..."
+    log_info "Building PhyNEO plugin..."
 
     eval "$(conda shell.bash hook)"
     conda activate "$ENV_NAME"
@@ -111,33 +111,25 @@ build_plugin() {
         -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
         -DCMAKE_INSTALL_PREFIX="$CONDA_PREFIX" \
         -DOPENMM_DIR="$CONDA_PREFIX" \
-        -DMPID_BUILD_CUDA_LIB=ON \
-        -DMPID_BUILD_PYTHON_WRAPPERS=ON \
+        -DPhyNEO_BUILD_CUDA_LIB=ON \
+        -DPhyNEO_BUILD_PYTHON_WRAPPERS=ON \
+        -DPYTHON_EXECUTABLE="$CONDA_PREFIX/envs/$ENV_NAME/bin/python" \
         ..
 
     # Build
     log_info "Building..."
     make -j$(nproc)
 
-    # Build Python wrappers
+    # Build and install Python wrappers
     log_info "Building Python wrappers..."
-    cd python
-    swig -python -c++ -o MPIDPluginWrapper.cpp -I"$CONDA_PREFIX/include" "${PLUGIN_DIR}/python/mpidplugin.i"
-    python setup.py build_ext --inplace
-
-    # Go back to build directory
-    cd "$PLUGIN_DIR/build"
-
-    # Install Python module directly to site-packages
-    log_info "Installing Python module..."
-    cp python/_mpidplugin*.so python/mpidplugin.py "$CONDA_PREFIX/lib/python3.12/site-packages/"
+    make PythonInstall
 
     # Install libraries
     log_info "Installing libraries..."
     mkdir -p "$CONDA_PREFIX/lib/plugins"
-    cp libMPIDPlugin.so "$CONDA_PREFIX/lib/"
-    [ -f platforms/cuda/libMPIDPluginCUDA.so ] && cp platforms/cuda/libMPIDPluginCUDA.so "$CONDA_PREFIX/lib/plugins/"
-    [ -f platforms/reference/libOpenMMMPIDReference.so ] && cp platforms/reference/libOpenMMMPIDReference.so "$CONDA_PREFIX/lib/plugins/"
+    cp libPhyNEOPlugin.so "$CONDA_PREFIX/lib/"
+    [ -f platforms/cuda/libPhyNEOPluginCUDA.so ] && cp platforms/cuda/libPhyNEOPluginCUDA.so "$CONDA_PREFIX/lib/plugins/"
+    [ -f platforms/reference/libOpenMMPhyNEOReference.so ] && cp platforms/reference/libOpenMMPhyNEOReference.so "$CONDA_PREFIX/lib/plugins/"
 
     log_info "Build and installation complete!"
 }
@@ -151,9 +143,9 @@ verify_installation() {
 
     # Check libraries
     local lib_files=(
-        "$CONDA_PREFIX/lib/libMPIDPlugin.so"
-        "$CONDA_PREFIX/lib/plugins/libMPIDPluginCUDA.so"
-        "$CONDA_PREFIX/lib/plugins/libOpenMMMPIDReference.so"
+        "$CONDA_PREFIX/lib/libPhyNEOPlugin.so"
+        "$CONDA_PREFIX/lib/plugins/libPhyNEOPluginCUDA.so"
+        "$CONDA_PREFIX/lib/plugins/libOpenMMPhyNEOReference.so"
     )
 
     for lib in "${lib_files[@]}"; do
@@ -165,7 +157,7 @@ verify_installation() {
     done
 
     # Check Python module
-    if python -c "import mpidplugin; print('mpidplugin imported successfully')" 2>/dev/null; then
+    if python -c "import phyneoplugin; print('phyneoplugin imported successfully')" 2>/dev/null; then
         log_info "Python module import: OK"
     else
         log_error "Python module import failed"
@@ -181,7 +173,7 @@ usage() {
     echo "Usage: $0 [OPTIONS]"
     echo ""
     echo "Options:"
-    echo "  --env-name NAME       Conda environment name (default: mpid-env)"
+    echo "  --env-name NAME       Conda environment name (default: phyneo-env)"
     echo "  --openmm-version VER  OpenMM version to install (default: 8.4)"
     echo "  --build-type TYPE     CMake build type: Release or Debug (default: Release)"
     echo "  --skip-create         Skip environment creation"
@@ -235,7 +227,7 @@ done
 # Main
 main() {
     log_info "============================================"
-    log_info "MPID OpenMM Plugin Installation"
+    log_info "PhyNEO OpenMM Plugin Installation"
     log_info "============================================"
     log_info "Plugin directory: $PLUGIN_DIR"
     log_info "Conda prefix: $CONDA_PREFIX"
