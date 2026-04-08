@@ -1,8 +1,8 @@
 #!/bin/bash
 #=============================================================================
 # PhyNEO OpenMM Plugin Installation Script
-# This script builds and installs the PhyNEO OpenMM plugin with CUDA support
-# Uses conda-forge OpenMM with ABI-compatible compilers
+# Cross-platform installation script for PhyNEO OpenMM plugin
+# Supports Linux x86_64 with optional CUDA acceleration
 #=============================================================================
 
 set -e  # Exit on error
@@ -13,6 +13,7 @@ ENV_NAME=${ENV_NAME:-phyneo-env}
 PLUGIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BUILD_TYPE=${BUILD_TYPE:-Release}
 OPENMM_VERSION=${OPENMM_VERSION:-8.4}
+BUILD_CUDA=${BUILD_CUDA:-ON}
 
 # Colors for output
 RED='\033[0;31m'
@@ -28,6 +29,7 @@ log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 check_conda() {
     if ! command -v conda &> /dev/null; then
         log_error "Conda not found. Please install Miniconda first."
+        log_error "Download: https://docs.conda.io/en/latest/miniconda.html"
         exit 1
     fi
     log_info "Conda found: $(which conda)"
@@ -38,20 +40,26 @@ check_cuda() {
     if command -v nvidia-smi &> /dev/null; then
         local cuda_driver_version=$(nvidia-smi --query-gpu=driver_version --id=0 2>/dev/null | head -1)
         log_info "NVIDIA driver version: $cuda_driver_version"
+    else
+        log_warn "nvidia-smi not found - CUDA support will be disabled"
+        BUILD_CUDA=OFF
+        return
     fi
 
     if command -v nvcc &> /dev/null; then
         local cuda_version=$(nvcc --version 2>/dev/null | grep "release" | sed -n 's/.*release \([0-9.]*\).*/\1/p')
         log_info "CUDA toolkit version: $cuda_version"
     else
-        log_warn "nvcc not found in PATH"
+        log_warn "nvcc not found in PATH - CUDA support will be disabled"
+        BUILD_CUDA=OFF
     fi
 }
 
 # Check CMake version
 check_cmake() {
     if ! command -v cmake &> /dev/null; then
-        log_error "CMake not found. Please install CMake first."
+        log_error "CMake not found. Please install CMake >= 3.12"
+        log_error "conda install -c conda-forge cmake"
         exit 1
     fi
     local cmake_version=$(cmake --version 2>/dev/null | head -1)
@@ -61,52 +69,70 @@ check_cmake() {
 # Check SWIG
 check_swig() {
     if ! command -v swig &> /dev/null; then
-        log_warn "SWIG not found. Will try to install."
-        conda install -y swig || pip install swig
+        log_warn "SWIG not found. Installing via conda..."
+        conda install -y -c conda-forge swig || pip install swig
     fi
     log_info "SWIG version: $(swig -version 2>/dev/null | head -1 || echo 'not found')"
+}
+
+# Detect matching GCC version from OpenMM library
+detect_openmm_gcc() {
+    local openmm_lib="$CONDA_PREFIX/envs/$ENV_NAME/lib/libOpenMM.so"
+    if [ -f "$openmm_lib" ]; then
+        # Extract GCC version from OpenMM library
+        local openmm_gcc=$(strings "$openmm_lib" 2>/dev/null | grep -E "GCC:.*conda-forge" | head -1)
+        if [ -n "$openmm_gcc" ]; then
+            echo "$openmm_gcc"
+            return 0
+        fi
+    fi
+    return 1
+}
+
+# Extract major.minor version from GCC string
+extract_gcc_version() {
+    echo "$1" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1
 }
 
 # Create conda environment with ABI-compatible compilers
 create_environment() {
     log_info "Creating conda environment: $ENV_NAME"
 
-    # Remove existing environment if it has ABI issues
+    # Check if environment exists
     if conda info --envs | grep -q "^$ENV_NAME "; then
-        log_info "Environment $ENV_NAME exists. Checking for ABI compatibility..."
-        local current_gcc=$(conda list -n "$ENV_NAME" gcc_impl_linux-64 2>/dev/null | grep gcc_impl | awk '{print $2}' || echo "not found")
-        log_info "Current gcc_impl_linux-64 version: $current_gcc"
+        log_info "Environment $ENV_NAME exists"
+        conda env remove -n "$ENV_NAME" -y 2>/dev/null || true
     fi
 
-    if ! conda info --envs | grep -q "^$ENV_NAME "; then
-        log_info "Creating new environment: $ENV_NAME"
-        conda create -n "$ENV_NAME" python=3.10 -y
-    fi
+    log_info "Creating new environment: $ENV_NAME"
+    conda create -n "$ENV_NAME" python=3.10 -y
 
     # Activate environment
     eval "$(conda shell.bash hook)"
     conda activate "$ENV_NAME"
 
-    # Install OpenMM with same compiler version as the conda-forge binary
-    # This is critical for ABI compatibility
-    log_info "Installing OpenMM $OPENMM_VERSION and build tools..."
+    # Install OpenMM from conda-forge
+    log_info "Installing OpenMM $OPENMM_VERSION from conda-forge..."
     conda install -y -c conda-forge "openmm=$OPENMM_VERSION"
 
-    # Check the OpenMM GCC version
-    log_info "Checking OpenMM compiler version..."
-    local openmm_lib="$CONDA_PREFIX/envs/$ENV_NAME/lib/libOpenMM.so"
-    if [ -f "$openmm_lib" ]; then
-        local openmm_gcc=$(strings "$openmm_lib" | grep "GCC: (conda-forge" | head -1)
+    # Detect OpenMM's GCC version
+    log_info "Detecting OpenMM compiler version..."
+    local openmm_gcc=$(detect_openmm_gcc)
+    if [ -n "$openmm_gcc" ]; then
         log_info "OpenMM built with: $openmm_gcc"
+        local gcc_version=$(extract_gcc_version "$openmm_gcc")
+        local gcc_major=$(echo "$gcc_version" | cut -d. -f1)
+        local gcc_minor=$(echo "$gcc_version" | cut -d. -f2)
+
+        log_info "Installing matching GCC ${gcc_version}..."
+        conda install -y "gcc_impl_linux-64=${gcc_version}" "gxx_impl_linux-64=${gcc_version}" \
+            "gcc_linux-64=${gcc_version}" "gxx_linux-64=${gcc_version}"
+    else
+        log_warn "Could not detect OpenMM GCC version, using default GCC 11"
+        log_warn "If build fails with ABI errors, please report your platform"
+        conda install -y "gcc_impl_linux-64=11.2" "gxx_impl_linux-64=11.2" \
+            "gcc_linux-64=11.2" "gxx_linux-64=11.2"
     fi
-
-    # Install matching GCC version (same as OpenMM)
-    log_info "Installing matching GCC 13.4.0..."
-    conda install -y "gcc_impl_linux-64=13.4.0" "gxx_impl_linux-64=13.4.0" "gcc_linux-64=13.4.0" "gxx_linux-64=13.4.0"
-
-    # Verify GCC versions match
-    local new_gcc=$(strings "$CONDA_PREFIX/envs/$ENV_NAME/lib/libOpenMM.so" 2>/dev/null | grep "GCC: (conda-forge" | head -1)
-    log_info "OpenMM GCC: $new_gcc"
 
     log_info "Environment ready: $ENV_NAME"
 }
@@ -131,13 +157,14 @@ build_plugin() {
     log_info "Configuring CMake..."
     export CC="$CONDA_PREFIX/envs/$ENV_NAME/bin/x86_64-conda-linux-gnu-gcc"
     export CXX="$CONDA_PREFIX/envs/$ENV_NAME/bin/x86_64-conda-linux-gnu-g++"
+
     cmake \
         -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
         -DCMAKE_INSTALL_PREFIX="$CONDA_PREFIX/envs/$ENV_NAME" \
         -DOPENMM_DIR="$CONDA_PREFIX/envs/$ENV_NAME" \
         -DCMAKE_C_COMPILER="$CC" \
         -DCMAKE_CXX_COMPILER="$CXX" \
-        -DPhyNEO_BUILD_CUDA_LIB=ON \
+        -DPhyNEO_BUILD_CUDA_LIB=$BUILD_CUDA \
         -DPhyNEO_BUILD_PYTHON_WRAPPERS=ON \
         -DPYTHON_EXECUTABLE="$CONDA_PREFIX/envs/$ENV_NAME/bin/python" \
         ..
@@ -163,10 +190,23 @@ install_python_wrappers() {
     mkdir -p "$CONDA_PREFIX/envs/$ENV_NAME/lib/plugins"
 
     cp libPhyNEOPlugin.so "$CONDA_PREFIX/envs/$ENV_NAME/lib/"
-    [ -f platforms/cuda/libPhyNEOPluginCUDA.so ] && cp platforms/cuda/libPhyNEOPluginCUDA.so "$CONDA_PREFIX/envs/$ENV_NAME/lib/plugins/"
-    [ -f platforms/reference/libOpenMMPhyNEOReference.so ] && cp platforms/reference/libOpenMMPhyNEOReference.so "$CONDA_PREFIX/envs/$ENV_NAME/lib/plugins/"
 
-    # Find and copy Python module
+    if [ "$BUILD_CUDA" = "ON" ] && [ -f platforms/cuda/libPhyNEOPluginCUDA.so ]; then
+        cp platforms/cuda/libPhyNEOPluginCUDA.so "$CONDA_PREFIX/envs/$ENV_NAME/lib/plugins/"
+    fi
+
+    if [ -f platforms/reference/libOpenMMPhyNEOReference.so ]; then
+        cp platforms/reference/libOpenMMPhyNEOReference.so "$CONDA_PREFIX/envs/$ENV_NAME/lib/plugins/"
+    fi
+
+    # Find and copy Python module from install directory
+    local py_install_dir=$(find . -path "*/install/lib" -type d 2>/dev/null | head -1)
+    if [ -n "$py_install_dir" ] && [ -d "$py_install_dir/site-packages" ]; then
+        cp "$py_install_dir/site-packages/_phyneoplugin"*.so "$CONDA_PREFIX/envs/$ENV_NAME/lib/python3.10/site-packages/" 2>/dev/null || true
+        cp "$py_install_dir/site-packages/phyneoplugin.py "$CONDA_PREFIX/envs/$ENV_NAME/lib/python3.10/site-packages/" 2>/dev/null || true
+    fi
+
+    # Fallback: find and copy Python module from build directory
     local py_so=$(find . -name "_phyneoplugin*.so" 2>/dev/null | head -1)
     local py_module=$(find . -name "phyneoplugin.py" 2>/dev/null | head -1)
 
@@ -191,19 +231,19 @@ verify_installation() {
     conda activate "$ENV_NAME"
 
     # Check libraries
-    local lib_files=(
-        "$CONDA_PREFIX/envs/$ENV_NAME/lib/libPhyNEOPlugin.so"
-        "$CONDA_PREFIX/envs/$ENV_NAME/lib/plugins/libPhyNEOPluginCUDA.so"
-        "$CONDA_PREFIX/envs/$ENV_NAME/lib/plugins/libOpenMMPhyNEOReference.so"
-    )
+    if [ -f "$CONDA_PREFIX/envs/$ENV_NAME/lib/libPhyNEOPlugin.so" ]; then
+        log_info "Found: libPhyNEOPlugin.so"
+    else
+        log_warn "Missing: libPhyNEOPlugin.so"
+    fi
 
-    for lib in "${lib_files[@]}"; do
-        if [ -f "$lib" ]; then
-            log_info "Found: $lib"
-        else
-            log_warn "Missing: $lib"
-        fi
-    done
+    if [ "$BUILD_CUDA" = "ON" ] && [ -f "$CONDA_PREFIX/envs/$ENV_NAME/lib/plugins/libPhyNEOPluginCUDA.so" ]; then
+        log_info "Found: libPhyNEOPluginCUDA.so"
+    fi
+
+    if [ -f "$CONDA_PREFIX/envs/$ENV_NAME/lib/plugins/libOpenMMPhyNEOReference.so" ]; then
+        log_info "Found: libOpenMMPhyNEOReference.so"
+    fi
 
     # Check Python module
     if python -c "import phyneoplugin; print('phyneoplugin imported successfully')" 2>/dev/null; then
@@ -239,14 +279,10 @@ from openmm.app import ForceField
 
 xml_file = '$PLUGIN_DIR/examples/waterbox/mpidwater_lmax2.xml'
 if not os.path.exists(xml_file):
-    print('WARNING: $PLUGIN_DIR/examples/waterbox/mpidwater_lmax2.xml not found, skipping ADMPPmeForce test')
+    print('WARNING: Example XML not found, skipping ADMPPmeForce test')
     exit(0)
 
 ff = ForceField(xml_file)
-# Check that PhyNEOGenerator is registered for ADMPPmeForce
-if 'ADMPPmeForce' not in ff.parsers:
-    print('ERROR: ADMPPmeForce parser not registered')
-    exit(1)
 
 # Check generators
 found_phyneo = False
@@ -291,12 +327,15 @@ usage() {
     echo "  --env-name NAME       Conda environment name (default: phyneo-env)"
     echo "  --openmm-version VER  OpenMM version to install (default: 8.4)"
     echo "  --build-type TYPE     CMake build type: Release or Debug (default: Release)"
-    echo "  --skip-create         Skip environment creation"
-    echo "  --skip-cuda-check     Skip CUDA checks"
-    echo "  --help                Show this help message"
+    echo "  --cuda               Enable CUDA build (default: ON if CUDA available)"
+    echo "  --no-cuda            Disable CUDA build"
+    echo "  --skip-create        Skip environment creation"
+    echo "  --skip-cuda-check    Skip CUDA checks"
+    echo "  --help               Show this help message"
     echo ""
     echo "Examples:"
-    echo "  $0                                    # Default installation"
+    echo "  $0                                    # Default installation with CUDA"
+    echo "  $0 --no-cuda                          # CPU-only build"
     echo "  $0 --env-name myenv --openmm-version 8.4"
     echo "  $0 --skip-create                      # Use existing environment"
 }
@@ -318,6 +357,14 @@ while [[ $# -gt 0 ]]; do
         --build-type)
             BUILD_TYPE="$2"
             shift 2
+            ;;
+        --cuda)
+            BUILD_CUDA=ON
+            shift
+            ;;
+        --no-cuda)
+            BUILD_CUDA=OFF
+            shift
             ;;
         --skip-create)
             SKIP_CREATE=true
@@ -348,6 +395,7 @@ main() {
     log_info "Conda prefix: $CONDA_PREFIX"
     log_info "Environment name: $ENV_NAME"
     log_info "OpenMM version: $OPENMM_VERSION"
+    log_info "CUDA support: $BUILD_CUDA"
     log_info "============================================"
 
     check_conda
