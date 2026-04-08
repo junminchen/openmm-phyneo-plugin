@@ -4,7 +4,7 @@ from openmm.unit import *
 import openmm.app.element as elem
 import openmm.app.forcefield as forcefield
 from sys import stdout, argv
-import mpidplugin
+import phyneoplugin
 import numpy as np
 
 pdb = PDBFile('waterbox_31ang.pdb')
