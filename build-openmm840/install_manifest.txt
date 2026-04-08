@@ -1,6 +1,0 @@
-/home/am3-peichenzhong-group/miniconda3/envs/mpid84/lib/libMPIDPlugin.so
-/home/am3-peichenzhong-group/miniconda3/envs/mpid84/include/openmm/MPIDForce.h
-/home/am3-peichenzhong-group/miniconda3/envs/mpid84/include/openmm/mpidKernels.h
-/home/am3-peichenzhong-group/miniconda3/envs/mpid84/include/openmm/internal/MPIDForceImpl.h
-/home/am3-peichenzhong-group/miniconda3/envs/mpid84/include/openmm/internal/windowsExportMPID.h
-/home/am3-peichenzhong-group/miniconda3/envs/mpid84/lib/plugins/libOpenMMMPIDReference.so

@@ -1,7 +1,0 @@
-/home/jmchen/miniconda3/envs/mpid_plugin_v2/lib/libMPIDPlugin.so
-/home/jmchen/miniconda3/envs/mpid_plugin_v2/include/openmm/MPIDForce.h
-/home/jmchen/miniconda3/envs/mpid_plugin_v2/include/openmm/mpidKernels.h
-/home/jmchen/miniconda3/envs/mpid_plugin_v2/include/openmm/internal/MPIDForceImpl.h
-/home/jmchen/miniconda3/envs/mpid_plugin_v2/include/openmm/internal/windowsExportMPID.h
-/home/jmchen/miniconda3/envs/mpid_plugin_v2/lib/plugins/libOpenMMMPIDReference.so
-/home/jmchen/miniconda3/envs/mpid_plugin_v2/lib/plugins/libMPIDPluginCUDA.so
