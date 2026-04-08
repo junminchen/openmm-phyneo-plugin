@@ -1,0 +1,8 @@
+<ForceField>
+ <Residues>
+  <Residue name="HOH">
+   <Bond from="O" to="H1"/>
+   <Bond from="O" to="H2"/>
+  </Residue>
+ </Residues>
+</ForceField>

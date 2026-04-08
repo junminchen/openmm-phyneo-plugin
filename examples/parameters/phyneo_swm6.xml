@@ -1,0 +1,38 @@
+<ForceField>
+ <AtomTypes>
+  <Type name="OT" class="OT" element="O" mass="15.999"/>
+  <Type name="HT" class="HT" element="H" mass="1.008"/>
+ </AtomTypes>
+ <Residues>
+  <Residue name="HOH">
+   <Atom name="H1" type="HT"/>
+   <Atom name="H2" type="HT"/>
+   <Atom name="O" type="OT"/>
+   <Bond from="0" to="2"/>
+   <Bond from="1" to="2"/>
+  </Residue>
+ </Residues>
+
+ <ADMPDispForce mScale12="0.00" mScale13="0.00" mScale14="1.00" mScale15="1.00" mScale16="1.00">
+   <Atom type="OT" A="2434728.1714" B="2489.520352" Q="0.0" C6="0.002584251" C8="0.0" C10="0.0"/>
+   <Atom type="HT" A="0.0000129211" B="0.003153945" Q="0.0" C6="0.000445327" C8="0.0" C10="0.0"/>
+ </ADMPDispForce>
+
+ <ADMPPmeForce lmax="2"
+     mScale12="0.00" mScale13="0.00" mScale14="1.00" mScale15="1.00" mScale16="1.00"
+     pScale12="0.00" pScale13="0.00" pScale14="1.00" pScale15="1.00" pScale16="1.00"
+     dScale12="1.00" dScale13="1.00" dScale14="1.00" dScale15="1.00" dScale16="1.00">
+   <Atom type="OT" kz="-HT" kx="-HT"
+             c0="-1.1128"
+             dX="0.0" dY="0.0" dZ="0.0049660"
+             qXX="-0.0036896" qXY="0.0" qYY="0.0036896" qXZ="0.0" qYZ="0.0" qZZ="0.0"
+             />
+   <Atom type="HT" kz="OT" kx="HT"
+             c0="0.5564"
+             dX="-0.0012571" dY="0.0" dZ="0.0012571"
+             qXX="-2.50953e-05" qXY="0.0" qYY="2.50953e-05" qXZ="-1.01916e-05" qYZ="0.0" qZZ="0.0"
+             />
+   <Polarize type="OT" polarizabilityXX="0.000978253" polarizabilityYY="0.000978253" polarizabilityZZ="0.000978253" thole="0.200"/>
+   <Polarize type="HT" polarizabilityXX="0.000168576" polarizabilityYY="0.000168576" polarizabilityZZ="0.000168576" thole="0.300"/>
+ </ADMPPmeForce>
+</ForceField>
