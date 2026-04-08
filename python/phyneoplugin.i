@@ -1,4 +1,4 @@
-%module mpidplugin
+%module phyneoplugin
 
 %include "factory.i"
 %import(module="openmm") "swig/OpenMMSwigHeaders.i"
@@ -17,7 +17,7 @@ namespace std {
 };
 
 %{
-#include "MPIDForce.h"
+#include "PhyNEOForce.h"
 
 #if defined(__has_include)
   #if __has_include("OpenMM.h")
@@ -66,7 +66,7 @@ import openmm.unit as unit
 
 namespace OpenMM {
 
-class MPIDForce : public Force {
+class PhyNEOForce : public Force {
 
 public:
 
@@ -116,20 +116,20 @@ public:
                           PolarizationCovalent11 = 4, PolarizationCovalent12 = 5, PolarizationCovalent13 = 6, PolarizationCovalent14 = 7, CovalentEnd = 8 };
 
     /**
-     * Create an MPIDForce.
+     * Create a PhyNEOForce.
      */
-    MPIDForce();
+    PhyNEOForce();
 
     /*
-     * Methods for casting a Force to an MPIDForce.
+     * Methods for casting a Force to a PhyNEOForce.
     */
     %extend {
-        static OpenMM::MPIDForce& cast(OpenMM::Force& force) {
-            return dynamic_cast<OpenMM::MPIDForce&>(force);
+        static OpenMM::PhyNEOForce& cast(OpenMM::Force& force) {
+            return dynamic_cast<OpenMM::PhyNEOForce&>(force);
         }
 
         static bool isinstance(OpenMM::Force& force) {
-            return (dynamic_cast<OpenMM::MPIDForce*>(&force) != NULL);
+            return (dynamic_cast<OpenMM::PhyNEOForce*>(&force) != NULL);
         }
     }
 
@@ -533,7 +533,7 @@ public:
      * @returns true if nonbondedMethod uses PBC and false otherwise
      */
     bool usesPeriodicBoundaryConditions() const {
-        return nonbondedMethod == MPIDForce::PME;
+        return nonbondedMethod == PhyNEOForce::PME;
     }
 
     /**
@@ -553,11 +553,11 @@ import openmm.app.forcefield as forcefield
 import warnings
 
 ## @private
-class MPIDGenerator(object):
+class PhyNEOGenerator(object):
 
     #=============================================================================================
 
-    """A MPIDGenerator constructs a MPIDForce."""
+    """A PhyNEOGenerator constructs a PhyNEOForce."""
 
     #=============================================================================================
 
@@ -608,17 +608,17 @@ class MPIDGenerator(object):
                 while(len(kIndices) < 4):
                     kIndices.append("")
 
-                axisType = MPIDForce.ZThenX
+                axisType = PhyNEOForce.ZThenX
                 if (not kz):
-                    axisType = MPIDForce.NoAxisType
+                    axisType = PhyNEOForce.NoAxisType
                 if (kz and not kx):
-                    axisType = MPIDForce.ZOnly
+                    axisType = PhyNEOForce.ZOnly
                 if (kz and kzNegative or kx and kxNegative):
-                    axisType = MPIDForce.Bisector
+                    axisType = PhyNEOForce.Bisector
                 if (kx and kxNegative and ky and kyNegative):
-                    axisType = MPIDForce.ZBisect
+                    axisType = PhyNEOForce.ZBisect
                 if (kz and kzNegative and kx and kxNegative and ky and kyNegative):
-                    axisType = MPIDForce.ThreeFold
+                    axisType = PhyNEOForce.ThreeFold
 
                 return axisType
 
@@ -627,21 +627,21 @@ class MPIDGenerator(object):
     @staticmethod
     def parseElement(element, forceField):
 
-        #   <MPIDForce >
+        #   <PhyNEOForce >
         # <Multipole class="1"    kz="2"    kx="4"    c0="-0.22620" d1="0.08214" d2="0.00000" d3="0.34883" q11="0.11775" q21="0.00000" q22="-1.02185" q31="-0.17555" q32="0.00000" q33="0.90410"  />
         # <Multipole class="2"    kz="1"    kx="3"    c0="-0.15245" d1="0.19517" d2="0.00000" d3="0.19687" q11="-0.20677" q21="0.00000" q22="-0.48084" q31="-0.01672" q32="0.00000" q33="0.68761"  />
 
-        existing = [f for f in forceField._forces if isinstance(f, MPIDGenerator)]
+        existing = [f for f in forceField._forces if isinstance(f, PhyNEOGenerator)]
         if len(existing) == 0:
-            generator = MPIDGenerator(forceField, element.get('coulomb14scale', None), element.get('defaultTholeWidth', None))
+            generator = PhyNEOGenerator(forceField, element.get('coulomb14scale', None), element.get('defaultTholeWidth', None))
             forceField.registerGenerator(generator)
         else:
-            # Multiple <MPIDForce> tags were found, probably in different files.  Simply add more types to the existing one.
+            # Multiple <PhyNEOForce> tags were found, probably in different files.  Simply add more types to the existing one.
             generator = existing[0]
             if abs(generator.scaleFactor14 != element.get('coulomb14scale', None)):
-                raise ValueError('Found multiple MPIDForce tags with different coulomb14scale arguments')
+                raise ValueError('Found multiple PhyNEOForce tags with different coulomb14scale arguments')
             if abs(generator.defaultTholeWidth != element.get('defaultTholeWidth', None)):
-                raise ValueError('Found multiple MPIDForce tags with different defaultTholeWidth arguments')
+                raise ValueError('Found multiple PhyNEOForce tags with different defaultTholeWidth arguments')
 
         # set type map: [ kIndices, multipoles, AMOEBA/OpenMM axis type]
 
@@ -663,7 +663,7 @@ class MPIDGenerator(object):
 
                 # set axis type based on k-Indices
 
-                axisType = MPIDGenerator.setAxisType(kIndices)
+                axisType = PhyNEOGenerator.setAxisType(kIndices)
 
                 # set multipole
 
@@ -709,7 +709,7 @@ class MPIDGenerator(object):
                     generator.typeMap[t].append(valueMap)
 
             else:
-                outputString = "MPIDGenerator: error getting type for multipole: %s" % (atom.attrib['class'])
+                outputString = "PhyNEOGenerator: error getting type for multipole: %s" % (atom.attrib['class'])
                 raise ValueError(outputString)
 
         # polarization parameters
@@ -726,7 +726,7 @@ class MPIDGenerator(object):
 
                 for t in types[0]:
                     if (t not in generator.typeMap):
-                        outputString = "MPIDGenerator: polarize type not present: %s" % (atom.attrib['type'])
+                        outputString = "PhyNEOGenerator: polarize type not present: %s" % (atom.attrib['type'])
                         raise ValueError(outputString)
                     else:
                         typeMapList = generator.typeMap[t]
@@ -740,25 +740,25 @@ class MPIDGenerator(object):
                                 hit = 1
 
                         if (hit == 0):
-                            outputString = "MPIDGenerator: error getting type for polarize: class index=%s not in multipole list?" % (atom.attrib['class'])
+                            outputString = "PhyNEOGenerator: error getting type for polarize: class index=%s not in multipole list?" % (atom.attrib['class'])
                             raise ValueError(outputString)
 
             else:
-                outputString = "MPIDGenerator: error getting type for polarize: %s" % (atom.attrib['class'])
+                outputString = "PhyNEOGenerator: error getting type for polarize: %s" % (atom.attrib['class'])
                 raise ValueError(outputString)
 
     #=============================================================================================
 
     def createForce(self, sys, data, nonbondedMethod, nonbondedCutoff, args):
 
-        methodMap = {forcefield.NoCutoff:MPIDForce.NoCutoff,
-                     forcefield.PME:MPIDForce.PME,
-                     forcefield.LJPME:MPIDForce.PME}
+        methodMap = {forcefield.NoCutoff:PhyNEOForce.NoCutoff,
+                     forcefield.PME:PhyNEOForce.PME,
+                     forcefield.LJPME:PhyNEOForce.PME}
 
-        force = MPIDForce()
+        force = PhyNEOForce()
         sys.addForce(force)
         if (nonbondedMethod not in methodMap):
-            raise ValueError( "MPIDForce: input cutoff method not available." )
+            raise ValueError( "PhyNEOForce: input cutoff method not available." )
         else:
             force.setNonbondedMethod(methodMap[nonbondedMethod])
         force.setCutoffDistance(nonbondedCutoff)
@@ -766,17 +766,17 @@ class MPIDGenerator(object):
         if ('ewaldErrorTolerance' in args):
             force.setEwaldErrorTolerance(float(args['ewaldErrorTolerance']))
 
-        force.setPolarizationType(MPIDForce.Extrapolated)
+        force.setPolarizationType(PhyNEOForce.Extrapolated)
         if ('polarization' in args):
             polarizationType = args['polarization']
             if (polarizationType.lower() == 'direct'):
-                force.setPolarizationType(MPIDForce.Direct)
+                force.setPolarizationType(PhyNEOForce.Direct)
             elif (polarizationType.lower() == 'mutual'):
-                force.setPolarizationType(MPIDForce.Mutual)
+                force.setPolarizationType(PhyNEOForce.Mutual)
             elif (polarizationType.lower() == 'extrapolated'):
-                force.setPolarizationType(MPIDForce.Extrapolated)
+                force.setPolarizationType(PhyNEOForce.Extrapolated)
             else:
-                raise ValueError( "MPIDForce: invalide polarization type: " + polarizationType)
+                raise ValueError( "PhyNEOForce: invalide polarization type: " + polarizationType)
 
         argval = float(args['coulomb14scale']) if 'coulomb14scale' in args else None
         myval = float(self.scaleFactor14) if self.scaleFactor14 else None
@@ -1065,9 +1065,9 @@ class MPIDGenerator(object):
                                                   savedMultipoleDict['quadrupole'], savedMultipoleDict['octopole'], savedMultipoleDict['axisType'],
                                                   zaxis, xaxis, yaxis, thole, polarizability)
                     if (atomIndex == newIndex):
-                        force.setCovalentMap(atomIndex, MPIDForce.Covalent12, tuple(bonded12ParticleSets[atomIndex]))
-                        force.setCovalentMap(atomIndex, MPIDForce.Covalent13, tuple(bonded13ParticleSets[atomIndex]))
-                        force.setCovalentMap(atomIndex, MPIDForce.Covalent14, tuple(bonded14ParticleSets[atomIndex]))
+                        force.setCovalentMap(atomIndex, PhyNEOForce.Covalent12, tuple(bonded12ParticleSets[atomIndex]))
+                        force.setCovalentMap(atomIndex, PhyNEOForce.Covalent13, tuple(bonded13ParticleSets[atomIndex]))
+                        force.setCovalentMap(atomIndex, PhyNEOForce.Covalent14, tuple(bonded14ParticleSets[atomIndex]))
                     else:
                         raise ValueError("Atom %s of %s %d is out of sync!." %(atom.name, atom.residue.name, atom.residue.index))
                 else:
@@ -1075,7 +1075,7 @@ class MPIDGenerator(object):
             else:
                 raise ValueError('No multipole type for atom %s %s %d' % (atom.name, atom.residue.name, atom.residue.index))
 
-forcefield.parsers["MPIDForce"] = MPIDGenerator.parseElement
+forcefield.parsers["PhyNEOForce"] = PhyNEOGenerator.parseElement
 %}
 
 }
