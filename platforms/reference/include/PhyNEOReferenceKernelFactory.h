@@ -1,8 +1,8 @@
-#ifndef MPID_OPENMM_REFERERENCE_KERNEL_FACTORY_H_
-#define MPID_OPENMM_REFERERENCE_KERNEL_FACTORY_H_
+#ifndef PhyNEO_OPENMM_REFERENCE_KERNEL_FACTORY_H_
+#define PhyNEO_OPENMM_REFERENCE_KERNEL_FACTORY_H_
 
 /* -------------------------------------------------------------------------- *
- *                            OpenMMMPID                                    *
+ *                            OpenMMPhyNEO                                    *
  * -------------------------------------------------------------------------- *
  * This is part of the OpenMM molecular simulation toolkit originating from   *
  * Simbios, the NIH National Center for Physics-Based Simulation of           *
@@ -32,14 +32,14 @@
 namespace OpenMM {
 
 /**
- * This KernelFactory creates all kernels for MPIDReferencePlatform.
+ * This KernelFactory creates all kernels for PhyNEOReferencePlatform.
  */
 
-class MPIDReferenceKernelFactory : public KernelFactory {
+class PhyNEOReferenceKernelFactory : public KernelFactory {
 public:
     KernelImpl* createKernelImpl(std::string name, const Platform& platform, ContextImpl& context) const;
 };
 
 } // namespace OpenMM
 
-#endif /*MPID_OPENMM_REFERERENCE_KERNEL_FACTORY_H_*/
+#endif /*PhyNEO_OPENMM_REFERENCE_KERNEL_FACTORY_H_*/

@@ -1,5 +1,5 @@
 /* -------------------------------------------------------------------------- *
- *                              OpenMMMPID                                  *
+ *                              OpenMMPhyNEO                                  *
  * -------------------------------------------------------------------------- *
  * This is part of the OpenMM molecular simulation toolkit originating from   *
  * Simbios, the NIH National Center for Physics-Based Simulation of           *
@@ -24,8 +24,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.      *
  * -------------------------------------------------------------------------- */
 
-#include "MPIDReferenceKernelFactory.h"
-#include "MPIDReferenceKernels.h"
+#include "PhyNEOReferenceKernelFactory.h"
+#include "PhyNEOReferenceKernels.h"
 #include "ReferencePlatform.h"
 #include "openmm/internal/ContextImpl.h"
 #include "openmm/OpenMMException.h"
@@ -47,23 +47,23 @@ extern "C" OPENMM_EXPORT void registerKernelFactories() {
     for (int i = 0; i < Platform::getNumPlatforms(); i++) {
         Platform& platform = Platform::getPlatform(i);
         if (dynamic_cast<ReferencePlatform*>(&platform) != NULL) {
-             MPIDReferenceKernelFactory* factory = new MPIDReferenceKernelFactory();
-             platform.registerKernelFactory(CalcMPIDForceKernel::Name(), factory);
+             PhyNEOReferenceKernelFactory* factory = new PhyNEOReferenceKernelFactory();
+             platform.registerKernelFactory(CalcPhyNEOForceKernel::Name(), factory);
         }
     }
 }
 
-extern "C" OPENMM_EXPORT void registerMPIDReferenceKernelFactories() {
+extern "C" OPENMM_EXPORT void registerPhyNEOReferenceKernelFactories() {
     registerKernelFactories();
 }
 
-KernelImpl* MPIDReferenceKernelFactory::createKernelImpl(std::string name, const Platform& platform, ContextImpl& context) const {
+KernelImpl* PhyNEOReferenceKernelFactory::createKernelImpl(std::string name, const Platform& platform, ContextImpl& context) const {
     ReferencePlatform::PlatformData& referencePlatformData = *static_cast<ReferencePlatform::PlatformData*>(context.getPlatformData());
 
-    // create MPIDReferenceData object if contextToMPIDDataMap does not contain
+    // create PhyNEOReferenceData object if contextToPhyNEODataMap does not contain
     // key equal to current context
-    if (name == CalcMPIDForceKernel::Name())
-        return new ReferenceCalcMPIDForceKernel(name, platform, context.getSystem());
+    if (name == CalcPhyNEOForceKernel::Name())
+        return new ReferenceCalcPhyNEOForceKernel(name, platform, context.getSystem());
 
     throw OpenMMException((std::string("Tried to create kernel with illegal kernel name '")+name+"'").c_str());
 }

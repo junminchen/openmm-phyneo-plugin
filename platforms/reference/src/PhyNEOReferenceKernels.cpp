@@ -1,5 +1,5 @@
 /* -------------------------------------------------------------------------- *
- *                               OpenMMMPID                                 *
+ *                               OpenMMPhyNEO                                 *
  * -------------------------------------------------------------------------- *
  * This is part of the OpenMM molecular simulation toolkit originating from   *
  * Simbios, the NIH National Center for Physics-Based Simulation of           *
@@ -24,11 +24,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.      *
  * -------------------------------------------------------------------------- */
 
-#include "MPIDReferenceKernels.h"
+#include "PhyNEOReferenceKernels.h"
 #include "ReferencePlatform.h"
 #include "openmm/internal/ContextImpl.h"
-#include "openmm/MPIDForce.h"
-#include "openmm/internal/MPIDForceImpl.h"
+#include "openmm/PhyNEOForce.h"
+#include "openmm/internal/PhyNEOForceImpl.h"
 #include "openmm/NonbondedForce.h"
 #include "openmm/internal/NonbondedForceImpl.h"
 
@@ -69,19 +69,19 @@ static Vec3* extractBoxVectors(ContextImpl& context) {
 
 
 /* -------------------------------------------------------------------------- *
- *                             MPIDForce                                      *
+ *                             PhyNEOForce                                      *
  * -------------------------------------------------------------------------- */
 
-ReferenceCalcMPIDForceKernel::ReferenceCalcMPIDForceKernel(std::string name, const Platform& platform, const System& system) : 
-         CalcMPIDForceKernel(name, platform), system(system), numMultipoles(0), mutualInducedMaxIterations(60), mutualInducedTargetEpsilon(1.0e-03),
+ReferenceCalcPhyNEOForceKernel::ReferenceCalcPhyNEOForceKernel(std::string name, const Platform& platform, const System& system) : 
+         CalcPhyNEOForceKernel(name, platform), system(system), numMultipoles(0), mutualInducedMaxIterations(60), mutualInducedTargetEpsilon(1.0e-03),
                                                          usePme(false),alphaEwald(0.0), cutoffDistance(1.0) {  
 
 }
 
-ReferenceCalcMPIDForceKernel::~ReferenceCalcMPIDForceKernel() {
+ReferenceCalcPhyNEOForceKernel::~ReferenceCalcPhyNEOForceKernel() {
 }
 
-void ReferenceCalcMPIDForceKernel::initialize(const System& system, const MPIDForce& force) {
+void ReferenceCalcPhyNEOForceKernel::initialize(const System& system, const PhyNEOForce& force) {
 
     numMultipoles   = force.getNumMultipoles();
 
@@ -143,17 +143,17 @@ void ReferenceCalcMPIDForceKernel::initialize(const System& system, const MPIDFo
     }
 
     polarizationType = force.getPolarizationType();
-    if (polarizationType == MPIDForce::Mutual) {
+    if (polarizationType == PhyNEOForce::Mutual) {
         mutualInducedMaxIterations = force.getMutualInducedMaxIterations();
         mutualInducedTargetEpsilon = force.getMutualInducedTargetEpsilon();
-    } else if (polarizationType == MPIDForce::Extrapolated) {
+    } else if (polarizationType == PhyNEOForce::Extrapolated) {
         extrapolationCoefficients = force.getExtrapolationCoefficients();
     }
 
     // PME
 
     nonbondedMethod  = force.getNonbondedMethod();
-    if (nonbondedMethod == MPIDForce::PME) {
+    if (nonbondedMethod == PhyNEOForce::PME) {
         usePme     = true;
         pmeGridDimension.resize(3);
         force.getPMEParameters(alphaEwald, pmeGridDimension[0], pmeGridDimension[1], pmeGridDimension[2]);
@@ -176,17 +176,17 @@ void ReferenceCalcMPIDForceKernel::initialize(const System& system, const MPIDFo
     return;
 }
 
-MPIDReferenceForce* ReferenceCalcMPIDForceKernel::setupMPIDReferenceForce(ContextImpl& context)
+PhyNEOReferenceForce* ReferenceCalcPhyNEOForceKernel::setupPhyNEOReferenceForce(ContextImpl& context)
 {
 
-    // MPIDReferenceForce is set to MPIDReferencePmeForce if 'usePme' is set
-    // MPIDReferenceForce is set to MPIDReferenceForce otherwise
+    // PhyNEOReferenceForce is set to PhyNEOReferencePmeForce if 'usePme' is set
+    // PhyNEOReferenceForce is set to PhyNEOReferenceForce otherwise
 
 
-    MPIDReferenceForce* mpidReferenceForce = NULL;
+    PhyNEOReferenceForce* mpidReferenceForce = NULL;
     if (usePme) {
 
-        MPIDReferencePmeForce* mpidReferencePmeForce = new MPIDReferencePmeForce();
+        PhyNEOReferencePmeForce* mpidReferencePmeForce = new PhyNEOReferencePmeForce();
         mpidReferencePmeForce->setAlphaEwald(alphaEwald);
         mpidReferencePmeForce->setCutoffDistance(cutoffDistance);
         mpidReferencePmeForce->setPmeGridDimensions(pmeGridDimension);
@@ -196,22 +196,22 @@ MPIDReferenceForce* ReferenceCalcMPIDForceKernel::setupMPIDReferenceForce(Contex
             throw OpenMMException("The periodic box size has decreased to less than twice the nonbonded cutoff.");
         }
         mpidReferencePmeForce->setPeriodicBoxSize(boxVectors);
-        mpidReferenceForce = static_cast<MPIDReferenceForce*>(mpidReferencePmeForce);
+        mpidReferenceForce = static_cast<PhyNEOReferenceForce*>(mpidReferencePmeForce);
 
     } else {
-         mpidReferenceForce = new MPIDReferenceForce(MPIDReferenceForce::NoCutoff);
+         mpidReferenceForce = new PhyNEOReferenceForce(PhyNEOReferenceForce::NoCutoff);
     }
 
     // set polarization type
     mpidReferenceForce->setDefaultTholeWidth(defaultTholeWidth);
-    if (polarizationType == MPIDForce::Mutual) {
-        mpidReferenceForce->setPolarizationType(MPIDReferenceForce::Mutual);
+    if (polarizationType == PhyNEOForce::Mutual) {
+        mpidReferenceForce->setPolarizationType(PhyNEOReferenceForce::Mutual);
         mpidReferenceForce->setMutualInducedDipoleTargetEpsilon(mutualInducedTargetEpsilon);
         mpidReferenceForce->setMaximumMutualInducedDipoleIterations(mutualInducedMaxIterations);
-    } else if (polarizationType == MPIDForce::Direct) {
-        mpidReferenceForce->setPolarizationType(MPIDReferenceForce::Direct);
-    } else if (polarizationType == MPIDForce::Extrapolated) {
-        mpidReferenceForce->setPolarizationType(MPIDReferenceForce::Extrapolated);
+    } else if (polarizationType == PhyNEOForce::Direct) {
+        mpidReferenceForce->setPolarizationType(PhyNEOReferenceForce::Direct);
+    } else if (polarizationType == PhyNEOForce::Extrapolated) {
+        mpidReferenceForce->setPolarizationType(PhyNEOReferenceForce::Extrapolated);
         mpidReferenceForce->setExtrapolationCoefficients(extrapolationCoefficients);
     } else {
         throw OpenMMException("Polarization type not recognzied.");
@@ -222,94 +222,94 @@ MPIDReferenceForce* ReferenceCalcMPIDForceKernel::setupMPIDReferenceForce(Contex
 
 }
 
-double ReferenceCalcMPIDForceKernel::execute(ContextImpl& context, bool includeForces, bool includeEnergy) {
+double ReferenceCalcPhyNEOForceKernel::execute(ContextImpl& context, bool includeForces, bool includeEnergy) {
 
-    MPIDReferenceForce* MPIDReferenceForce = setupMPIDReferenceForce(context);
+    PhyNEOReferenceForce* PhyNEOReferenceForce = setupPhyNEOReferenceForce(context);
 
     vector<Vec3>& posData = extractPositions(context);
     vector<Vec3>& forceData = extractForces(context);
-    double energy = MPIDReferenceForce->calculateForceAndEnergy(posData, charges, dipoles, quadrupoles, octopoles, tholes,
+    double energy = PhyNEOReferenceForce->calculateForceAndEnergy(posData, charges, dipoles, quadrupoles, octopoles, tholes,
                                                                            dampingFactors, polarity, axisTypes, 
                                                                            multipoleAtomZs, multipoleAtomXs, multipoleAtomYs,
                                                                            multipoleAtomCovalentInfo, forceData);
 
-    delete MPIDReferenceForce;
+    delete PhyNEOReferenceForce;
 
     return static_cast<double>(energy);
 }
 
-void ReferenceCalcMPIDForceKernel::getInducedDipoles(ContextImpl& context, vector<Vec3>& outputDipoles) {
+void ReferenceCalcPhyNEOForceKernel::getInducedDipoles(ContextImpl& context, vector<Vec3>& outputDipoles) {
     int numParticles = context.getSystem().getNumParticles();
     outputDipoles.resize(numParticles);
 
-    // Create an MPIDReferenceForce to do the calculation.
+    // Create an PhyNEOReferenceForce to do the calculation.
     
-    MPIDReferenceForce* MPIDReferenceForce = setupMPIDReferenceForce(context);
+    PhyNEOReferenceForce* PhyNEOReferenceForce = setupPhyNEOReferenceForce(context);
     vector<Vec3>& posData = extractPositions(context);
     
     // Retrieve the induced dipoles.
     
     vector<Vec3> inducedDipoles;
-    MPIDReferenceForce->calculateInducedDipoles(posData, charges, dipoles, quadrupoles, octopoles, tholes,
+    PhyNEOReferenceForce->calculateInducedDipoles(posData, charges, dipoles, quadrupoles, octopoles, tholes,
             dampingFactors, polarity, axisTypes, multipoleAtomZs, multipoleAtomXs, multipoleAtomYs, multipoleAtomCovalentInfo, inducedDipoles);
     for (int i = 0; i < numParticles; i++)
         outputDipoles[i] = inducedDipoles[i];
-    delete MPIDReferenceForce;
+    delete PhyNEOReferenceForce;
 }
 
-void ReferenceCalcMPIDForceKernel::getLabFramePermanentDipoles(ContextImpl& context, vector<Vec3>& outputDipoles) {
+void ReferenceCalcPhyNEOForceKernel::getLabFramePermanentDipoles(ContextImpl& context, vector<Vec3>& outputDipoles) {
     int numParticles = context.getSystem().getNumParticles();
     outputDipoles.resize(numParticles);
 
-    // Create an MPIDReferenceForce to do the calculation.
+    // Create an PhyNEOReferenceForce to do the calculation.
     
-    MPIDReferenceForce* MPIDReferenceForce = setupMPIDReferenceForce(context);
+    PhyNEOReferenceForce* PhyNEOReferenceForce = setupPhyNEOReferenceForce(context);
     vector<Vec3>& posData = extractPositions(context);
     
     // Retrieve the permanent dipoles in the lab frame.
     
     vector<Vec3> labFramePermanentDipoles;
-    MPIDReferenceForce->calculateLabFramePermanentDipoles(posData, charges, dipoles, quadrupoles, octopoles, tholes,
+    PhyNEOReferenceForce->calculateLabFramePermanentDipoles(posData, charges, dipoles, quadrupoles, octopoles, tholes,
             dampingFactors, polarity, axisTypes, multipoleAtomZs, multipoleAtomXs, multipoleAtomYs, multipoleAtomCovalentInfo, labFramePermanentDipoles);
     for (int i = 0; i < numParticles; i++)
         outputDipoles[i] = labFramePermanentDipoles[i];
-    delete MPIDReferenceForce;
+    delete PhyNEOReferenceForce;
 }
 
 
-void ReferenceCalcMPIDForceKernel::getTotalDipoles(ContextImpl& context, vector<Vec3>& outputDipoles) {
+void ReferenceCalcPhyNEOForceKernel::getTotalDipoles(ContextImpl& context, vector<Vec3>& outputDipoles) {
     int numParticles = context.getSystem().getNumParticles();
     outputDipoles.resize(numParticles);
 
-    // Create an MPIDReferenceForce to do the calculation.
+    // Create an PhyNEOReferenceForce to do the calculation.
     
-    MPIDReferenceForce* MPIDReferenceForce = setupMPIDReferenceForce(context);
+    PhyNEOReferenceForce* PhyNEOReferenceForce = setupPhyNEOReferenceForce(context);
     vector<Vec3>& posData = extractPositions(context);
     
     // Retrieve the permanent dipoles in the lab frame.
     
     vector<Vec3> totalDipoles;
-    MPIDReferenceForce->calculateTotalDipoles(posData, charges, dipoles, quadrupoles, octopoles, tholes,
+    PhyNEOReferenceForce->calculateTotalDipoles(posData, charges, dipoles, quadrupoles, octopoles, tholes,
             dampingFactors, polarity, axisTypes, multipoleAtomZs, multipoleAtomXs, multipoleAtomYs, multipoleAtomCovalentInfo, totalDipoles);
 
     for (int i = 0; i < numParticles; i++)
         outputDipoles[i] = totalDipoles[i];
-    delete MPIDReferenceForce;
+    delete PhyNEOReferenceForce;
 }
 
 
 
-void ReferenceCalcMPIDForceKernel::getElectrostaticPotential(ContextImpl& context, const std::vector< Vec3 >& inputGrid,
+void ReferenceCalcPhyNEOForceKernel::getElectrostaticPotential(ContextImpl& context, const std::vector< Vec3 >& inputGrid,
                                                                         std::vector< double >& outputElectrostaticPotential) {
 
-    MPIDReferenceForce* MPIDReferenceForce = setupMPIDReferenceForce(context);
+    PhyNEOReferenceForce* PhyNEOReferenceForce = setupPhyNEOReferenceForce(context);
     vector<Vec3>& posData                                     = extractPositions(context);
     vector<Vec3> grid(inputGrid.size());
     vector<double> potential(inputGrid.size());
     for (unsigned int ii = 0; ii < inputGrid.size(); ii++) {
         grid[ii] = inputGrid[ii];
     }
-    MPIDReferenceForce->calculateElectrostaticPotential(posData, charges, dipoles, quadrupoles, octopoles, tholes,
+    PhyNEOReferenceForce->calculateElectrostaticPotential(posData, charges, dipoles, quadrupoles, octopoles, tholes,
                                                                    dampingFactors, polarity, axisTypes, 
                                                                    multipoleAtomZs, multipoleAtomXs, multipoleAtomYs,
                                                                    multipoleAtomCovalentInfo, grid, potential);
@@ -319,10 +319,10 @@ void ReferenceCalcMPIDForceKernel::getElectrostaticPotential(ContextImpl& contex
         outputElectrostaticPotential[ii] = potential[ii];
     }
 
-    delete MPIDReferenceForce;
+    delete PhyNEOReferenceForce;
 }
 
-void ReferenceCalcMPIDForceKernel::getSystemMultipoleMoments(ContextImpl& context, std::vector< double >& outputMultipoleMoments) {
+void ReferenceCalcPhyNEOForceKernel::getSystemMultipoleMoments(ContextImpl& context, std::vector< double >& outputMultipoleMoments) {
 
     // retrieve masses
 
@@ -332,17 +332,17 @@ void ReferenceCalcMPIDForceKernel::getSystemMultipoleMoments(ContextImpl& contex
         masses.push_back(system.getParticleMass(i));
     }    
 
-    MPIDReferenceForce* MPIDReferenceForce = setupMPIDReferenceForce(context);
+    PhyNEOReferenceForce* PhyNEOReferenceForce = setupPhyNEOReferenceForce(context);
     vector<Vec3>& posData                                     = extractPositions(context);
-    MPIDReferenceForce->calculateMPIDSystemMultipoleMoments(masses, posData, charges, dipoles, quadrupoles, octopoles, tholes,
+    PhyNEOReferenceForce->calculatePhyNEOSystemMultipoleMoments(masses, posData, charges, dipoles, quadrupoles, octopoles, tholes,
                                                                          dampingFactors, polarity, axisTypes, 
                                                                          multipoleAtomZs, multipoleAtomXs, multipoleAtomYs,
                                                                          multipoleAtomCovalentInfo, outputMultipoleMoments);
 
-    delete MPIDReferenceForce;
+    delete PhyNEOReferenceForce;
 }
 
-void ReferenceCalcMPIDForceKernel::copyParametersToContext(ContextImpl& context, const MPIDForce& force) {
+void ReferenceCalcPhyNEOForceKernel::copyParametersToContext(ContextImpl& context, const PhyNEOForce& force) {
     if (numMultipoles != force.getNumMultipoles())
         throw OpenMMException("updateParametersInContext: The number of multipoles has changed");
 
@@ -377,7 +377,7 @@ void ReferenceCalcMPIDForceKernel::copyParametersToContext(ContextImpl& context,
     }
 }
 
-void ReferenceCalcMPIDForceKernel::getPMEParameters(double& alpha, int& nx, int& ny, int& nz) const {
+void ReferenceCalcPhyNEOForceKernel::getPMEParameters(double& alpha, int& nx, int& ny, int& nz) const {
     if (!usePme)
         throw OpenMMException("getPMEParametersInContext: This Context is not using PME");
     alpha = alphaEwald;

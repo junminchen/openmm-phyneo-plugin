@@ -21,10 +21,10 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef __MPIDReferenceForce_H__
-#define __MPIDReferenceForce_H__
+#ifndef __PhyNEOReferenceForce_H__
+#define __PhyNEOReferenceForce_H__
 
-#include "openmm/MPIDForce.h"
+#include "openmm/PhyNEOForce.h"
 #include "openmm/Vec3.h"
 #include <map>
 #include "fftpack.h"
@@ -318,12 +318,12 @@ private:
 
 using namespace OpenMM;
 
-class MPIDReferenceForce {
+class PhyNEOReferenceForce {
 
    /**
-    * MPIDReferenceForce is base class for Force calculations
-    * MPIDReferenceGeneralizedKirkwoodForce  is derived class for Generalized Kirkwood calculations
-    * MPIDReferencePmeForce is derived class for PME calculations
+    * PhyNEOReferenceForce is base class for Force calculations
+    * PhyNEOReferenceGeneralizedKirkwoodForce  is derived class for Generalized Kirkwood calculations
+    * PhyNEOReferencePmeForce is derived class for PME calculations
     *
     * Below is a outline of the sequence of methods called to evaluate the force and energy 
     * for each scenario: Generalized Kirkwood (GK) and PME.
@@ -339,7 +339,7 @@ class MPIDReferenceForce {
     *
     *                                                      GK case includes the following calls:
     *
-    *                                                          MPIDReferenceForce::calculateElectrostatic()
+    *                                                          PhyNEOReferenceForce::calculateElectrostatic()
     *                                                               loop over particle pairs: calculateElectrostaticPairIxn()
     *
     *                                                          TINKER's egk1a: calculateKirkwoodPairIxn()
@@ -448,20 +448,20 @@ public:
      * Constructor
      * 
      */
-    MPIDReferenceForce();
+    PhyNEOReferenceForce();
  
     /**
      * Constructor
      * 
      * @param nonbondedMethod nonbonded method
      */
-    MPIDReferenceForce(NonbondedMethod nonbondedMethod);
+    PhyNEOReferenceForce(NonbondedMethod nonbondedMethod);
  
     /**
      * Destructor
      * 
      */
-    virtual ~MPIDReferenceForce() {};
+    virtual ~PhyNEOReferenceForce() {};
  
     /**
      * Get nonbonded method.
@@ -749,7 +749,7 @@ public:
      * @param multipoleAtomCovalentInfo covalent info needed to set scaling factors
      * @param outputMultipoleMoments    output multipole moments
      */
-    void calculateMPIDSystemMultipoleMoments(const std::vector<double>& masses,
+    void calculatePhyNEOSystemMultipoleMoments(const std::vector<double>& masses,
                                                const std::vector<OpenMM::Vec3>& particlePositions,
                                                const std::vector<double>& charges,
                                                const std::vector<double>& dipoles,
@@ -1376,7 +1376,7 @@ protected:
 };
 
 
-class MPIDReferencePmeForce : public MPIDReferenceForce {
+class PhyNEOReferencePmeForce : public PhyNEOReferenceForce {
 
 public:
 
@@ -1384,13 +1384,13 @@ public:
      * Constructor
      * 
      */
-    MPIDReferencePmeForce();
+    PhyNEOReferencePmeForce();
  
     /**
      * Destructor
      * 
      */
-    ~MPIDReferencePmeForce();
+    ~PhyNEOReferencePmeForce();
  
     /**
      * Get cutoff distance.
@@ -1450,7 +1450,7 @@ public:
 
 private:
 
-    static const int MPID_PME_ORDER;
+    static const int PhyNEO_PME_ORDER;
     static const double SQRT_PI;
 
     double _alphaEwald;
@@ -1535,7 +1535,7 @@ private:
     void calculateFixedMultipoleField(const vector<MultipoleParticleData>& particleData);
 
     /**
-     * This is called from computeMPIDBsplines().  It calculates the spline coefficients for a single atom along a single axis.
+     * This is called from computePhyNEOBsplines().  It calculates the spline coefficients for a single atom along a single axis.
      * 
      * @param thetai output spline coefficients
      * @param w offset from grid point
@@ -1547,7 +1547,7 @@ private:
      *
      * @param particleData   vector of particle positions and parameters (charge, labFrame dipoles, quadrupoles, ...)
      */
-    void computeMPIDBsplines(const std::vector<MultipoleParticleData>& particleData);
+    void computePhyNEOBsplines(const std::vector<MultipoleParticleData>& particleData);
 
     /**
      * Transform multipoles from cartesian coordinates to fractional coordinates.
@@ -1570,7 +1570,7 @@ private:
      * Perform reciprocal convolution.
      * 
      */
-    void performMPIDReciprocalConvolution();
+    void performPhyNEOReciprocalConvolution();
 
     /**
      * Compute reciprocal potential due fixed multipoles at each particle site.
@@ -1705,7 +1705,7 @@ private:
      * @param forces            vector of particle forces to be updated
      * @param torques           vector of particle torques to be updated
      */
-     double computeReciprocalSpaceInducedDipoleForceAndEnergy(MPIDReferenceForce::PolarizationType polarizationType,
+     double computeReciprocalSpaceInducedDipoleForceAndEnergy(PhyNEOReferenceForce::PolarizationType polarizationType,
                                                               const std::vector<MultipoleParticleData>& particleData,
                                                               std::vector<Vec3>& forces, std::vector<Vec3>& torques) const;
 
@@ -1726,4 +1726,4 @@ private:
 
 } // namespace OpenMM
 
-#endif // _MPIDReferenceForce___
+#endif // _PhyNEOReferenceForce___

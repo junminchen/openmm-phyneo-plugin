@@ -22,7 +22,7 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "MPIDReferenceForce.h"
+#include "PhyNEOReferenceForce.h"
 #include "jama_svd.h"
 #include <algorithm>
 
@@ -33,7 +33,7 @@
 using std::vector;
 using namespace OpenMM;
 
-MPIDReferenceForce::MPIDReferenceForce() :
+PhyNEOReferenceForce::PhyNEOReferenceForce() :
                                                    _nonbondedMethod(NoCutoff),
                                                    _numParticles(0),
                                                    _electric(138.935455846),
@@ -50,7 +50,7 @@ MPIDReferenceForce::MPIDReferenceForce() :
     initialize();
 }
 
-MPIDReferenceForce::MPIDReferenceForce(NonbondedMethod nonbondedMethod) :
+PhyNEOReferenceForce::PhyNEOReferenceForce(NonbondedMethod nonbondedMethod) :
                                                    _nonbondedMethod(nonbondedMethod),
                                                    _numParticles(0),
                                                    _electric(138.935455846),
@@ -67,7 +67,7 @@ MPIDReferenceForce::MPIDReferenceForce(NonbondedMethod nonbondedMethod) :
     initialize();
 }
 
-void MPIDReferenceForce::initialize()
+void PhyNEOReferenceForce::initialize()
 {
     unsigned int index    = 0;
     _mScale[index++]      = 0.0;
@@ -84,93 +84,93 @@ void MPIDReferenceForce::initialize()
     _pScale[index++]      = 1.0;
 }
 
-void MPIDReferenceForce::set14ScaleFactor(double factor)
+void PhyNEOReferenceForce::set14ScaleFactor(double factor)
 {
     _pScale[3] = _mScale[3] = factor;
 }
 
-double MPIDReferenceForce::get14ScaleFactor() const
+double PhyNEOReferenceForce::get14ScaleFactor() const
 {
     assert(_pScale[3] == _mScale[3]);
     return _pScale[3];
 }
 
-MPIDReferenceForce::NonbondedMethod MPIDReferenceForce::getNonbondedMethod() const
+PhyNEOReferenceForce::NonbondedMethod PhyNEOReferenceForce::getNonbondedMethod() const
 {
     return _nonbondedMethod;
 }
 
-void MPIDReferenceForce::setNonbondedMethod(MPIDReferenceForce::NonbondedMethod nonbondedMethod)
+void PhyNEOReferenceForce::setNonbondedMethod(PhyNEOReferenceForce::NonbondedMethod nonbondedMethod)
 {
     _nonbondedMethod = nonbondedMethod;
 }
 
-MPIDReferenceForce::PolarizationType MPIDReferenceForce::getPolarizationType() const
+PhyNEOReferenceForce::PolarizationType PhyNEOReferenceForce::getPolarizationType() const
 {
     return _polarizationType;
 }
 
-void MPIDReferenceForce::setPolarizationType(MPIDReferenceForce::PolarizationType polarizationType)
+void PhyNEOReferenceForce::setPolarizationType(PhyNEOReferenceForce::PolarizationType polarizationType)
 {
     _polarizationType = polarizationType;
 }
 
-double MPIDReferenceForce::getDefaultTholeWidth() const
+double PhyNEOReferenceForce::getDefaultTholeWidth() const
 {
     return _defaultTholeWidth;
 }
 
-void MPIDReferenceForce::setDefaultTholeWidth(double width)
+void PhyNEOReferenceForce::setDefaultTholeWidth(double width)
 {
     _defaultTholeWidth = width;
 }
 
-int MPIDReferenceForce::getMutualInducedDipoleConverged() const
+int PhyNEOReferenceForce::getMutualInducedDipoleConverged() const
 {
     return _mutualInducedDipoleConverged;
 }
 
-void MPIDReferenceForce::setMutualInducedDipoleConverged(int mutualInducedDipoleConverged)
+void PhyNEOReferenceForce::setMutualInducedDipoleConverged(int mutualInducedDipoleConverged)
 {
     _mutualInducedDipoleConverged = mutualInducedDipoleConverged;
 }
 
-int MPIDReferenceForce::getMutualInducedDipoleIterations() const
+int PhyNEOReferenceForce::getMutualInducedDipoleIterations() const
 {
     return _mutualInducedDipoleIterations;
 }
 
-void MPIDReferenceForce::setMutualInducedDipoleIterations(int mutualInducedDipoleIterations)
+void PhyNEOReferenceForce::setMutualInducedDipoleIterations(int mutualInducedDipoleIterations)
 {
     _mutualInducedDipoleIterations = mutualInducedDipoleIterations;
 }
 
-double MPIDReferenceForce::getMutualInducedDipoleEpsilon() const
+double PhyNEOReferenceForce::getMutualInducedDipoleEpsilon() const
 {
     return _mutualInducedDipoleEpsilon;
 }
 
-void MPIDReferenceForce::setMutualInducedDipoleEpsilon(double mutualInducedDipoleEpsilon)
+void PhyNEOReferenceForce::setMutualInducedDipoleEpsilon(double mutualInducedDipoleEpsilon)
 {
     _mutualInducedDipoleEpsilon = mutualInducedDipoleEpsilon;
 }
 
-int MPIDReferenceForce::getMaximumMutualInducedDipoleIterations() const
+int PhyNEOReferenceForce::getMaximumMutualInducedDipoleIterations() const
 {
     return _maximumMutualInducedDipoleIterations;
 }
 
-void MPIDReferenceForce::setMaximumMutualInducedDipoleIterations(int maximumMutualInducedDipoleIterations)
+void PhyNEOReferenceForce::setMaximumMutualInducedDipoleIterations(int maximumMutualInducedDipoleIterations)
 {
     _maximumMutualInducedDipoleIterations = maximumMutualInducedDipoleIterations;
 }
 
-double MPIDReferenceForce::getMutualInducedDipoleTargetEpsilon() const
+double PhyNEOReferenceForce::getMutualInducedDipoleTargetEpsilon() const
 {
     return _mutualInducedDipoleTargetEpsilon;
 }
 
-void MPIDReferenceForce::setExtrapolationCoefficients(const std::vector<double> &coefficients)
+void PhyNEOReferenceForce::setExtrapolationCoefficients(const std::vector<double> &coefficients)
 {
     _maxPTOrder = coefficients.size(); // This accounts for the zero-based counting; actual highest order is 1 less
     _extrapolationCoefficients = coefficients;
@@ -182,12 +182,12 @@ void MPIDReferenceForce::setExtrapolationCoefficients(const std::vector<double> 
     }
 }
 
-void MPIDReferenceForce::setMutualInducedDipoleTargetEpsilon(double mutualInducedDipoleTargetEpsilon)
+void PhyNEOReferenceForce::setMutualInducedDipoleTargetEpsilon(double mutualInducedDipoleTargetEpsilon)
 {
     _mutualInducedDipoleTargetEpsilon = mutualInducedDipoleTargetEpsilon;
 }
 
-void MPIDReferenceForce::setupScaleMaps(const vector< vector< vector<int> > >& multipoleParticleCovalentInfo)
+void PhyNEOReferenceForce::setupScaleMaps(const vector< vector< vector<int> > >& multipoleParticleCovalentInfo)
 {
 
     /* Setup for scaling maps:
@@ -212,7 +212,7 @@ void MPIDReferenceForce::setupScaleMaps(const vector< vector< vector<int> > >& m
 
         // pScale & mScale
 
-        for (unsigned jj = 0; jj < MPIDForce::PolarizationCovalent11; jj++) {
+        for (unsigned jj = 0; jj < PhyNEOForce::PolarizationCovalent11; jj++) {
             for (int covalentIndex : covalentInfo[jj]) {
                 if (covalentIndex < ii)
                     continue;
@@ -224,7 +224,7 @@ void MPIDReferenceForce::setupScaleMaps(const vector< vector< vector<int> > >& m
     }
 }
 
-double MPIDReferenceForce::getMultipoleScaleFactor(unsigned int particleI, unsigned int particleJ, ScaleType scaleType) const
+double PhyNEOReferenceForce::getMultipoleScaleFactor(unsigned int particleI, unsigned int particleJ, ScaleType scaleType) const
 {
 
     MapIntRealOpenMM  scaleMap   = _scaleMaps[particleI][scaleType];
@@ -236,19 +236,19 @@ double MPIDReferenceForce::getMultipoleScaleFactor(unsigned int particleI, unsig
     }
 }
 
-void MPIDReferenceForce::getDScaleAndPScale(unsigned int particleI, unsigned int particleJ, double& dScale, double& pScale) const
+void PhyNEOReferenceForce::getDScaleAndPScale(unsigned int particleI, unsigned int particleJ, double& dScale, double& pScale) const
 {
     pScale = getMultipoleScaleFactor(particleI, particleJ, P_SCALE);
     dScale = pScale;
 }
 
-void MPIDReferenceForce::getMultipoleScaleFactors(unsigned int particleI, unsigned int particleJ, vector<double>& scaleFactors) const
+void PhyNEOReferenceForce::getMultipoleScaleFactors(unsigned int particleI, unsigned int particleJ, vector<double>& scaleFactors) const
 {
     scaleFactors[P_SCALE] = getMultipoleScaleFactor(particleI, particleJ, P_SCALE);
     scaleFactors[M_SCALE] = getMultipoleScaleFactor(particleI, particleJ, M_SCALE);
 }
 
-double MPIDReferenceForce::normalizeVec3(Vec3& vectorToNormalize) const
+double PhyNEOReferenceForce::normalizeVec3(Vec3& vectorToNormalize) const
 {
     double norm = sqrt(vectorToNormalize.dot(vectorToNormalize));
     if (norm > 0.0) {
@@ -257,21 +257,21 @@ double MPIDReferenceForce::normalizeVec3(Vec3& vectorToNormalize) const
     return norm;
 }
 
-void MPIDReferenceForce::initializeRealOpenMMVector(vector<double>& vectorToInitialize) const
+void PhyNEOReferenceForce::initializeRealOpenMMVector(vector<double>& vectorToInitialize) const
 {
     double zero = 0.0;
     vectorToInitialize.resize(_numParticles);
     std::fill(vectorToInitialize.begin(), vectorToInitialize.end(), zero);
 }
 
-void MPIDReferenceForce::initializeVec3Vector(vector<Vec3>& vectorToInitialize) const
+void PhyNEOReferenceForce::initializeVec3Vector(vector<Vec3>& vectorToInitialize) const
 {
     vectorToInitialize.resize(_numParticles);
     Vec3 zeroVec(0.0, 0.0, 0.0);
     std::fill(vectorToInitialize.begin(), vectorToInitialize.end(), zeroVec);
 }
 
-void MPIDReferenceForce::copyVec3Vector(const vector<OpenMM::Vec3>& inputVector, vector<OpenMM::Vec3>& outputVector) const
+void PhyNEOReferenceForce::copyVec3Vector(const vector<OpenMM::Vec3>& inputVector, vector<OpenMM::Vec3>& outputVector) const
 {
     outputVector.resize(inputVector.size());
     for (unsigned int ii = 0; ii < inputVector.size(); ii++) {
@@ -279,7 +279,7 @@ void MPIDReferenceForce::copyVec3Vector(const vector<OpenMM::Vec3>& inputVector,
     }
 }
 
-void MPIDReferenceForce::loadParticleData(const vector<Vec3>& particlePositions,
+void PhyNEOReferenceForce::loadParticleData(const vector<Vec3>& particlePositions,
                                                      const vector<double>& charges,
                                                      const vector<double>& dipoles,
                                                      const vector<double>& quadrupoles,
@@ -349,17 +349,17 @@ void MPIDReferenceForce::loadParticleData(const vector<Vec3>& particlePositions,
     }
 }
 
-void MPIDReferenceForce::zeroFixedMultipoleFields()
+void PhyNEOReferenceForce::zeroFixedMultipoleFields()
 {
     initializeVec3Vector(_fixedMultipoleField);
 }
 
-void MPIDReferenceForce::checkChiralCenterAtParticle(MultipoleParticleData& particleI, int axisType,
+void PhyNEOReferenceForce::checkChiralCenterAtParticle(MultipoleParticleData& particleI, int axisType,
                                                                 MultipoleParticleData& particleZ, MultipoleParticleData& particleX,
                                                                 MultipoleParticleData& particleY) const
 {
 
-    if (axisType != MPIDForce::ZThenX || particleY.particleIndex == -1) {
+    if (axisType != PhyNEOForce::ZThenX || particleY.particleIndex == -1) {
         return;
     }
 
@@ -380,7 +380,7 @@ void MPIDReferenceForce::checkChiralCenterAtParticle(MultipoleParticleData& part
     }
 }
 
-void MPIDReferenceForce::checkChiral(vector<MultipoleParticleData>& particleData,
+void PhyNEOReferenceForce::checkChiral(vector<MultipoleParticleData>& particleData,
                                                 const vector<int>& multipoleAtomXs,
                                                 const vector<int>& multipoleAtomYs,
                                                 const vector<int>& multipoleAtomZs,
@@ -396,7 +396,7 @@ void MPIDReferenceForce::checkChiral(vector<MultipoleParticleData>& particleData
     }
 }
 
-void MPIDReferenceForce::applyRotationMatrixToParticle(      MultipoleParticleData& particleI,
+void PhyNEOReferenceForce::applyRotationMatrixToParticle(      MultipoleParticleData& particleI,
                                                                   const MultipoleParticleData* particleZ,
                                                                   const MultipoleParticleData* particleX,
                                                                         MultipoleParticleData* particleY,
@@ -416,7 +416,7 @@ void MPIDReferenceForce::applyRotationMatrixToParticle(      MultipoleParticleDa
 
     // branch based on axis type
 
-    if (axisType == MPIDForce::ZOnly) {
+    if (axisType == PhyNEOForce::ZOnly) {
 
         // z-only
 
@@ -427,7 +427,7 @@ void MPIDReferenceForce::applyRotationMatrixToParticle(      MultipoleParticleDa
     }
     else {
         vectorX = particleX->position - particleI.position;
-        if (axisType == MPIDForce::Bisector) {
+        if (axisType == PhyNEOForce::Bisector) {
 
             // bisector
 
@@ -437,7 +437,7 @@ void MPIDReferenceForce::applyRotationMatrixToParticle(      MultipoleParticleDa
             vectorZ += vectorX;
             normalizeVec3(vectorZ);
         }
-        else if (axisType == MPIDForce::ZBisect) {
+        else if (axisType == PhyNEOForce::ZBisect) {
 
             // z-bisect
 
@@ -451,7 +451,7 @@ void MPIDReferenceForce::applyRotationMatrixToParticle(      MultipoleParticleDa
             vectorX += vectorY;
             normalizeVec3(vectorX);
         }
-        else if (axisType == MPIDForce::ThreeFold) {
+        else if (axisType == PhyNEOForce::ThreeFold) {
 
             // 3-fold
 
@@ -647,7 +647,7 @@ void MPIDReferenceForce::applyRotationMatrixToParticle(      MultipoleParticleDa
         particleI.sphericalOctopole[ii] = rotatedOctopole[ii];
 }
 
-void MPIDReferenceForce::formQIRotationMatrix(const Vec3& iPosition,
+void PhyNEOReferenceForce::formQIRotationMatrix(const Vec3& iPosition,
                                                          const Vec3& jPosition,
                                                          const Vec3 &deltaR,
                                                          double r,
@@ -683,7 +683,7 @@ void MPIDReferenceForce::formQIRotationMatrix(const Vec3& iPosition,
 
 
 
-void MPIDReferenceForce::buildSphericalQuadrupoleRotationMatrix(const double (&D1)[3][3], double (&D2)[5][5]) const
+void PhyNEOReferenceForce::buildSphericalQuadrupoleRotationMatrix(const double (&D1)[3][3], double (&D2)[5][5]) const
 {
     D2[0][0] = 0.5*(3.0*D1[0][0]*D1[0][0] - 1.0);
     D2[1][0] = sqrtThree*D1[0][0]*D1[1][0];
@@ -712,7 +712,7 @@ void MPIDReferenceForce::buildSphericalQuadrupoleRotationMatrix(const double (&D
     D2[4][4] = D1[2][1]*D1[1][2] + D1[1][1]*D1[2][2];
 }
 
-void MPIDReferenceForce::buildSphericalOctopoleRotationMatrix(const double (&D1)[3][3], const double (&D2)[5][5], double (&D3)[7][7]) const
+void PhyNEOReferenceForce::buildSphericalOctopoleRotationMatrix(const double (&D1)[3][3], const double (&D2)[5][5], double (&D3)[7][7]) const
 {
     D3[0][0] = D1[0][0]*D2[0][0] - 0.5773502691896258*(D1[1][0]*D2[1][0] + D1[2][0]*D2[2][0]);
     D3[0][1] = 0.25*(4.242640687119285*D1[0][0]*D2[0][1] - 2.449489742783178*(D1[1][0]*D2[1][1] + D1[2][0]*D2[2][1]));
@@ -766,7 +766,7 @@ void MPIDReferenceForce::buildSphericalOctopoleRotationMatrix(const double (&D1)
 }
 
 
-void MPIDReferenceForce::buildPartialSphericalQuadrupoleRotationMatrix(const double (&D1)[3][3], double (&D2)[3][5]) const
+void PhyNEOReferenceForce::buildPartialSphericalQuadrupoleRotationMatrix(const double (&D1)[3][3], double (&D2)[3][5]) const
 {
     D2[0][0] = 0.5*(3.0*D1[0][0]*D1[0][0] - 1.0);
     D2[0][1] = sqrtThree*D1[0][0]*D1[0][1];
@@ -785,7 +785,7 @@ void MPIDReferenceForce::buildPartialSphericalQuadrupoleRotationMatrix(const dou
     D2[2][4] = D1[2][1]*D1[0][2] + D1[0][1]*D1[2][2];
 }
 
-void MPIDReferenceForce::applyRotationMatrix(vector<MultipoleParticleData>& particleData,
+void PhyNEOReferenceForce::applyRotationMatrix(vector<MultipoleParticleData>& particleData,
                                                         const vector<int>& multipoleAtomXs,
                                                         const vector<int>& multipoleAtomYs,
                                                         const vector<int>& multipoleAtomZs,
@@ -801,7 +801,7 @@ void MPIDReferenceForce::applyRotationMatrix(vector<MultipoleParticleData>& part
     }
 }
 
-void MPIDReferenceForce::getAndScaleInverseRs(double dampI, double dampJ, double pscale,
+void PhyNEOReferenceForce::getAndScaleInverseRs(double dampI, double dampJ, double pscale,
                                                          double tholeI, double tholeJ,
                                                          double r, vector<double>& rrI) const
 {
@@ -834,7 +834,7 @@ void MPIDReferenceForce::getAndScaleInverseRs(double dampI, double dampJ, double
     }
 }
 
-void MPIDReferenceForce::calculateFixedMultipoleFieldPairIxn(const MultipoleParticleData& particleI,
+void PhyNEOReferenceForce::calculateFixedMultipoleFieldPairIxn(const MultipoleParticleData& particleI,
                                                                         const MultipoleParticleData& particleJ,
                                                                         double dScale, double pScale)
 {
@@ -908,7 +908,7 @@ void MPIDReferenceForce::calculateFixedMultipoleFieldPairIxn(const MultipolePart
     _fixedMultipoleField[particleIndex]      += field*dScale;
 }
 
-void MPIDReferenceForce::calculateFixedMultipoleField(const vector<MultipoleParticleData>& particleData)
+void PhyNEOReferenceForce::calculateFixedMultipoleField(const vector<MultipoleParticleData>& particleData)
 {
 
     // calculate fixed multipole fields
@@ -933,7 +933,7 @@ void MPIDReferenceForce::calculateFixedMultipoleField(const vector<MultipolePart
     }
 }
 
-void MPIDReferenceForce::initializeInducedDipoles(vector<UpdateInducedDipoleFieldStruct>& updateInducedDipoleFields)
+void PhyNEOReferenceForce::initializeInducedDipoles(vector<UpdateInducedDipoleFieldStruct>& updateInducedDipoleFields)
 {
 
     // initialize inducedDipoles
@@ -945,7 +945,7 @@ void MPIDReferenceForce::initializeInducedDipoles(vector<UpdateInducedDipoleFiel
     }
 }
 
-void MPIDReferenceForce::calculateInducedDipolePairIxn(unsigned int particleI,
+void PhyNEOReferenceForce::calculateInducedDipolePairIxn(unsigned int particleI,
                                                                   unsigned int particleJ,
                                                                   double rr3,
                                                                   double rr5,
@@ -960,7 +960,7 @@ void MPIDReferenceForce::calculateInducedDipolePairIxn(unsigned int particleI,
     field[particleJ]           += inducedDipole[particleI]*rr3 + deltaR*dDotDelta;
 }
 
-void MPIDReferenceForce::calculateInducedDipolePairIxns(const MultipoleParticleData& particleI,
+void PhyNEOReferenceForce::calculateInducedDipolePairIxns(const MultipoleParticleData& particleI,
                                                                    const MultipoleParticleData& particleJ,
                                                                    vector<UpdateInducedDipoleFieldStruct>& updateInducedDipoleFields)
 {
@@ -972,7 +972,7 @@ void MPIDReferenceForce::calculateInducedDipolePairIxns(const MultipoleParticleD
     double r      = sqrt(deltaR.dot(deltaR));
     vector<double> rrI(2);
     // If we're using the extrapolation algorithm, we need to compute the field gradient, so ask for one more rrI value.
-    if (getPolarizationType() == MPIDReferenceForce::Extrapolated)
+    if (getPolarizationType() == PhyNEOReferenceForce::Extrapolated)
         rrI.push_back(0.0);
 
     double pscale = getMultipoleScaleFactor(particleI.particleIndex, particleJ.particleIndex, P_SCALE);
@@ -985,7 +985,7 @@ void MPIDReferenceForce::calculateInducedDipolePairIxns(const MultipoleParticleD
     for (auto& field : updateInducedDipoleFields) {
         calculateInducedDipolePairIxn(particleI.particleIndex, particleJ.particleIndex, rr3, rr5, deltaR,
                                        *field.inducedDipoles, field.inducedDipoleField);
-        if (getPolarizationType() == MPIDReferenceForce::Extrapolated) {
+        if (getPolarizationType() == PhyNEOReferenceForce::Extrapolated) {
             // Compute and store the field gradient for later use.
             double dx = deltaR[0];
             double dy = deltaR[1];
@@ -1032,7 +1032,7 @@ void MPIDReferenceForce::calculateInducedDipolePairIxns(const MultipoleParticleD
     }
 }
 
-void MPIDReferenceForce::calculateInducedDipoleFields(const vector<MultipoleParticleData>& particleData, vector<UpdateInducedDipoleFieldStruct>& updateInducedDipoleFields) {
+void PhyNEOReferenceForce::calculateInducedDipoleFields(const vector<MultipoleParticleData>& particleData, vector<UpdateInducedDipoleFieldStruct>& updateInducedDipoleFields) {
     // Initialize the fields to zero.
 
     Vec3 zeroVec(0.0, 0.0, 0.0);
@@ -1046,7 +1046,7 @@ void MPIDReferenceForce::calculateInducedDipoleFields(const vector<MultipolePart
             calculateInducedDipolePairIxns(particleData[ii], particleData[jj], updateInducedDipoleFields);
 }
 
-double MPIDReferenceForce::updateInducedDipoleFields(const vector<MultipoleParticleData>& particleData,
+double PhyNEOReferenceForce::updateInducedDipoleFields(const vector<MultipoleParticleData>& particleData,
                                                                 vector<UpdateInducedDipoleFieldStruct>& updateInducedDipoleFields)
 {
     // Calculate the fields coming from induced dipoles.
@@ -1068,7 +1068,7 @@ double MPIDReferenceForce::updateInducedDipoleFields(const vector<MultipoleParti
     return maxEpsilon;
 }
 
-double MPIDReferenceForce::updateInducedDipole(const vector<MultipoleParticleData>& particleData,
+double PhyNEOReferenceForce::updateInducedDipole(const vector<MultipoleParticleData>& particleData,
                                                           const vector<Vec3>& fixedMultipoleField,
                                                           const vector<Vec3>& inducedDipoleField,
                                                           vector<Vec3>& inducedDipole)
@@ -1089,7 +1089,7 @@ double MPIDReferenceForce::updateInducedDipole(const vector<MultipoleParticleDat
     return epsilon;
 }
 
-void MPIDReferenceForce::convergeInduceDipolesBySOR(const vector<MultipoleParticleData>& particleData,
+void PhyNEOReferenceForce::convergeInduceDipolesBySOR(const vector<MultipoleParticleData>& particleData,
                                                                vector<UpdateInducedDipoleFieldStruct>& updateInducedDipoleField)
 {
 
@@ -1122,7 +1122,7 @@ void MPIDReferenceForce::convergeInduceDipolesBySOR(const vector<MultipolePartic
 }
 
 
-void MPIDReferenceForce::convergeInduceDipolesByExtrapolation(const vector<MultipoleParticleData>& particleData, vector<UpdateInducedDipoleFieldStruct>& updateInducedDipoleField) {
+void PhyNEOReferenceForce::convergeInduceDipolesByExtrapolation(const vector<MultipoleParticleData>& particleData, vector<UpdateInducedDipoleFieldStruct>& updateInducedDipoleField) {
     // Start by storing the direct dipoles as PT0
 
     int numFields = updateInducedDipoleField.size();
@@ -1179,7 +1179,7 @@ void MPIDReferenceForce::convergeInduceDipolesByExtrapolation(const vector<Multi
     setMutualInducedDipoleConverged(true);
 }
 
-void MPIDReferenceForce::convergeInduceDipolesByDIIS(const vector<MultipoleParticleData>& particleData, vector<UpdateInducedDipoleFieldStruct>& updateInducedDipoleField) {
+void PhyNEOReferenceForce::convergeInduceDipolesByDIIS(const vector<MultipoleParticleData>& particleData, vector<UpdateInducedDipoleFieldStruct>& updateInducedDipoleField) {
     int numFields = updateInducedDipoleField.size();
     vector<vector<vector<Vec3> > > prevDipoles(numFields);
     vector<vector<Vec3> > prevErrors;
@@ -1251,7 +1251,7 @@ void MPIDReferenceForce::convergeInduceDipolesByDIIS(const vector<MultipoleParti
 
 }
 
-void MPIDReferenceForce::computeDIISCoefficients(const vector<vector<Vec3> >& prevErrors, vector<double>& coefficients) const {
+void PhyNEOReferenceForce::computeDIISCoefficients(const vector<vector<Vec3> >& prevErrors, vector<double>& coefficients) const {
     int steps = coefficients.size();
     if (steps == 1) {
         coefficients[0] = 1;
@@ -1290,7 +1290,7 @@ void MPIDReferenceForce::computeDIISCoefficients(const vector<vector<Vec3> >& pr
     }
 }
 
-void MPIDReferenceForce::calculateInducedDipoles(const vector<MultipoleParticleData>& particleData)
+void PhyNEOReferenceForce::calculateInducedDipoles(const vector<MultipoleParticleData>& particleData)
 {
 
     // calculate fixed electric fields
@@ -1315,20 +1315,20 @@ void MPIDReferenceForce::calculateInducedDipoles(const vector<MultipoleParticleD
 
     initializeInducedDipoles(updateInducedDipoleField);
 
-    if (getPolarizationType() == MPIDReferenceForce::Direct) {
+    if (getPolarizationType() == PhyNEOReferenceForce::Direct) {
         setMutualInducedDipoleConverged(true);
         return;
     }
 
     // UpdateInducedDipoleFieldStruct contains induced dipole, fixed multipole fields and fields
     // due to other induced dipoles at each site
-    if (getPolarizationType() == MPIDReferenceForce::Mutual)
+    if (getPolarizationType() == PhyNEOReferenceForce::Mutual)
         convergeInduceDipolesByDIIS(particleData, updateInducedDipoleField);
-    else if (getPolarizationType() == MPIDReferenceForce::Extrapolated)
+    else if (getPolarizationType() == PhyNEOReferenceForce::Extrapolated)
         convergeInduceDipolesByExtrapolation(particleData, updateInducedDipoleField);
 }
 
-double MPIDReferenceForce::calculateElectrostaticPairIxn(const MultipoleParticleData& particleI,
+double PhyNEOReferenceForce::calculateElectrostaticPairIxn(const MultipoleParticleData& particleI,
                                                                         const MultipoleParticleData& particleJ,
                                                                         const vector<double>& scalingFactors,
                                                                         vector<Vec3>& forces,
@@ -1831,7 +1831,7 @@ double MPIDReferenceForce::calculateElectrostaticPairIxn(const MultipoleParticle
     double iEJZ = qiUindJ[1]*Vjid[2] - qiUindJ[2]*Vjid[1];
 
     // Add in the induced-induced terms, if needed.
-    if(getPolarizationType() == MPIDReferenceForce::Mutual) {
+    if(getPolarizationType() == PhyNEOReferenceForce::Mutual) {
         // Uind-Uind terms (m=0)
         double eCoef = -8.0*rInvVec[3]*uScale*thole_d0;
         double dCoef = 12.0*rInvVec[4]*uScale*dthole_d0;
@@ -1892,7 +1892,7 @@ double MPIDReferenceForce::calculateElectrostaticPairIxn(const MultipoleParticle
     return energy;
 }
 
-void MPIDReferenceForce::mapTorqueToForceForParticle(const MultipoleParticleData& particleI,
+void PhyNEOReferenceForce::mapTorqueToForceForParticle(const MultipoleParticleData& particleI,
                                                                 const MultipoleParticleData& particleU,
                                                                 const MultipoleParticleData& particleV,
                                                                       MultipoleParticleData* particleW,
@@ -1928,7 +1928,7 @@ void MPIDReferenceForce::mapTorqueToForceForParticle(const MultipoleParticleData
     // compute the vector between the atoms and 1/sqrt(d2), d2 is distance between
     // this atom and the axis atom
 
-    if (axisType == MPIDForce::NoAxisType) {
+    if (axisType == PhyNEOForce::NoAxisType) {
         return;
     }
 
@@ -1939,7 +1939,7 @@ void MPIDReferenceForce::mapTorqueToForceForParticle(const MultipoleParticleData
     norms[V] = normalizeVec3(vectorV);
 
     Vec3 vectorW;
-    if (particleW && (axisType == MPIDForce::ZBisect || axisType == MPIDForce::ThreeFold)) {
+    if (particleW && (axisType == PhyNEOForce::ZBisect || axisType == PhyNEOForce::ThreeFold)) {
          vectorW = particleW->position - particleI.position;
     } else {
          vectorW = vectorU.cross(vectorV);
@@ -1975,7 +1975,7 @@ void MPIDReferenceForce::mapTorqueToForceForParticle(const MultipoleParticleData
 
     // branch based on axis type
 
-    if (axisType == MPIDForce::ZThenX || axisType == MPIDForce::Bisector) {
+    if (axisType == PhyNEOForce::ZThenX || axisType == PhyNEOForce::Bisector) {
 
         double factor1;
         double factor2;
@@ -1987,7 +1987,7 @@ void MPIDReferenceForce::mapTorqueToForceForParticle(const MultipoleParticleData
         factor2                 =  dphi[W]/(norms[U]);
         factor3                 = -dphi[U]/(norms[V]*angles[UV][1]);
 
-        if (axisType == MPIDForce::Bisector) {
+        if (axisType == PhyNEOForce::Bisector) {
             factor2    *= half;
             factor4     = half*dphi[W]/(norms[V]);
         } else {
@@ -2004,7 +2004,7 @@ void MPIDReferenceForce::mapTorqueToForceForParticle(const MultipoleParticleData
             forces[particleI.particleIndex][ii]                 +=  (forceU + forceV);
         }
 
-    } else if (axisType == MPIDForce::ZBisect) {
+    } else if (axisType == PhyNEOForce::ZBisect) {
 
         Vec3 vectorR          = vectorV + vectorW;
         Vec3 vectorS          = vectorU.cross(vectorR);
@@ -2065,7 +2065,7 @@ void MPIDReferenceForce::mapTorqueToForceForParticle(const MultipoleParticleData
 
         forces[particleI.particleIndex]        += (forceU + forceV + forceW);
 
-    } else if (axisType == MPIDForce::ThreeFold) {
+    } else if (axisType == PhyNEOForce::ThreeFold) {
 
         // 3-fold
 
@@ -2097,7 +2097,7 @@ void MPIDReferenceForce::mapTorqueToForceForParticle(const MultipoleParticleData
             forces[particleI.particleIndex][ii] += (du + dv + dw);
         }
 
-    } else if (axisType == MPIDForce::ZOnly) {
+    } else if (axisType == PhyNEOForce::ZOnly) {
 
         // z-only
 
@@ -2109,7 +2109,7 @@ void MPIDReferenceForce::mapTorqueToForceForParticle(const MultipoleParticleData
     }
 }
 
-void MPIDReferenceForce::mapTorqueToForce(vector<MultipoleParticleData>& particleData,
+void PhyNEOReferenceForce::mapTorqueToForce(vector<MultipoleParticleData>& particleData,
                                                      const vector<int>& multipoleAtomXs,
                                                      const vector<int>& multipoleAtomYs,
                                                      const vector<int>& multipoleAtomZs,
@@ -2121,7 +2121,7 @@ void MPIDReferenceForce::mapTorqueToForce(vector<MultipoleParticleData>& particl
     // map torques to forces
 
     for (unsigned int ii = 0; ii < particleData.size(); ii++) {
-        if (axisTypes[ii] != MPIDForce::NoAxisType) {
+        if (axisTypes[ii] != PhyNEOForce::NoAxisType) {
              mapTorqueToForceForParticle(particleData[ii],
                                          particleData[multipoleAtomZs[ii]], particleData[multipoleAtomXs[ii]],
                                          multipoleAtomYs[ii] > -1 ? &particleData[multipoleAtomYs[ii]] : NULL,
@@ -2130,7 +2130,7 @@ void MPIDReferenceForce::mapTorqueToForce(vector<MultipoleParticleData>& particl
     }
 }
 
-double MPIDReferenceForce::calculateElectrostatic(const vector<MultipoleParticleData>& particleData,
+double PhyNEOReferenceForce::calculateElectrostatic(const vector<MultipoleParticleData>& particleData,
                                                              vector<Vec3>& torques,
                                                              vector<Vec3>& forces)
 {
@@ -2157,7 +2157,7 @@ double MPIDReferenceForce::calculateElectrostatic(const vector<MultipoleParticle
             }
         }
     }
-    if (getPolarizationType() == MPIDReferenceForce::Extrapolated) {
+    if (getPolarizationType() == PhyNEOReferenceForce::Extrapolated) {
         double prefac = (_electric/_dielectric);
         for (int i = 0; i < _numParticles; i++) {
             // Compute the µ(m) T µ(n) force contributions here
@@ -2190,7 +2190,7 @@ double MPIDReferenceForce::calculateElectrostatic(const vector<MultipoleParticle
     return energy;
 }
 
-void MPIDReferenceForce::setup(const vector<Vec3>& particlePositions,
+void PhyNEOReferenceForce::setup(const vector<Vec3>& particlePositions,
                                           const vector<double>& charges,
                                           const vector<double>& dipoles,
                                           const vector<double>& quadrupoles,
@@ -2235,7 +2235,7 @@ void MPIDReferenceForce::setup(const vector<Vec3>& particlePositions,
     }
 }
 
-double MPIDReferenceForce::calculateForceAndEnergy(const vector<Vec3>& particlePositions,
+double PhyNEOReferenceForce::calculateForceAndEnergy(const vector<Vec3>& particlePositions,
                                                              const vector<double>& charges,
                                                              const vector<double>& dipoles,
                                                              const vector<double>& quadrupoles,
@@ -2269,7 +2269,7 @@ double MPIDReferenceForce::calculateForceAndEnergy(const vector<Vec3>& particleP
     return energy;
 }
 
-void MPIDReferenceForce::calculateInducedDipoles(const vector<Vec3>& particlePositions,
+void PhyNEOReferenceForce::calculateInducedDipoles(const vector<Vec3>& particlePositions,
                                                             const vector<double>& charges,
                                                             const vector<double>& dipoles,
                                                             const vector<double>& quadrupoles,
@@ -2295,7 +2295,7 @@ void MPIDReferenceForce::calculateInducedDipoles(const vector<Vec3>& particlePos
 
 
 
-void MPIDReferenceForce::calculateLabFramePermanentDipoles(const vector<Vec3>& particlePositions,
+void PhyNEOReferenceForce::calculateLabFramePermanentDipoles(const vector<Vec3>& particlePositions,
                                                                       const vector<double>& charges,
                                                                       const vector<double>& dipoles,
                                                                       const vector<double>& quadrupoles,
@@ -2320,7 +2320,7 @@ void MPIDReferenceForce::calculateLabFramePermanentDipoles(const vector<Vec3>& p
         outputRotatedPermanentDipoles[i] = particleData[i].dipole;
 }
 
-void MPIDReferenceForce::calculateTotalDipoles(const vector<Vec3>& particlePositions,
+void PhyNEOReferenceForce::calculateTotalDipoles(const vector<Vec3>& particlePositions,
                                                           const vector<double>& charges,
                                                           const vector<double>& dipoles,
                                                           const vector<double>& quadrupoles,
@@ -2346,7 +2346,7 @@ void MPIDReferenceForce::calculateTotalDipoles(const vector<Vec3>& particlePosit
             outputTotalDipoles[i][j] = particleData[i].dipole[j] + _inducedDipole[i][j];
 }
 
-void MPIDReferenceForce::calculateMPIDSystemMultipoleMoments(const vector<double>& masses,
+void PhyNEOReferenceForce::calculatePhyNEOSystemMultipoleMoments(const vector<double>& masses,
                                                                           const vector<Vec3>& particlePositions,
                                                                           const vector<double>& charges,
                                                                           const vector<double>& dipoles,
@@ -2461,7 +2461,7 @@ void MPIDReferenceForce::calculateMPIDSystemMultipoleMoments(const vector<double
     }
 }
 
-double MPIDReferenceForce::calculateElectrostaticPotentialForParticleGridPoint(const MultipoleParticleData& particleI, const Vec3& gridPoint) const
+double PhyNEOReferenceForce::calculateElectrostaticPotentialForParticleGridPoint(const MultipoleParticleData& particleI, const Vec3& gridPoint) const
 {
 
     Vec3 deltaR = particleI.position - gridPoint;
@@ -2488,7 +2488,7 @@ double MPIDReferenceForce::calculateElectrostaticPotentialForParticleGridPoint(c
     return potential;
 }
 
-void MPIDReferenceForce::calculateElectrostaticPotential(const vector<Vec3>& particlePositions,
+void PhyNEOReferenceForce::calculateElectrostaticPotential(const vector<Vec3>& particlePositions,
                                                                     const vector<double>& charges,
                                                                     const vector<double>& dipoles,
                                                                     const vector<double>& quadrupoles,
@@ -2530,18 +2530,18 @@ void MPIDReferenceForce::calculateElectrostaticPotential(const vector<Vec3>& par
         p *= term;
 }
 
-MPIDReferenceForce::UpdateInducedDipoleFieldStruct::UpdateInducedDipoleFieldStruct(vector<OpenMM::Vec3>& inputFixed_E_Field, vector<OpenMM::Vec3>& inputInducedDipoles, vector<vector<Vec3> >& extrapolatedDipoles,  vector<vector<double> >& extrapolatedDipoleField,  vector<vector<double> >& extrapolatedDipoleFieldGradient) :
+PhyNEOReferenceForce::UpdateInducedDipoleFieldStruct::UpdateInducedDipoleFieldStruct(vector<OpenMM::Vec3>& inputFixed_E_Field, vector<OpenMM::Vec3>& inputInducedDipoles, vector<vector<Vec3> >& extrapolatedDipoles,  vector<vector<double> >& extrapolatedDipoleField,  vector<vector<double> >& extrapolatedDipoleFieldGradient) :
         fixedMultipoleField(&inputFixed_E_Field), inducedDipoles(&inputInducedDipoles), extrapolatedDipoles(&extrapolatedDipoles), extrapolatedDipoleField(&extrapolatedDipoleField),  extrapolatedDipoleFieldGradient(&extrapolatedDipoleFieldGradient) {
     inducedDipoleField.resize(fixedMultipoleField->size());
 }
 
 
-const int MPIDReferencePmeForce::MPID_PME_ORDER = 6;
+const int PhyNEOReferencePmeForce::PhyNEO_PME_ORDER = 6;
 
-const double MPIDReferencePmeForce::SQRT_PI = 1.77245385091;
+const double PhyNEOReferencePmeForce::SQRT_PI = 1.77245385091;
 
-MPIDReferencePmeForce::MPIDReferencePmeForce() :
-               MPIDReferenceForce(PME),
+PhyNEOReferencePmeForce::PhyNEOReferencePmeForce() :
+               PhyNEOReferenceForce(PME),
                _cutoffDistance(1.0), _cutoffDistanceSquared(1.0),
                _pmeGridSize(0), _totalGridSize(0), _alphaEwald(0.0)
 {
@@ -2551,7 +2551,7 @@ MPIDReferencePmeForce::MPIDReferencePmeForce() :
     _pmeGridDimensions = IntVec(-1, -1, -1);
 }
 
-MPIDReferencePmeForce::~MPIDReferencePmeForce()
+PhyNEOReferencePmeForce::~PhyNEOReferencePmeForce()
 {
     if (_fftplan) {
         fftpack_destroy(_fftplan);
@@ -2561,28 +2561,28 @@ MPIDReferencePmeForce::~MPIDReferencePmeForce()
     }
 };
 
-double MPIDReferencePmeForce::getCutoffDistance() const
+double PhyNEOReferencePmeForce::getCutoffDistance() const
 {
      return _cutoffDistance;
 };
 
-void MPIDReferencePmeForce::setCutoffDistance(double cutoffDistance)
+void PhyNEOReferencePmeForce::setCutoffDistance(double cutoffDistance)
 {
      _cutoffDistance        = cutoffDistance;
      _cutoffDistanceSquared = cutoffDistance*cutoffDistance;
 };
 
-double MPIDReferencePmeForce::getAlphaEwald() const
+double PhyNEOReferencePmeForce::getAlphaEwald() const
 {
      return _alphaEwald;
 };
 
-void MPIDReferencePmeForce::setAlphaEwald(double alphaEwald)
+void PhyNEOReferencePmeForce::setAlphaEwald(double alphaEwald)
 {
      _alphaEwald = alphaEwald;
 };
 
-void MPIDReferencePmeForce::getPmeGridDimensions(vector<int>& pmeGridDimensions) const
+void PhyNEOReferencePmeForce::getPmeGridDimensions(vector<int>& pmeGridDimensions) const
 {
 
     pmeGridDimensions.resize(3);
@@ -2592,7 +2592,7 @@ void MPIDReferencePmeForce::getPmeGridDimensions(vector<int>& pmeGridDimensions)
     pmeGridDimensions[2] = _pmeGridDimensions[2];
 };
 
-void MPIDReferencePmeForce::setPmeGridDimensions(vector<int>& pmeGridDimensions)
+void PhyNEOReferencePmeForce::setPmeGridDimensions(vector<int>& pmeGridDimensions)
 {
 
     if ((pmeGridDimensions[0] == _pmeGridDimensions[0]) &&
@@ -2612,7 +2612,7 @@ void MPIDReferencePmeForce::setPmeGridDimensions(vector<int>& pmeGridDimensions)
     initializeBSplineModuli();
 };
 
-void MPIDReferencePmeForce::setPeriodicBoxSize(OpenMM::Vec3* vectors)
+void PhyNEOReferencePmeForce::setPeriodicBoxSize(OpenMM::Vec3* vectors)
 {
 
     if (vectors[0][0] == 0.0 || vectors[1][1] == 0.0 || vectors[2][2] == 0.0) {
@@ -2637,7 +2637,7 @@ int compareInt2(const int2& v1, const int2& v2)
     return v1[1] < v2[1];
 }
 
-void MPIDReferencePmeForce::resizePmeArrays()
+void PhyNEOReferencePmeForce::resizePmeArrays()
 {
 
     _totalGridSize = _pmeGridDimensions[0]*_pmeGridDimensions[1]*_pmeGridDimensions[2];
@@ -2651,7 +2651,7 @@ void MPIDReferencePmeForce::resizePmeArrays()
 
     for (unsigned int ii = 0; ii < 3; ii++) {
        _pmeBsplineModuli[ii].resize(_pmeGridDimensions[ii]);
-       _thetai[ii].resize(MPID_PME_ORDER*_numParticles);
+       _thetai[ii].resize(PhyNEO_PME_ORDER*_numParticles);
     }
 
     _iGrid.resize(_numParticles);
@@ -2659,7 +2659,7 @@ void MPIDReferencePmeForce::resizePmeArrays()
     _phidp.resize(35*_numParticles);
 }
 
-void MPIDReferencePmeForce::initializePmeGrid()
+void PhyNEOReferencePmeForce::initializePmeGrid()
 {
     if (_pmeGrid == NULL)
         return;
@@ -2668,14 +2668,14 @@ void MPIDReferencePmeForce::initializePmeGrid()
         _pmeGrid[jj].re = _pmeGrid[jj].im = 0.0;
 }
 
-void MPIDReferencePmeForce::getPeriodicDelta(Vec3& deltaR) const
+void PhyNEOReferencePmeForce::getPeriodicDelta(Vec3& deltaR) const
 {
     deltaR -= _periodicBoxVectors[2]*floor(deltaR[2]*_recipBoxVectors[2][2]+0.5);
     deltaR -= _periodicBoxVectors[1]*floor(deltaR[1]*_recipBoxVectors[1][1]+0.5);
     deltaR -= _periodicBoxVectors[0]*floor(deltaR[0]*_recipBoxVectors[0][0]+0.5);
 }
 
-void MPIDReferencePmeForce::getDampedInverseDistances(const MultipoleParticleData& particleI,
+void PhyNEOReferencePmeForce::getDampedInverseDistances(const MultipoleParticleData& particleI,
                                                                  const MultipoleParticleData& particleJ,
                                                                  double dscale, double pscale, double r,
                                                                  std::vector<double>& dampedDInverseDistances,
@@ -2717,7 +2717,7 @@ void MPIDReferencePmeForce::getDampedInverseDistances(const MultipoleParticleDat
     dampedPInverseDistances[3] = 105.0*(1.0-pscale*scaleFactor[3])/r9;
 }
 
-void MPIDReferencePmeForce::initializeBSplineModuli()
+void PhyNEOReferencePmeForce::initializeBSplineModuli()
 {
 
     // Initialize the b-spline moduli.
@@ -2728,11 +2728,11 @@ void MPIDReferencePmeForce::initializeBSplineModuli()
         maxSize = maxSize  > _pmeGridDimensions[ii] ? maxSize : _pmeGridDimensions[ii];
     }
 
-    double array[MPID_PME_ORDER];
+    double array[PhyNEO_PME_ORDER];
     double x = 0.0;
     array[0]     = 1.0 - x;
     array[1]     = x;
-    for (int k = 2; k < MPID_PME_ORDER; k++) {
+    for (int k = 2; k < PhyNEO_PME_ORDER; k++) {
         double denom = 1.0/k;
         array[k] = x*array[k-1]*denom;
         for (int i = 1; i < k; i++) {
@@ -2742,7 +2742,7 @@ void MPIDReferencePmeForce::initializeBSplineModuli()
     }
 
     vector<double> bsarray(maxSize+1, 0.0);
-    for (int i = 2; i <= MPID_PME_ORDER+1; i++) {
+    for (int i = 2; i <= PhyNEO_PME_ORDER+1; i++) {
         bsarray[i] = array[i-2];
     }
     for (int dim = 0; dim < 3; dim++) {
@@ -2794,13 +2794,13 @@ void MPIDReferencePmeForce::initializeBSplineModuli()
                 factor = M_PI*k/size;
                 for (int j = 1; j <= jcut; j++) {
                     double arg = factor/(factor+M_PI*j);
-                    sum1 = sum1 + pow(arg,   MPID_PME_ORDER);
-                    sum2 = sum2 + pow(arg, 2*MPID_PME_ORDER);
+                    sum1 = sum1 + pow(arg,   PhyNEO_PME_ORDER);
+                    sum2 = sum2 + pow(arg, 2*PhyNEO_PME_ORDER);
                 }
                 for (int j = 1; j <= jcut; j++) {
                     double arg  = factor/(factor-M_PI*j);
-                    sum1 += pow(arg,   MPID_PME_ORDER);
-                    sum2 += pow(arg, 2*MPID_PME_ORDER);
+                    sum1 += pow(arg,   PhyNEO_PME_ORDER);
+                    sum2 += pow(arg, 2*PhyNEO_PME_ORDER);
                 }
                 zeta = sum2/sum1;
             }
@@ -2809,7 +2809,7 @@ void MPIDReferencePmeForce::initializeBSplineModuli()
     }
 }
 
-void MPIDReferencePmeForce::calculateFixedMultipoleFieldPairIxn(const MultipoleParticleData& particleI,
+void PhyNEOReferencePmeForce::calculateFixedMultipoleFieldPairIxn(const MultipoleParticleData& particleI,
                                                                            const MultipoleParticleData& particleJ,
                                                                            double dscale, double pscale)
 {
@@ -2919,17 +2919,17 @@ void MPIDReferencePmeForce::calculateFixedMultipoleFieldPairIxn(const MultipoleP
 
 }
 
-void MPIDReferencePmeForce::calculateFixedMultipoleField(const vector<MultipoleParticleData>& particleData)
+void PhyNEOReferencePmeForce::calculateFixedMultipoleField(const vector<MultipoleParticleData>& particleData)
 {
 
     // first calculate reciprocal space fixed multipole fields
 
     resizePmeArrays();
-    computeMPIDBsplines(particleData);
+    computePhyNEOBsplines(particleData);
     initializePmeGrid();
     spreadFixedMultipolesOntoGrid(particleData);
     fftpack_exec_3d(_fftplan, FFTPACK_FORWARD, _pmeGrid, _pmeGrid);
-    performMPIDReciprocalConvolution();
+    performPhyNEOReciprocalConvolution();
     fftpack_exec_3d(_fftplan, FFTPACK_BACKWARD, _pmeGrid, _pmeGrid);
     computeFixedPotentialFromGrid();
     recordFixedMultipoleField();
@@ -2945,18 +2945,18 @@ void MPIDReferencePmeForce::calculateFixedMultipoleField(const vector<MultipoleP
 
     // include direct space fixed multipole fields
 
-    this->MPIDReferenceForce::calculateFixedMultipoleField(particleData);
+    this->PhyNEOReferenceForce::calculateFixedMultipoleField(particleData);
 }
 
-#define ARRAY(x,y) array[(x)-1+((y)-1)*MPID_PME_ORDER]
+#define ARRAY(x,y) array[(x)-1+((y)-1)*PhyNEO_PME_ORDER]
 
 /**
  * This is called from computeBsplines().  It calculates the spline coefficients for a single atom along a single axis.
  */
-void MPIDReferencePmeForce::computeBSplinePoint(vector<double5>& thetai, double w)
+void PhyNEOReferencePmeForce::computeBSplinePoint(vector<double5>& thetai, double w)
 {
 
-    double array[MPID_PME_ORDER*MPID_PME_ORDER];
+    double array[PhyNEO_PME_ORDER*PhyNEO_PME_ORDER];
 
     // initialization to get to 2nd order recursion
 
@@ -2971,7 +2971,7 @@ void MPIDReferencePmeForce::computeBSplinePoint(vector<double5>& thetai, double 
 
     // compute standard B-spline recursion to desired order
 
-    for (int i = 4; i <= MPID_PME_ORDER; i++) {
+    for (int i = 4; i <= PhyNEO_PME_ORDER; i++) {
         int k = i - 1;
         double denom = 1.0 / k;
         ARRAY(i,i) = denom * w * ARRAY(k,k);
@@ -2982,71 +2982,71 @@ void MPIDReferencePmeForce::computeBSplinePoint(vector<double5>& thetai, double 
 
     // get coefficients for the B-spline first derivative
 
-    int k = MPID_PME_ORDER - 1;
-    ARRAY(k,MPID_PME_ORDER) = ARRAY(k,MPID_PME_ORDER-1);
-    for (int i = MPID_PME_ORDER-1; i >= 2; i--)
+    int k = PhyNEO_PME_ORDER - 1;
+    ARRAY(k,PhyNEO_PME_ORDER) = ARRAY(k,PhyNEO_PME_ORDER-1);
+    for (int i = PhyNEO_PME_ORDER-1; i >= 2; i--)
         ARRAY(k,i) = ARRAY(k,i-1) - ARRAY(k,i);
     ARRAY(k,1) = -ARRAY(k,1);
 
     // get coefficients for the B-spline second derivative
 
-    k = MPID_PME_ORDER - 2;
-    ARRAY(k,MPID_PME_ORDER-1) = ARRAY(k,MPID_PME_ORDER-2);
-    for (int i = MPID_PME_ORDER-2; i >= 2; i--)
+    k = PhyNEO_PME_ORDER - 2;
+    ARRAY(k,PhyNEO_PME_ORDER-1) = ARRAY(k,PhyNEO_PME_ORDER-2);
+    for (int i = PhyNEO_PME_ORDER-2; i >= 2; i--)
         ARRAY(k,i) = ARRAY(k,i-1) - ARRAY(k,i);
     ARRAY(k,1) = -ARRAY(k,1);
-    ARRAY(k,MPID_PME_ORDER) = ARRAY(k,MPID_PME_ORDER-1);
-    for (int i = MPID_PME_ORDER-1; i >= 2; i--)
+    ARRAY(k,PhyNEO_PME_ORDER) = ARRAY(k,PhyNEO_PME_ORDER-1);
+    for (int i = PhyNEO_PME_ORDER-1; i >= 2; i--)
         ARRAY(k,i) = ARRAY(k,i-1) - ARRAY(k,i);
     ARRAY(k,1) = -ARRAY(k,1);
 
     // get coefficients for the B-spline third derivative
 
-    k = MPID_PME_ORDER - 3;
-    ARRAY(k,MPID_PME_ORDER-2) = ARRAY(k,MPID_PME_ORDER-3);
-    for (int i = MPID_PME_ORDER-3; i >= 2; i--)
+    k = PhyNEO_PME_ORDER - 3;
+    ARRAY(k,PhyNEO_PME_ORDER-2) = ARRAY(k,PhyNEO_PME_ORDER-3);
+    for (int i = PhyNEO_PME_ORDER-3; i >= 2; i--)
         ARRAY(k,i) = ARRAY(k,i-1) - ARRAY(k,i);
     ARRAY(k,1) = -ARRAY(k,1);
-    ARRAY(k,MPID_PME_ORDER-1) = ARRAY(k,MPID_PME_ORDER-2);
-    for (int i = MPID_PME_ORDER-2; i >= 2; i--)
+    ARRAY(k,PhyNEO_PME_ORDER-1) = ARRAY(k,PhyNEO_PME_ORDER-2);
+    for (int i = PhyNEO_PME_ORDER-2; i >= 2; i--)
         ARRAY(k,i) = ARRAY(k,i-1) - ARRAY(k,i);
     ARRAY(k,1) = -ARRAY(k,1);
-    ARRAY(k,MPID_PME_ORDER) = ARRAY(k,MPID_PME_ORDER-1);
-    for (int i = MPID_PME_ORDER-1; i >= 2; i--)
+    ARRAY(k,PhyNEO_PME_ORDER) = ARRAY(k,PhyNEO_PME_ORDER-1);
+    for (int i = PhyNEO_PME_ORDER-1; i >= 2; i--)
         ARRAY(k,i) = ARRAY(k,i-1) - ARRAY(k,i);
     ARRAY(k,1) = -ARRAY(k,1);
 
 
     // get coefficients for the B-spline fourth derivative
 
-    k = MPID_PME_ORDER - 4;
-    ARRAY(k,MPID_PME_ORDER-3) = ARRAY(k,MPID_PME_ORDER-4);
-    for (int i = MPID_PME_ORDER-4; i >= 2; i--)
+    k = PhyNEO_PME_ORDER - 4;
+    ARRAY(k,PhyNEO_PME_ORDER-3) = ARRAY(k,PhyNEO_PME_ORDER-4);
+    for (int i = PhyNEO_PME_ORDER-4; i >= 2; i--)
         ARRAY(k,i) = ARRAY(k,i-1) - ARRAY(k,i);
     ARRAY(k,1) = -ARRAY(k,1);
-    ARRAY(k,MPID_PME_ORDER-2) = ARRAY(k,MPID_PME_ORDER-3);
-    for (int i = MPID_PME_ORDER-3; i >= 2; i--)
+    ARRAY(k,PhyNEO_PME_ORDER-2) = ARRAY(k,PhyNEO_PME_ORDER-3);
+    for (int i = PhyNEO_PME_ORDER-3; i >= 2; i--)
         ARRAY(k,i) = ARRAY(k,i-1) - ARRAY(k,i);
     ARRAY(k,1) = -ARRAY(k,1);
-    ARRAY(k,MPID_PME_ORDER-1) = ARRAY(k,MPID_PME_ORDER-2);
-    for (int i = MPID_PME_ORDER-2; i >= 2; i--)
+    ARRAY(k,PhyNEO_PME_ORDER-1) = ARRAY(k,PhyNEO_PME_ORDER-2);
+    for (int i = PhyNEO_PME_ORDER-2; i >= 2; i--)
         ARRAY(k,i) = ARRAY(k,i-1) - ARRAY(k,i);
     ARRAY(k,1) = -ARRAY(k,1);
-    ARRAY(k,MPID_PME_ORDER) = ARRAY(k,MPID_PME_ORDER-1);
-    for (int i = MPID_PME_ORDER-1; i >= 2; i--)
+    ARRAY(k,PhyNEO_PME_ORDER) = ARRAY(k,PhyNEO_PME_ORDER-1);
+    for (int i = PhyNEO_PME_ORDER-1; i >= 2; i--)
         ARRAY(k,i) = ARRAY(k,i-1) - ARRAY(k,i);
     ARRAY(k,1) = -ARRAY(k,1);
 
     // copy coefficients from temporary to permanent storage
 
-    for (int i = 1; i <= MPID_PME_ORDER; i++)
-        thetai[i-1] = double5(ARRAY(MPID_PME_ORDER,i), ARRAY(MPID_PME_ORDER-1,i), ARRAY(MPID_PME_ORDER-2,i), ARRAY(MPID_PME_ORDER-3,i), ARRAY(MPID_PME_ORDER-4, i));
+    for (int i = 1; i <= PhyNEO_PME_ORDER; i++)
+        thetai[i-1] = double5(ARRAY(PhyNEO_PME_ORDER,i), ARRAY(PhyNEO_PME_ORDER-1,i), ARRAY(PhyNEO_PME_ORDER-2,i), ARRAY(PhyNEO_PME_ORDER-3,i), ARRAY(PhyNEO_PME_ORDER-4, i));
 }
 
 /**
  * Compute b-spline coefficients.
  */
-void MPIDReferencePmeForce::computeMPIDBsplines(const vector<MultipoleParticleData>& particleData)
+void PhyNEOReferencePmeForce::computePhyNEOBsplines(const vector<MultipoleParticleData>& particleData)
 {
     //  get the B-spline coefficients for each multipole site
 
@@ -3060,12 +3060,12 @@ void MPIDReferencePmeForce::computeMPIDBsplines(const vector<MultipoleParticleDa
             double fr = _pmeGridDimensions[jj]*(w-(int)(w+0.5)+0.5);
             int ifr   = static_cast<int>(floor(fr));
             w         = fr - ifr;
-            igrid[jj] = ifr - MPID_PME_ORDER + 1;
+            igrid[jj] = ifr - PhyNEO_PME_ORDER + 1;
             igrid[jj] += igrid[jj] < 0 ? _pmeGridDimensions[jj] : 0;
-            vector<double5> thetaiTemp(MPID_PME_ORDER);
+            vector<double5> thetaiTemp(PhyNEO_PME_ORDER);
             computeBSplinePoint(thetaiTemp, w);
-            for (unsigned int kk = 0; kk < MPID_PME_ORDER; kk++)
-                _thetai[jj][ii*MPID_PME_ORDER+kk] = thetaiTemp[kk];
+            for (unsigned int kk = 0; kk < PhyNEO_PME_ORDER; kk++)
+                _thetai[jj][ii*PhyNEO_PME_ORDER+kk] = thetaiTemp[kk];
         }
 
         // Record the grid point.
@@ -3074,7 +3074,7 @@ void MPIDReferencePmeForce::computeMPIDBsplines(const vector<MultipoleParticleDa
     }
 }
 
-void MPIDReferencePmeForce::transformMultipolesToFractionalCoordinates(const vector<MultipoleParticleData>& particleData) {
+void PhyNEOReferencePmeForce::transformMultipolesToFractionalCoordinates(const vector<MultipoleParticleData>& particleData) {
     // Build matrices for transforming the dipoles and quadrupoles.
 
     Vec3 a[3];
@@ -3168,7 +3168,7 @@ void MPIDReferencePmeForce::transformMultipolesToFractionalCoordinates(const vec
     }
 }
 
-void MPIDReferencePmeForce::transformPotentialToCartesianCoordinates(const vector<double>& fphi, vector<double>& cphi) const {
+void PhyNEOReferencePmeForce::transformPotentialToCartesianCoordinates(const vector<double>& fphi, vector<double>& cphi) const {
     // Build a matrix for transforming the potential.
 
     Vec3 a[3];
@@ -3266,7 +3266,7 @@ void MPIDReferencePmeForce::transformPotentialToCartesianCoordinates(const vecto
     }
 }
 
-void MPIDReferencePmeForce::spreadFixedMultipolesOntoGrid(const vector<MultipoleParticleData>& particleData)
+void PhyNEOReferencePmeForce::spreadFixedMultipolesOntoGrid(const vector<MultipoleParticleData>& particleData)
 {
 
     transformMultipolesToFractionalCoordinates(particleData);
@@ -3301,15 +3301,15 @@ void MPIDReferencePmeForce::spreadFixedMultipolesOntoGrid(const vector<Multipole
         double atomOctopoleYZZ  = _transformed[atomIndex].octopole[QYZZ];
         double atomOctopoleZZZ  = _transformed[atomIndex].octopole[QZZZ];
         IntVec& gridPoint = _iGrid[atomIndex];
-        for (int ix = 0; ix < MPID_PME_ORDER; ix++) {
+        for (int ix = 0; ix < PhyNEO_PME_ORDER; ix++) {
             int x = (gridPoint[0]+ix) % _pmeGridDimensions[0];
-            for (int iy = 0; iy < MPID_PME_ORDER; iy++) {
+            for (int iy = 0; iy < PhyNEO_PME_ORDER; iy++) {
                 int y = (gridPoint[1]+iy) % _pmeGridDimensions[1];
-                for (int iz = 0; iz < MPID_PME_ORDER; iz++) {
+                for (int iz = 0; iz < PhyNEO_PME_ORDER; iz++) {
                     int z = (gridPoint[2]+iz) % _pmeGridDimensions[2];
-                    double5 t = _thetai[0][atomIndex*MPID_PME_ORDER+ix];
-                    double5 u = _thetai[1][atomIndex*MPID_PME_ORDER+iy];
-                    double5 v = _thetai[2][atomIndex*MPID_PME_ORDER+iz];
+                    double5 t = _thetai[0][atomIndex*PhyNEO_PME_ORDER+ix];
+                    double5 u = _thetai[1][atomIndex*PhyNEO_PME_ORDER+iy];
+                    double5 v = _thetai[2][atomIndex*PhyNEO_PME_ORDER+iz];
                     double term0 = atomCharge*u[0]*v[0] + atomDipole[1]*u[1]*v[0] + atomDipole[2]*u[0]*v[1]
                                  + atomQuadrupoleYY*u[2]*v[0] + atomQuadrupoleZZ*u[0]*v[2] + atomQuadrupoleYZ*u[1]*v[1]
                                  + atomOctopoleYYY*u[3]*v[0] + atomOctopoleYYZ*u[2]*v[1] + atomOctopoleYZZ*u[1]*v[2] + atomOctopoleZZZ*u[0]*v[3];
@@ -3326,7 +3326,7 @@ void MPIDReferencePmeForce::spreadFixedMultipolesOntoGrid(const vector<Multipole
     }
 }
 
-void MPIDReferencePmeForce::performMPIDReciprocalConvolution()
+void PhyNEOReferencePmeForce::performPhyNEOReciprocalConvolution()
 {
 
     double expFactor   = (M_PI*M_PI)/(_alphaEwald*_alphaEwald);
@@ -3365,7 +3365,7 @@ void MPIDReferencePmeForce::performMPIDReciprocalConvolution()
     }
 }
 
-void MPIDReferencePmeForce::computeFixedPotentialFromGrid()
+void PhyNEOReferencePmeForce::computeFixedPotentialFromGrid()
 {
     // extract the permanent multipole field at each site
 
@@ -3406,9 +3406,9 @@ void MPIDReferencePmeForce::computeFixedPotentialFromGrid()
         double tuv211 = 0.0;
         double tuv121 = 0.0;
         double tuv112 = 0.0;
-        for (int iz = 0; iz < MPID_PME_ORDER; iz++) {
+        for (int iz = 0; iz < PhyNEO_PME_ORDER; iz++) {
             int k = gridPoint[2]+iz-(gridPoint[2]+iz >= _pmeGridDimensions[2] ? _pmeGridDimensions[2] : 0);
-            double5 v = _thetai[2][m*MPID_PME_ORDER+iz];
+            double5 v = _thetai[2][m*PhyNEO_PME_ORDER+iz];
             double tu00 = 0.0;
             double tu10 = 0.0;
             double tu01 = 0.0;
@@ -3424,15 +3424,15 @@ void MPIDReferencePmeForce::computeFixedPotentialFromGrid()
             double tu31 = 0.0;
             double tu13 = 0.0;
             double tu22 = 0.0;
-            for (int iy = 0; iy < MPID_PME_ORDER; iy++) {
+            for (int iy = 0; iy < PhyNEO_PME_ORDER; iy++) {
                 int j = gridPoint[1]+iy-(gridPoint[1]+iy >= _pmeGridDimensions[1] ? _pmeGridDimensions[1] : 0);
-                double5 u = _thetai[1][m*MPID_PME_ORDER+iy];
+                double5 u = _thetai[1][m*PhyNEO_PME_ORDER+iy];
                 double5 t = double5(0.0, 0.0, 0.0, 0.0, 0.0);
-                for (int ix = 0; ix < MPID_PME_ORDER; ix++) {
+                for (int ix = 0; ix < PhyNEO_PME_ORDER; ix++) {
                     int i = gridPoint[0]+ix-(gridPoint[0]+ix >= _pmeGridDimensions[0] ? _pmeGridDimensions[0] : 0);
                     int gridIndex = i*_pmeGridDimensions[1]*_pmeGridDimensions[2] + j*_pmeGridDimensions[2] + k;
                     double tq = _pmeGrid[gridIndex].re;
-                    double5 tadd = _thetai[0][m*MPID_PME_ORDER+ix];
+                    double5 tadd = _thetai[0][m*PhyNEO_PME_ORDER+ix];
                     t[0] += tq*tadd[0];
                     t[1] += tq*tadd[1];
                     t[2] += tq*tadd[2];
@@ -3529,7 +3529,7 @@ void MPIDReferencePmeForce::computeFixedPotentialFromGrid()
     }
 }
 
-void MPIDReferencePmeForce::spreadInducedDipolesOnGrid(const vector<Vec3>& inputInducedDipole) {
+void PhyNEOReferencePmeForce::spreadInducedDipolesOnGrid(const vector<Vec3>& inputInducedDipole) {
     // Create the matrix to convert from Cartesian to fractional coordinates.
 
     Vec3 cartToFrac[3];
@@ -3549,16 +3549,16 @@ void MPIDReferencePmeForce::spreadInducedDipolesOnGrid(const vector<Vec3>& input
                                   inputInducedDipole[atomIndex][0]*cartToFrac[1][0] + inputInducedDipole[atomIndex][1]*cartToFrac[1][1] + inputInducedDipole[atomIndex][2]*cartToFrac[1][2],
                                   inputInducedDipole[atomIndex][0]*cartToFrac[2][0] + inputInducedDipole[atomIndex][1]*cartToFrac[2][1] + inputInducedDipole[atomIndex][2]*cartToFrac[2][2]);
         IntVec& gridPoint = _iGrid[atomIndex];
-        for (int ix = 0; ix < MPID_PME_ORDER; ix++) {
+        for (int ix = 0; ix < PhyNEO_PME_ORDER; ix++) {
             int x = (gridPoint[0]+ix) % _pmeGridDimensions[0];
-            for (int iy = 0; iy < MPID_PME_ORDER; iy++) {
+            for (int iy = 0; iy < PhyNEO_PME_ORDER; iy++) {
                 int y = (gridPoint[1]+iy) % _pmeGridDimensions[1];
-                for (int iz = 0; iz < MPID_PME_ORDER; iz++) {
+                for (int iz = 0; iz < PhyNEO_PME_ORDER; iz++) {
                     int z = (gridPoint[2]+iz) % _pmeGridDimensions[2];
 
-                    double5 t = _thetai[0][atomIndex*MPID_PME_ORDER+ix];
-                    double5 u = _thetai[1][atomIndex*MPID_PME_ORDER+iy];
-                    double5 v = _thetai[2][atomIndex*MPID_PME_ORDER+iz];
+                    double5 t = _thetai[0][atomIndex*PhyNEO_PME_ORDER+ix];
+                    double5 u = _thetai[1][atomIndex*PhyNEO_PME_ORDER+iy];
+                    double5 v = _thetai[2][atomIndex*PhyNEO_PME_ORDER+iz];
 
                     double term01 = inducedDipole[1]*u[1]*v[0] + inducedDipole[2]*u[0]*v[1];
                     double term11 = inducedDipole[0]*u[0]*v[0];
@@ -3572,7 +3572,7 @@ void MPIDReferencePmeForce::spreadInducedDipolesOnGrid(const vector<Vec3>& input
     }
 }
 
-void MPIDReferencePmeForce::computeInducedPotentialFromGrid()
+void PhyNEOReferencePmeForce::computeInducedPotentialFromGrid()
 {
     // extract the induced dipole field at each site
 
@@ -3613,9 +3613,9 @@ void MPIDReferencePmeForce::computeInducedPotentialFromGrid()
         double tuv211 = 0.0;
         double tuv121 = 0.0;
         double tuv112 = 0.0;
-        for (int iz = 0; iz < MPID_PME_ORDER; iz++) {
+        for (int iz = 0; iz < PhyNEO_PME_ORDER; iz++) {
             int k = gridPoint[2]+iz-(gridPoint[2]+iz >= _pmeGridDimensions[2] ? _pmeGridDimensions[2] : 0);
-            double5 v = _thetai[2][m*MPID_PME_ORDER+iz];
+            double5 v = _thetai[2][m*PhyNEO_PME_ORDER+iz];
             double tu00 = 0.0;
             double tu10 = 0.0;
             double tu01 = 0.0;
@@ -3631,15 +3631,15 @@ void MPIDReferencePmeForce::computeInducedPotentialFromGrid()
             double tu31 = 0.0;
             double tu13 = 0.0;
             double tu22 = 0.0;
-            for (int iy = 0; iy < MPID_PME_ORDER; iy++) {
+            for (int iy = 0; iy < PhyNEO_PME_ORDER; iy++) {
                 int j = gridPoint[1]+iy-(gridPoint[1]+iy >= _pmeGridDimensions[1] ? _pmeGridDimensions[1] : 0);
-                double5 u = _thetai[1][m*MPID_PME_ORDER+iy];
+                double5 u = _thetai[1][m*PhyNEO_PME_ORDER+iy];
                 double5 t = double5(0.0, 0.0, 0.0, 0.0, 0.0);
-                for (int ix = 0; ix < MPID_PME_ORDER; ix++) {
+                for (int ix = 0; ix < PhyNEO_PME_ORDER; ix++) {
                     int i = gridPoint[0]+ix-(gridPoint[0]+ix >= _pmeGridDimensions[0] ? _pmeGridDimensions[0] : 0);
                     int gridIndex = i*_pmeGridDimensions[1]*_pmeGridDimensions[2] + j*_pmeGridDimensions[2] + k;
                     double tq = _pmeGrid[gridIndex].re;
-                    double5 tadd = _thetai[0][m*MPID_PME_ORDER+ix];
+                    double5 tadd = _thetai[0][m*PhyNEO_PME_ORDER+ix];
                     t[0] += tq*tadd[0];
                     t[1] += tq*tadd[1];
                     t[2] += tq*tadd[2];
@@ -3736,7 +3736,7 @@ void MPIDReferencePmeForce::computeInducedPotentialFromGrid()
     }
 }
 
-double MPIDReferencePmeForce::computeReciprocalSpaceFixedMultipoleForceAndEnergy(const vector<MultipoleParticleData>& particleData,
+double PhyNEOReferencePmeForce::computeReciprocalSpaceFixedMultipoleForceAndEnergy(const vector<MultipoleParticleData>& particleData,
                                                                                             vector<Vec3>& forces, vector<Vec3>& torques) const
 {
     double multipole[20]; //                                  XXX XXY XXZ XYY XYZ XZZ YYY YYZ YZZ ZZZ
@@ -3868,7 +3868,7 @@ double MPIDReferencePmeForce::computeReciprocalSpaceFixedMultipoleForceAndEnergy
 /**
  * Compute the forces due to the reciprocal space PME calculation for induced dipoles.
  */
-double MPIDReferencePmeForce::computeReciprocalSpaceInducedDipoleForceAndEnergy(MPIDReferenceForce::PolarizationType polarizationType,
+double PhyNEOReferencePmeForce::computeReciprocalSpaceInducedDipoleForceAndEnergy(PhyNEOReferenceForce::PolarizationType polarizationType,
                                                                                            const vector<MultipoleParticleData>& particleData,
                                                                                            vector<Vec3>& forces, vector<Vec3>& torques) const
 {
@@ -3895,7 +3895,7 @@ double MPIDReferencePmeForce::computeReciprocalSpaceInducedDipoleForceAndEnergy(
         multipole[1] = particleData[i].dipole[0];
         multipole[2] = particleData[i].dipole[1];
         multipole[3] = particleData[i].dipole[2];
-        if (polarizationType == MPIDReferenceForce::Mutual && particleData[i].isAnisotropic){
+        if (polarizationType == PhyNEOReferenceForce::Mutual && particleData[i].isAnisotropic){
             multipole[1] += _inducedDipole[i][0];
             multipole[2] += _inducedDipole[i][1];
             multipole[3] += _inducedDipole[i][2];
@@ -4002,7 +4002,7 @@ double MPIDReferencePmeForce::computeReciprocalSpaceInducedDipoleForceAndEnergy(
             f[1] += 2.0*inducedDipole[k]*_phi[35*i+j2];
             f[2] += 2.0*inducedDipole[k]*_phi[35*i+j3];
  
-            if (polarizationType == MPIDReferenceForce::Mutual) {
+            if (polarizationType == PhyNEOReferenceForce::Mutual) {
                 f[0] += inducedDipole[k]*2.0*_phidp[35*i+j1];
                 f[1] += inducedDipole[k]*2.0*_phidp[35*i+j2];
                 f[2] += inducedDipole[k]*2.0*_phidp[35*i+j3];
@@ -4023,7 +4023,7 @@ double MPIDReferencePmeForce::computeReciprocalSpaceInducedDipoleForceAndEnergy(
     return (0.25*_electric*energy);
 }
 
-void MPIDReferencePmeForce::recordFixedMultipoleField()
+void PhyNEOReferencePmeForce::recordFixedMultipoleField()
 {
     Vec3 fracToCart[3];
     for (int i = 0; i < 3; i++)
@@ -4036,14 +4036,14 @@ void MPIDReferencePmeForce::recordFixedMultipoleField()
     }
 }
 
-void MPIDReferencePmeForce::initializeInducedDipoles(vector<UpdateInducedDipoleFieldStruct>& updateInducedDipoleFields)
+void PhyNEOReferencePmeForce::initializeInducedDipoles(vector<UpdateInducedDipoleFieldStruct>& updateInducedDipoleFields)
 {
 
-    this->MPIDReferenceForce::initializeInducedDipoles(updateInducedDipoleFields);
+    this->PhyNEOReferenceForce::initializeInducedDipoles(updateInducedDipoleFields);
     calculateReciprocalSpaceInducedDipoleField(updateInducedDipoleFields);
 }
 
-void MPIDReferencePmeForce::recordInducedDipoleField(vector<Vec3>& field)
+void PhyNEOReferencePmeForce::recordInducedDipoleField(vector<Vec3>& field)
 {
     Vec3 fracToCart[3];
     for (int i = 0; i < 3; i++)
@@ -4057,20 +4057,20 @@ void MPIDReferencePmeForce::recordInducedDipoleField(vector<Vec3>& field)
     }
 }
 
-void MPIDReferencePmeForce::calculateReciprocalSpaceInducedDipoleField(vector<UpdateInducedDipoleFieldStruct>& updateInducedDipoleFields)
+void PhyNEOReferencePmeForce::calculateReciprocalSpaceInducedDipoleField(vector<UpdateInducedDipoleFieldStruct>& updateInducedDipoleFields)
 {
     // Perform PME for the induced dipoles.
 
     initializePmeGrid();
     spreadInducedDipolesOnGrid(*updateInducedDipoleFields[0].inducedDipoles);
     fftpack_exec_3d(_fftplan, FFTPACK_FORWARD, _pmeGrid, _pmeGrid);
-    performMPIDReciprocalConvolution();
+    performPhyNEOReciprocalConvolution();
     fftpack_exec_3d(_fftplan, FFTPACK_BACKWARD, _pmeGrid, _pmeGrid);
     computeInducedPotentialFromGrid();
     recordInducedDipoleField(updateInducedDipoleFields[0].inducedDipoleField);
 }
 
-void MPIDReferencePmeForce::calculateInducedDipoleFields(const vector<MultipoleParticleData>& particleData,
+void PhyNEOReferencePmeForce::calculateInducedDipoleFields(const vector<MultipoleParticleData>& particleData,
                                                                      vector<UpdateInducedDipoleFieldStruct>& updateInducedDipoleFields)
 {
     // Initialize the fields to zero.
@@ -4091,7 +4091,7 @@ void MPIDReferencePmeForce::calculateInducedDipoleFields(const vector<MultipoleP
 
     calculateReciprocalSpaceInducedDipoleField(updateInducedDipoleFields);
 
-    if(getPolarizationType() == MPIDReferenceForce::Extrapolated) {
+    if(getPolarizationType() == PhyNEOReferenceForce::Extrapolated) {
         // While we have the reciprocal space (fractional coordinate) field gradient available, add it to the real space
         // terms computed above, after transforming to Cartesian coordinates.  This allows real and reciprocal space
         // dipole response force contributions to be computed together.
@@ -4140,7 +4140,7 @@ void MPIDReferencePmeForce::calculateInducedDipoleFields(const vector<MultipoleP
     }
 }
 
-void MPIDReferencePmeForce::calculateDirectInducedDipolePairIxn(unsigned int iIndex, unsigned int jIndex,
+void PhyNEOReferencePmeForce::calculateDirectInducedDipolePairIxn(unsigned int iIndex, unsigned int jIndex,
                                                                            double preFactor1, double preFactor2,
                                                                            const Vec3& delta,
                                                                            const vector<Vec3>& inducedDipole,
@@ -4158,7 +4158,7 @@ void MPIDReferencePmeForce::calculateDirectInducedDipolePairIxn(unsigned int iIn
     field[jIndex]  += delta*(dur*preFactor2) + inducedDipole[iIndex]*preFactor1;
 }
 
-void MPIDReferencePmeForce::calculateDirectInducedDipolePairIxns(const MultipoleParticleData& particleI,
+void PhyNEOReferencePmeForce::calculateDirectInducedDipolePairIxns(const MultipoleParticleData& particleI,
                                                                  const MultipoleParticleData& particleJ,
                                                                  vector<UpdateInducedDipoleFieldStruct>& updateInducedDipoleFields)
 {
@@ -4233,7 +4233,7 @@ void MPIDReferencePmeForce::calculateDirectInducedDipolePairIxns(const Multipole
     for (auto& field : updateInducedDipoleFields) {
         calculateDirectInducedDipolePairIxn(particleI.particleIndex, particleJ.particleIndex, preFactor1, preFactor2, deltaR,
                                             *field.inducedDipoles, field.inducedDipoleField);
-        if (getPolarizationType() == MPIDReferenceForce::Extrapolated) {
+        if (getPolarizationType() == PhyNEOReferenceForce::Extrapolated) {
             // Compute and store the field gradient for later use.
             double dx = deltaR[0];
             double dy = deltaR[1];
@@ -4280,7 +4280,7 @@ void MPIDReferencePmeForce::calculateDirectInducedDipolePairIxns(const Multipole
     }
 }
 
-double MPIDReferencePmeForce::calculatePmeSelfEnergy(const vector<MultipoleParticleData>& particleData) const
+double PhyNEOReferencePmeForce::calculatePmeSelfEnergy(const vector<MultipoleParticleData>& particleData) const
 {
     double cii = 0.0;
     double dii = 0.0;
@@ -4317,7 +4317,7 @@ double MPIDReferencePmeForce::calculatePmeSelfEnergy(const vector<MultipoleParti
     return energy;
 }
 
-void MPIDReferencePmeForce::calculatePmeSelfTorque(const vector<MultipoleParticleData>& particleData,
+void PhyNEOReferencePmeForce::calculatePmeSelfTorque(const vector<MultipoleParticleData>& particleData,
                                                               vector<Vec3>& torques) const
 {
     double term = (2.0/3.0)*(_electric/_dielectric)*(_alphaEwald*_alphaEwald*_alphaEwald)/SQRT_PI;
@@ -4332,7 +4332,7 @@ void MPIDReferencePmeForce::calculatePmeSelfTorque(const vector<MultipoleParticl
     }
 }
 
-double MPIDReferencePmeForce::calculatePmeDirectElectrostaticPairIxn(const MultipoleParticleData& particleI,
+double PhyNEOReferencePmeForce::calculatePmeDirectElectrostaticPairIxn(const MultipoleParticleData& particleI,
                                                                                     const MultipoleParticleData& particleJ,
                                                                                     const vector<double>& scalingFactors,
                                                                                     vector<Vec3>& forces,
@@ -4857,7 +4857,7 @@ double MPIDReferencePmeForce::calculatePmeDirectElectrostaticPairIxn(const Multi
     double iEJZ = qiUindJ[1]*Vjid[2] - qiUindJ[2]*Vjid[1];
 
     // Add in the induced-induced terms, if needed.
-    if(getPolarizationType() == MPIDReferenceForce::Mutual) {
+    if(getPolarizationType() == PhyNEOReferenceForce::Mutual) {
         // Uind-Uind terms (m=0)
         double eCoef = -2.0*fourThirds*rInvVec[3]*(3.0*(uScale*thole_d0 + bVec[3]) + alphaRVec[3]*X);
         double dCoef = 2.0*rInvVec[4]*(6.0*(uScale*dthole_d0 + bVec[3]) + 4.0*alphaRVec[5]*X);
@@ -4919,7 +4919,7 @@ double MPIDReferencePmeForce::calculatePmeDirectElectrostaticPairIxn(const Multi
 
 }
 
-double MPIDReferencePmeForce::calculateElectrostatic(const vector<MultipoleParticleData>& particleData,
+double PhyNEOReferencePmeForce::calculateElectrostatic(const vector<MultipoleParticleData>& particleData,
                                                                 vector<Vec3>& torques, vector<Vec3>& forces)
 {
     double energy = 0.0;
@@ -4953,7 +4953,7 @@ double MPIDReferencePmeForce::calculateElectrostatic(const vector<MultipoleParti
 
     // Now that both the direct and reciprocal space contributions have been added, we can compute the dipole
     // response contributions to the forces, if we're using the extrapolated polarization algorithm.
-    if (getPolarizationType() == MPIDReferenceForce::Extrapolated) {
+    if (getPolarizationType() == PhyNEOReferenceForce::Extrapolated) {
         double prefac = (_electric/_dielectric);
         for (int i = 0; i < _numParticles; i++) {
             // Compute the µ(m) T µ(n) force contributions here

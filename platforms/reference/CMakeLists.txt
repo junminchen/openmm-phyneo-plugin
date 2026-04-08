@@ -1,13 +1,13 @@
 #---------------------------------------------------
-# OpenMM Reference MPID Implementation
+# OpenMM Reference PhyNEO Implementation
 #
-# Creates OpenMMMPIDReference library.
+# Creates OpenMMPhyNEOReference library.
 #
 # Windows:
-#   OpenMMMPIDReference.dll
-#   OpenMMMPIDReference.lib
+#   OpenMMPhyNEOReference.dll
+#   OpenMMPhyNEOReference.lib
 # Unix:
-#   libOpenMMMPIDReference.so
+#   libOpenMMPhyNEOReference.so
 #----------------------------------------------------
 
 # The source is organized into subdirectories, but we handle them all from
@@ -17,9 +17,9 @@ SET(OPENMM_SOURCE_SUBDIRS .)
 # Collect up information about the version of the OpenMM library we're building
 # and make it available to the code so it can be built into the binaries.
 
-SET(OPENMMMPIDREFERENCE_LIBRARY_NAME OpenMMMPIDReference)
+SET(OPENMMPhyNEOREFERENCE_LIBRARY_NAME OpenMMPhyNEOReference)
 
-SET(SHARED_TARGET ${OPENMMMPIDREFERENCE_LIBRARY_NAME})
+SET(SHARED_TARGET ${OPENMMPhyNEOREFERENCE_LIBRARY_NAME})
 
 INCLUDE_DIRECTORIES("${OPENMM_DIR}/include/openmm/reference")
 INCLUDE_DIRECTORIES("${OPENMM_DIR}/libraries/jama/include")
@@ -71,7 +71,7 @@ INCLUDE_DIRECTORIES(BEFORE ${CMAKE_SOURCE_DIR}/platforms/reference/src/SimTKRefe
 ADD_LIBRARY(${SHARED_TARGET} SHARED ${SOURCE_FILES} ${SOURCE_INCLUDE_FILES} ${API_ABS_INCLUDE_FILES})
 
 TARGET_LINK_LIBRARIES(${SHARED_TARGET} ${OPENMM_TARGET})
-TARGET_LINK_LIBRARIES(${SHARED_TARGET} ${SHARED_MPID_TARGET})
+TARGET_LINK_LIBRARIES(${SHARED_TARGET} ${SHARED_PhyNEO_TARGET})
 SET_TARGET_PROPERTIES(${SHARED_TARGET} PROPERTIES COMPILE_FLAGS "${EXTRA_COMPILE_FLAGS} -DOPENMM_BUILDING_SHARED_LIBRARY")
 SET_TARGET_PROPERTIES(${SHARED_TARGET} PROPERTIES LINK_FLAGS "${EXTRA_LINK_FLAGS}")
 
