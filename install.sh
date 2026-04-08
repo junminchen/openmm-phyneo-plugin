@@ -231,6 +231,54 @@ print('SUCCESS: PhyNEOForce added to System!')
         return 1
     fi
 
+    # Test ADMPPmeForce XML parsing
+    log_info "Testing ADMPPmeForce XML parsing..."
+    if python -c "
+import os
+from openmm.app import ForceField
+
+xml_file = '$PLUGIN_DIR/examples/waterbox/mpidwater_lmax2.xml'
+if not os.path.exists(xml_file):
+    print('WARNING: $PLUGIN_DIR/examples/waterbox/mpidwater_lmax2.xml not found, skipping ADMPPmeForce test')
+    exit(0)
+
+ff = ForceField(xml_file)
+# Check that PhyNEOGenerator is registered for ADMPPmeForce
+if 'ADMPPmeForce' not in ff.parsers:
+    print('ERROR: ADMPPmeForce parser not registered')
+    exit(1)
+
+# Check generators
+found_phyneo = False
+for generator in ff.getGenerators():
+    name = type(generator).__name__
+    if name == 'PhyNEOGenerator':
+        found_phyneo = True
+        if not hasattr(generator, 'lmax'):
+            print('ERROR: PhyNEOGenerator missing lmax attribute')
+            exit(1)
+        if not hasattr(generator, 'mScales'):
+            print('ERROR: PhyNEOGenerator missing mScales attribute')
+            exit(1)
+        if not hasattr(generator, 'pScales'):
+            print('ERROR: PhyNEOGenerator missing pScales attribute')
+            exit(1)
+        if not hasattr(generator, 'dScales'):
+            print('ERROR: PhyNEOGenerator missing dScales attribute')
+            exit(1)
+        print(f'SUCCESS: PhyNEOGenerator found with lmax={generator.lmax}, mScales={generator.mScales}')
+        break
+
+if not found_phyneo:
+    print('ERROR: PhyNEOGenerator not found in ForceField generators')
+    exit(1)
+" 2>/dev/null; then
+        log_info "ADMPPmeForce XML parsing test: PASSED"
+    else
+        log_error "ADMPPmeForce XML parsing test: FAILED"
+        return 1
+    fi
+
     log_info "Installation verified successfully!"
     return 0
 }
@@ -322,6 +370,14 @@ main() {
     log_info "============================================"
     log_info "Installation complete!"
     log_info "============================================"
+    log_info "Supported XML force field formats:"
+    log_info "  - PhyNEOForce (native OpenMM style)"
+    log_info "  - ADMPPmeForce (DMFF multipole style)"
+    log_info "  - ADMPDispPMEForce (DMFF dispersion style)"
+    log_info ""
+    log_info "Scale factors supported: mScale12-16, pScale12-16, dScale12-16"
+    log_info "Multipole parameters: lmax (0-4), c0, dX/dY/dZ, qXX-qZZ, oXXX-oZZZ"
+    log_info ""
     log_info "To use the plugin:"
     log_info "  conda activate $ENV_NAME"
     log_info "  cd $PLUGIN_DIR/examples/waterbox"

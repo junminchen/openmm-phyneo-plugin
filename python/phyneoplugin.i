@@ -888,6 +888,42 @@ class PhyNEOGenerator(object):
                 outputString = "PhyNEOGenerator: error getting type for polarize: %s" % (atom.attrib['type'])
                 raise ValueError(outputString)
 
+    @staticmethod
+    def parseADMPDispPMEElement(element, forceField):
+        """Parse ADMPDispPMEForce XML format from DMFF-style forcefield files.
+
+        <ADMPDispPMEForce lmax="2"
+              mScale12="0.0" mScale13="0.0" mScale14="1.0" mScale15="1.0" mScale16="1.0"
+              pScale12="0.0" pScale13="0.0" pScale14="1.0" pScale15="1.0" pScale16="1.0"
+              dScale12="0.0" dScale13="0.0" dScale14="1.0" dScale15="1.0" dScale16="1.0">
+        </ADMPDispPMEForce>
+        """
+
+        # Parse scale factors for 12-16 interactions
+        mScales = []
+        pScales = []
+        dScales = []
+        for i in range(2, 7):  # indices 12, 13, 14, 15, 16
+            mScales.append(float(element.get(f'mScale1{i}', 1.0)))
+            pScales.append(float(element.get(f'pScale1{i}', 1.0)))
+            dScales.append(float(element.get(f'dScale1{i}', 1.0)))
+
+        lmax = int(element.get('lmax', 2))
+
+        # Get or create generator
+        existing = [f for f in forceField._forces if isinstance(f, PhyNEOGenerator)]
+        if len(existing) == 0:
+            generator = PhyNEOGenerator(forceField, 1.0, None)
+            forceField.registerGenerator(generator)
+        else:
+            generator = existing[0]
+
+        # Set lmax and scale factors (dispersion uses same params)
+        generator.lmax = lmax
+        generator.mScales = mScales
+        generator.pScales = pScales
+        generator.dScales = dScales
+
     #=============================================================================================
 
     def createForce(self, sys, data, nonbondedMethod, nonbondedCutoff, args):
@@ -1218,6 +1254,7 @@ class PhyNEOGenerator(object):
 
 forcefield.parsers["PhyNEOForce"] = PhyNEOGenerator.parseElement
 forcefield.parsers["ADMPPmeForce"] = PhyNEOGenerator.parseADMPPmeElement
+forcefield.parsers["ADMPDispPMEForce"] = PhyNEOGenerator.parseADMPDispPMEElement
 %}
 
 }
