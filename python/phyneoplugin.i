@@ -566,6 +566,10 @@ class PhyNEOGenerator(object):
         self.scaleFactor14 = scaleFactor14
         self.defaultTholeWidth = defaultTholeWidth
         self.typeMap = {}
+        self.lmax = 2
+        self.mScales = [0.0, 0.0, 1.0, 1.0, 1.0]
+        self.pScales = [0.0, 0.0, 1.0, 1.0, 1.0]
+        self.dScales = [1.0, 1.0, 1.0, 1.0, 1.0]
 
     #=============================================================================================
     # Set axis type
@@ -645,7 +649,7 @@ class PhyNEOGenerator(object):
 
         # set type map: [ kIndices, multipoles, AMOEBA/OpenMM axis type]
 
-        for atom in element.findall('Multipole'):
+        for atom in element.findall('Multipole') + element.findall('Atom'):
             types = forceField._findAtomTypes(atom.attrib, 1)
             if None not in types:
 
@@ -745,6 +749,143 @@ class PhyNEOGenerator(object):
 
             else:
                 outputString = "PhyNEOGenerator: error getting type for polarize: %s" % (atom.attrib['class'])
+                raise ValueError(outputString)
+
+    #=============================================================================================
+
+    @staticmethod
+    def parseADMPPmeElement(element, forceField):
+        """Parse ADMPPmeForce XML format from DMFF-style forcefield files.
+
+        <ADMPPmeForce lmax="2"
+                      mScale12="0.0" mScale13="0.0" mScale14="1.0" mScale15="1.0" mScale16="1.0"
+                      pScale12="0.0" pScale13="0.0" pScale14="1.0" pScale15="1.0" pScale16="1.0"
+                      dScale12="0.0" dScale13="0.0" dScale14="1.0" dScale15="1.0" dScale16="1.0">
+            <Atom type="OW" kz="381" kx="381" c0="-1.0614" dX="0.0" dY="0.0" dZ="-0.023671684" .../>
+            <Polarize type="OW" polarizabilityXX="0.00088" .../>
+        </ADMPPmeForce>
+        """
+
+        # Parse scale factors for 12-16 interactions
+        mScales = []
+        pScales = []
+        dScales = []
+        for i in range(2, 7):  # indices 12, 13, 14, 15, 16
+            mScales.append(float(element.get(f'mScale1{i}', 1.0)))
+            pScales.append(float(element.get(f'pScale1{i}', 1.0)))
+            dScales.append(float(element.get(f'dScale1{i}', 1.0)))
+
+        lmax = int(element.get('lmax', 2))
+
+        # Get or create generator
+        existing = [f for f in forceField._forces if isinstance(f, PhyNEOGenerator)]
+        if len(existing) == 0:
+            generator = PhyNEOGenerator(forceField, 1.0, None)
+            forceField.registerGenerator(generator)
+        else:
+            generator = existing[0]
+
+        # Set lmax and scale factors
+        generator.lmax = lmax
+        generator.mScales = mScales
+        generator.pScales = pScales
+        generator.dScales = dScales
+
+        # Parse Atom child elements (DMFF format uses <Atom>, Amoeba uses <Multipole>)
+        for atom in element.findall('Atom') + element.findall('Multipole'):
+            types = forceField._findAtomTypes(atom.attrib, 1)
+            if None not in types:
+
+                # k-indices not provided default to 0
+                kIndices = [atom.attrib.get('type', atom.attrib.get('class', ''))]
+
+                kStrings = [ 'kz', 'kx', 'ky' ]
+                for kString in kStrings:
+                    try:
+                        if atom.attrib.get(kString):
+                             kIndices.append(atom.attrib[kString])
+                    except:
+                        pass
+
+                # set axis type based on k-Indices
+                axisType = PhyNEOGenerator.setAxisType(kIndices)
+
+                # set multipole
+                charge = float(atom.get('c0', 0.0))
+
+                conversion = 1.0
+                dipole = [ conversion*float(atom.get(f'd{X}', 0.0)) for X in ['X', 'Y', 'Z'] ]
+
+                quadrupole = []
+                quadrupole.append(conversion*float(atom.get('qXX', 0.0)))
+                quadrupole.append(conversion*float(atom.get('qXY', 0.0)))
+                quadrupole.append(conversion*float(atom.get('qYY', 0.0)))
+                quadrupole.append(conversion*float(atom.get('qXZ', 0.0)))
+                quadrupole.append(conversion*float(atom.get('qYZ', 0.0)))
+                quadrupole.append(conversion*float(atom.get('qZZ', 0.0)))
+
+                octopole = []
+                octopole.append(conversion*float(atom.get('oXXX', 0.0)))
+                octopole.append(conversion*float(atom.get('oXXY', 0.0)))
+                octopole.append(conversion*float(atom.get('oXYY', 0.0)))
+                octopole.append(conversion*float(atom.get('oYYY', 0.0)))
+                octopole.append(conversion*float(atom.get('oXXZ', 0.0)))
+                octopole.append(conversion*float(atom.get('oXYZ', 0.0)))
+                octopole.append(conversion*float(atom.get('oYYZ', 0.0)))
+                octopole.append(conversion*float(atom.get('oXZZ', 0.0)))
+                octopole.append(conversion*float(atom.get('oYZZ', 0.0)))
+                octopole.append(conversion*float(atom.get('oZZZ', 0.0)))
+
+                for t in types[0]:
+                    if (t not in generator.typeMap):
+                        generator.typeMap[t] = []
+
+                    valueMap = dict()
+                    valueMap['classIndex'] = atom.attrib.get('type', atom.attrib.get('class', ''))
+                    valueMap['kIndices'] = kIndices
+                    valueMap['charge'] = charge
+                    valueMap['dipole'] = dipole
+                    valueMap['quadrupole'] = quadrupole
+                    valueMap['octopole'] = octopole
+                    valueMap['axisType'] = axisType
+                    generator.typeMap[t].append(valueMap)
+
+            else:
+                outputString = "PhyNEOGenerator: error getting type for multipole: %s" % (atom.attrib.get('class', atom.attrib.get('type', 'unknown')))
+                raise ValueError(outputString)
+
+        # polarization parameters
+        for atom in element.findall('Polarize'):
+            types = forceField._findAtomTypes(atom.attrib, 1)
+            if None not in types:
+
+                classIndex = atom.attrib['type']
+                polarizability = [ float(atom.attrib['polarizabilityXX']),
+                                   float(atom.attrib['polarizabilityYY']),
+                                   float(atom.attrib['polarizabilityZZ']) ]
+                thole = float(atom.attrib['thole'])
+
+                for t in types[0]:
+                    if (t not in generator.typeMap):
+                        outputString = "PhyNEOGenerator: polarize type not present: %s" % (atom.attrib['type'])
+                        raise ValueError(outputString)
+                    else:
+                        typeMapList = generator.typeMap[t]
+                        hit = 0
+                        for (ii, typeMap) in enumerate(typeMapList):
+
+                            if (typeMap['classIndex'] == classIndex):
+                                typeMap['polarizability'] = polarizability
+                                typeMap['thole'] = thole
+                                typeMapList[ii] = typeMap
+                                hit = 1
+
+                        if (hit == 0):
+                            outputString = "PhyNEOGenerator: error getting type for polarize: class index=%s not in multipole list?" % (atom.attrib['type'])
+                            raise ValueError(outputString)
+
+            else:
+                outputString = "PhyNEOGenerator: error getting type for polarize: %s" % (atom.attrib['type'])
                 raise ValueError(outputString)
 
     #=============================================================================================
@@ -1076,6 +1217,7 @@ class PhyNEOGenerator(object):
                 raise ValueError('No multipole type for atom %s %s %d' % (atom.name, atom.residue.name, atom.residue.index))
 
 forcefield.parsers["PhyNEOForce"] = PhyNEOGenerator.parseElement
+forcefield.parsers["ADMPPmeForce"] = PhyNEOGenerator.parseADMPPmeElement
 %}
 
 }
