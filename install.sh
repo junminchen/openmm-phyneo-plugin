@@ -127,12 +127,16 @@ build_plugin() {
     mkdir -p build
     cd build
 
-    # Configure with CMake
+    # Configure with CMake - use conda compilers for ABI compatibility
     log_info "Configuring CMake..."
+    export CC="$CONDA_PREFIX/envs/$ENV_NAME/bin/x86_64-conda-linux-gnu-gcc"
+    export CXX="$CONDA_PREFIX/envs/$ENV_NAME/bin/x86_64-conda-linux-gnu-g++"
     cmake \
         -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
         -DCMAKE_INSTALL_PREFIX="$CONDA_PREFIX/envs/$ENV_NAME" \
         -DOPENMM_DIR="$CONDA_PREFIX/envs/$ENV_NAME" \
+        -DCMAKE_C_COMPILER="$CC" \
+        -DCMAKE_CXX_COMPILER="$CXX" \
         -DPhyNEO_BUILD_CUDA_LIB=ON \
         -DPhyNEO_BUILD_PYTHON_WRAPPERS=ON \
         -DPYTHON_EXECUTABLE="$CONDA_PREFIX/envs/$ENV_NAME/bin/python" \

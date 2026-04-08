@@ -22,7 +22,7 @@
   <Atom type="OT" charge="-0.0" sigma="0.31983264" epsilon="0.677808"/>
   <Atom type="HT" charge="0.0" sigma="1" epsilon="0"/>
  </NonbondedForce>
- <PhyNEOForce>
+ <PhyNEOForce defaultTholeWidth="8">
    <Multipole type="OT" kz="-HT" kx="-HT"
              c0="-1.0614"
              dX="0.0" dY="0.0"  dZ="-0.023671684"
