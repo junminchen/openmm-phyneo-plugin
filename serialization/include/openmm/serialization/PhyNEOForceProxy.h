@@ -1,5 +1,8 @@
+#ifndef OPENMM_PHYNEO_MULTIPOLE_FORCE_PROXY_H_
+#define OPENMM_PHYNEO_MULTIPOLE_FORCE_PROXY_H_
+
 /* -------------------------------------------------------------------------- *
- *                                OpenMMMPID                                  *
+ *                                OpenMMPHyNEO                                *
  * -------------------------------------------------------------------------- *
  * This is part of the OpenMM molecular simulation toolkit originating from   *
  * Simbios, the NIH National Center for Physics-Based Simulation of           *
@@ -29,37 +32,22 @@
  * USE OR OTHER DEALINGS IN THE SOFTWARE.                                     *
  * -------------------------------------------------------------------------- */
 
-#ifdef WIN32
-#include <windows.h>
-#include <sstream>
-#else
-#include <dlfcn.h>
-#include <dirent.h>
-#include <cstdlib>
-#endif
-
-#include "openmm/OpenMMException.h"
-
-#include "openmm/MPIDForce.h"
-
+#include "openmm/internal/windowsExportPhyNEO.h"
 #include "openmm/serialization/SerializationProxy.h"
 
-#include "openmm/serialization/MPIDForceProxy.h"
+namespace OpenMM {
 
-#if defined(WIN32)
-    #include <windows.h>
-    extern "C" OPENMM_EXPORT_MPID void registerMPIDSerializationProxies();
-    BOOL WINAPI DllMain(HANDLE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved) {
-        if (ul_reason_for_call == DLL_PROCESS_ATTACH)
-            registerMPIDSerializationProxies();
-        return TRUE;
-    }
-#else
-    extern "C" void __attribute__((constructor)) registerMPIDSerializationProxies();
-#endif
+/**
+ * This is a proxy for serializing PhyNEOForce objects.
+ */
 
-using namespace OpenMM;
+class OPENMM_EXPORT_PHYNEO PhyNEOForceProxy : public SerializationProxy {
+public:
+    PhyNEOForceProxy();
+    void serialize(const void* object, SerializationNode& node) const;
+    void* deserialize(const SerializationNode& node) const;
+};
 
-extern "C" OPENMM_EXPORT_MPID void registerMPIDSerializationProxies() {
-    SerializationProxy::registerProxy(typeid(MPIDForce),                   new MPIDForceProxy());
-}
+} // namespace OpenMM
+
+#endif /*OPENMM_PHYNEO_MULTIPOLE_FORCE_PROXY_H_*/

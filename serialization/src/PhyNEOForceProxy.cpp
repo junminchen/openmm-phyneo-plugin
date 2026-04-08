@@ -1,5 +1,5 @@
 /* -------------------------------------------------------------------------- *
- *                                OpenMMMPID                                *
+ *                                OpenMMPHyNEO                                *
  * -------------------------------------------------------------------------- *
  * This is part of the OpenMM molecular simulation toolkit originating from   *
  * Simbios, the NIH National Center for Physics-Based Simulation of           *
@@ -29,16 +29,16 @@
  * USE OR OTHER DEALINGS IN THE SOFTWARE.                                     *
  * -------------------------------------------------------------------------- */
 
-#include "openmm/serialization/MPIDForceProxy.h"
+#include "openmm/serialization/PhyNEOForceProxy.h"
 #include "openmm/serialization/SerializationNode.h"
 #include "openmm/Force.h"
-#include "openmm/MPIDForce.h"
+#include "openmm/PhyNEOForce.h"
 #include <sstream>
 
 using namespace OpenMM;
 using namespace std;
 
-MPIDForceProxy::MPIDForceProxy() : SerializationProxy("MPIDForce") {
+PhyNEOForceProxy::PhyNEOForceProxy() : SerializationProxy("PhyNEOForce") {
 }
 
 static void getCovalentTypes(std::vector<std::string>& covalentTypes) {
@@ -67,9 +67,9 @@ void loadCovalentMap(const SerializationNode& map, std::vector< int >& covalentM
     }
 }
 
-void MPIDForceProxy::serialize(const void* object, SerializationNode& node) const {
+void PhyNEOForceProxy::serialize(const void* object, SerializationNode& node) const {
     node.setIntProperty("version", 0);
-    const MPIDForce& force = *reinterpret_cast<const MPIDForce*>(object);
+    const PhyNEOForce& force = *reinterpret_cast<const PhyNEOForce*>(object);
 
     node.setIntProperty("forceGroup", force.getForceGroup());
     node.setIntProperty("nonbondedMethod",                  force.getNonbondedMethod());
@@ -86,8 +86,8 @@ void MPIDForceProxy::serialize(const void* object, SerializationNode& node) cons
     node.setDoubleProperty("scaleFactor14",                 force.get14ScaleFactor());
 
     SerializationNode& gridDimensionsNode  = node.createChildNode("MultipoleParticleGridDimension");
-    gridDimensionsNode.setIntProperty("d0", nx).setIntProperty("d1", ny).setIntProperty("d2", nz); 
-    
+    gridDimensionsNode.setIntProperty("d0", nx).setIntProperty("d1", ny).setIntProperty("d2", nz);
+
     SerializationNode& coefficients = node.createChildNode("ExtrapolationCoefficients");
     vector<double> coeff = force.getExtrapolationCoefficients();
     for (int i = 0; i < coeff.size(); i++) {
@@ -143,22 +143,22 @@ void MPIDForceProxy::serialize(const void* object, SerializationNode& node) cons
 
         for (unsigned int jj = 0; jj < covalentTypes.size(); jj++) {
             std::vector< int > covalentMap;
-            force.getCovalentMap(ii, static_cast<MPIDForce::CovalentType>(jj), covalentMap);
+            force.getCovalentMap(ii, static_cast<PhyNEOForce::CovalentType>(jj), covalentMap);
             addCovalentMap(particle, ii, covalentTypes[jj], covalentMap);
         }
     }
 }
 
-void* MPIDForceProxy::deserialize(const SerializationNode& node) const {
+void* PhyNEOForceProxy::deserialize(const SerializationNode& node) const {
     int version = node.getIntProperty("version");
     if (version < 0 || version > 0)
         throw OpenMMException("Unsupported version number");
-    MPIDForce* force = new MPIDForce();
+    PhyNEOForce* force = new PhyNEOForce();
 
     try {
         force->setForceGroup(node.getIntProperty("forceGroup", 0));
-        force->setNonbondedMethod(static_cast<MPIDForce::NonbondedMethod>(node.getIntProperty("nonbondedMethod")));
-        force->setPolarizationType(static_cast<MPIDForce::PolarizationType>(node.getIntProperty("polarizationType")));
+        force->setNonbondedMethod(static_cast<PhyNEOForce::NonbondedMethod>(node.getIntProperty("nonbondedMethod")));
+        force->setPolarizationType(static_cast<PhyNEOForce::PolarizationType>(node.getIntProperty("polarizationType")));
         force->setMutualInducedMaxIterations(node.getIntProperty("mutualInducedMaxIterations"));
 
         force->setCutoffDistance(node.getDoubleProperty("cutoffDistance"));
@@ -168,7 +168,7 @@ void* MPIDForceProxy::deserialize(const SerializationNode& node) const {
 
         const SerializationNode& gridDimensionsNode  = node.getChildNode("MultipoleParticleGridDimension");
         force->setPMEParameters(node.getDoubleProperty("aEwald"), gridDimensionsNode.getIntProperty("d0"), gridDimensionsNode.getIntProperty("d1"), gridDimensionsNode.getIntProperty("d2"));
-    
+
         const SerializationNode& coefficients = node.getChildNode("ExtrapolationCoefficients");
         vector<double> coeff;
         for (int i = 0; ; i++) {
@@ -226,12 +226,12 @@ void* MPIDForceProxy::deserialize(const SerializationNode& node) const {
                                 particle.getDoubleProperty("thole"),
                                 polarizability);
 
-            // covalent maps 
+            // covalent maps
 
             for (unsigned int jj = 0; jj < covalentTypes.size(); jj++) {
                 std::vector< int > covalentMap;
                 loadCovalentMap(particle.getChildNode(covalentTypes[jj]), covalentMap);
-                force->setCovalentMap(ii, static_cast<MPIDForce::CovalentType>(jj), covalentMap);
+                force->setCovalentMap(ii, static_cast<PhyNEOForce::CovalentType>(jj), covalentMap);
             }
         }
 

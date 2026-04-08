@@ -1,8 +1,5 @@
-#ifndef OPENMM_MPID_MULTIPOLE_FORCE_PROXY_H_
-#define OPENMM_MPID_MULTIPOLE_FORCE_PROXY_H_
-
 /* -------------------------------------------------------------------------- *
- *                                OpenMMMPID                                *
+ *                                OpenMMPHyNEO                                *
  * -------------------------------------------------------------------------- *
  * This is part of the OpenMM molecular simulation toolkit originating from   *
  * Simbios, the NIH National Center for Physics-Based Simulation of           *
@@ -32,22 +29,37 @@
  * USE OR OTHER DEALINGS IN THE SOFTWARE.                                     *
  * -------------------------------------------------------------------------- */
 
-#include "openmm/internal/windowsExportMPID.h"
+#ifdef WIN32
+#include <windows.h>
+#include <sstream>
+#else
+#include <dlfcn.h>
+#include <dirent.h>
+#include <cstdlib>
+#endif
+
+#include "openmm/OpenMMException.h"
+
+#include "openmm/PhyNEOForce.h"
+
 #include "openmm/serialization/SerializationProxy.h"
 
-namespace OpenMM {
+#include "openmm/serialization/PhyNEOForceProxy.h"
 
-/**
- * This is a proxy for serializing MPIDForce objects.
- */
+#if defined(WIN32)
+    #include <windows.h>
+    extern "C" OPENMM_EXPORT_PHYNEO void registerPhyNEOSerializationProxies();
+    BOOL WINAPI DllMain(HANDLE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved) {
+        if (ul_reason_for_call == DLL_PROCESS_ATTACH)
+            registerPhyNEOSerializationProxies();
+        return TRUE;
+    }
+#else
+    extern "C" void __attribute__((constructor)) registerPhyNEOSerializationProxies();
+#endif
 
-class OPENMM_EXPORT_MPID MPIDForceProxy : public SerializationProxy {
-public:
-    MPIDForceProxy();
-    void serialize(const void* object, SerializationNode& node) const;
-    void* deserialize(const SerializationNode& node) const;
-};
+using namespace OpenMM;
 
-} // namespace OpenMM
-
-#endif /*OPENMM_MPID_MULTIPOLE_FORCE_PROXY_H_*/
+extern "C" OPENMM_EXPORT_PHYNEO void registerPhyNEOSerializationProxies() {
+    SerializationProxy::registerProxy(typeid(PhyNEOForce),                   new PhyNEOForceProxy());
+}

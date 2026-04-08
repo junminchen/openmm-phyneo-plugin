@@ -1,5 +1,5 @@
 /* -------------------------------------------------------------------------- *
- *                                OpenMMMPID                                *
+ *                                OpenMMPHyNEO                                *
  * -------------------------------------------------------------------------- *
  * This is part of the OpenMM molecular simulation toolkit originating from   *
  * Simbios, the NIH National Center for Physics-Based Simulation of           *
@@ -31,7 +31,7 @@
 
 #include "openmm/Platform.h"
 #include "openmm/internal/AssertionUtilities.h"
-#include "openmm/MPIDForce.h"
+#include "openmm/PhyNEOForce.h"
 #include "openmm/OpenMMException.h"
 #include "openmm/serialization/XmlSerializer.h"
 #include <iostream>
@@ -41,7 +41,7 @@
 using namespace OpenMM;
 using namespace std;
 
-extern "C" void registerMPIDSerializationProxies();
+extern "C" void registerPhyNEOSerializationProxies();
 
 static void getCovalentTypes(std::vector<std::string>& covalentTypes) {
 
@@ -59,9 +59,9 @@ static void getCovalentTypes(std::vector<std::string>& covalentTypes) {
 void testSerialization() {
     // Create a Force.
 
-    MPIDForce force1;
+    PhyNEOForce force1;
     force1.setForceGroup(3);
-    force1.setNonbondedMethod(MPIDForce::NoCutoff);
+    force1.setNonbondedMethod(PhyNEOForce::NoCutoff);
     force1.setCutoffDistance(0.9);
     force1.setAEwald(0.544);
     //force1.setPmeBSplineOrder(4);
@@ -70,14 +70,14 @@ void testSerialization() {
     gridDimension.push_back(64);
     gridDimension.push_back(63);
     gridDimension.push_back(61);
-    force1.setPmeGridDimensions(gridDimension); 
-    //force1.setMutualInducedIterationMethod(MPIDForce::SOR); 
-    force1.setMutualInducedMaxIterations(200); 
-    force1.setMutualInducedTargetEpsilon(1.0e-05); 
-    //force1.setElectricConstant(138.93); 
-    force1.setEwaldErrorTolerance(1.0e-05); 
+    force1.setPmeGridDimensions(gridDimension);
+    //force1.setMutualInducedIterationMethod(PhyNEOForce::SOR);
+    force1.setMutualInducedMaxIterations(200);
+    force1.setMutualInducedTargetEpsilon(1.0e-05);
+    //force1.setElectricConstant(138.93);
+    force1.setEwaldErrorTolerance(1.0e-05);
     force1.set14ScaleFactor(0.4);
-    
+
     vector<double> coeff;
     coeff.push_back(0.0);
     coeff.push_back(-0.1);
@@ -102,25 +102,25 @@ void testSerialization() {
         for (unsigned int jj = 0; jj < 3; jj++) {
             polarizability.push_back(static_cast<double>(rand()));
         }
-        force1.addMultipole(static_cast<double>(ii+1), molecularDipole, molecularQuadrupole, molecularOctopole, MPIDForce::Bisector,
+        force1.addMultipole(static_cast<double>(ii+1), molecularDipole, molecularQuadrupole, molecularOctopole, PhyNEOForce::Bisector,
                             ii+1, ii+2, ii+3, static_cast<double>(rand()), polarizability);
 
         for (unsigned int jj = 0; jj < covalentTypes.size(); jj++) {
             std::vector< int > covalentMap;
             covalentMap.push_back(ii*jj); covalentMap.push_back(rand()); covalentMap.push_back(rand());
-            force1.setCovalentMap(ii, static_cast<MPIDForce::CovalentType>(jj), covalentMap);
+            force1.setCovalentMap(ii, static_cast<PhyNEOForce::CovalentType>(jj), covalentMap);
         }
     }
 
     // Serialize and then deserialize it.
 
     stringstream buffer;
-    XmlSerializer::serialize<MPIDForce>(&force1, "Force", buffer);
+    XmlSerializer::serialize<PhyNEOForce>(&force1, "Force", buffer);
 
-    MPIDForce* copy = XmlSerializer::deserialize<MPIDForce>(buffer);
+    PhyNEOForce* copy = XmlSerializer::deserialize<PhyNEOForce>(buffer);
 
-    // Compare the two forces to see if they are identical.  
-    MPIDForce& force2 = *copy;
+    // Compare the two forces to see if they are identical.
+    PhyNEOForce& force2 = *copy;
 
     ASSERT_EQUAL(force1.getForceGroup(), force2.getForceGroup());
     ASSERT_EQUAL(force1.getCutoffDistance(),                force2.getCutoffDistance());
@@ -134,15 +134,15 @@ void testSerialization() {
 
     std::vector<int> gridDimension1;
     std::vector<int> gridDimension2;
-    force1.getPmeGridDimensions(gridDimension1); 
-    force2.getPmeGridDimensions(gridDimension2); 
+    force1.getPmeGridDimensions(gridDimension1);
+    force2.getPmeGridDimensions(gridDimension2);
     ASSERT_EQUAL(gridDimension1.size(),  gridDimension2.size());
     for (unsigned int jj = 0; jj < gridDimension1.size(); jj++) {
         ASSERT_EQUAL(gridDimension1[jj], gridDimension2[jj]);
     }
-    
+
     ASSERT_EQUAL_CONTAINERS(force1.getExtrapolationCoefficients(), force2.getExtrapolationCoefficients());
-    
+
     ASSERT_EQUAL(force1.getNumMultipoles(),  force2.getNumMultipoles());
     for (unsigned int ii = 0; ii < static_cast<unsigned int>(force1.getNumMultipoles()); ii++) {
 
@@ -197,8 +197,8 @@ void testSerialization() {
         for (unsigned int jj = 0; jj < covalentTypes.size(); jj++) {
             std::vector<int> covalentMap1;
             std::vector<int> covalentMap2;
-            force1.getCovalentMap(ii, static_cast<MPIDForce::CovalentType>(jj), covalentMap1);
-            force2.getCovalentMap(ii, static_cast<MPIDForce::CovalentType>(jj), covalentMap2);
+            force1.getCovalentMap(ii, static_cast<PhyNEOForce::CovalentType>(jj), covalentMap1);
+            force2.getCovalentMap(ii, static_cast<PhyNEOForce::CovalentType>(jj), covalentMap2);
             ASSERT_EQUAL(covalentMap1.size(),        covalentMap2.size());
             for (unsigned int kk = 0; kk < covalentMap1.size(); kk++) {
                 ASSERT_EQUAL(covalentMap1[kk],        covalentMap2[kk]);
@@ -209,7 +209,7 @@ void testSerialization() {
 
 int main() {
     try {
-        registerMPIDSerializationProxies();
+        registerPhyNEOSerializationProxies();
         testSerialization();
     }
     catch(const exception& e) {
