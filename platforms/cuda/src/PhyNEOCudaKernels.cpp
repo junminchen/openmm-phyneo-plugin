@@ -1,5 +1,5 @@
 /* -------------------------------------------------------------------------- *
- *                               OpenMMMPID                                 *
+ *                               OpenMMPhyNEO                                 *
  * -------------------------------------------------------------------------- *
  * This is part of the OpenMM molecular simulation toolkit originating from   *
  * Simbios, the NIH National Center for Physics-Based Simulation of           *
@@ -27,10 +27,10 @@
 #ifdef WIN32
   #define _USE_MATH_DEFINES // Needed to get M_PI
 #endif
-#include "MPIDCudaKernels.h"
-#include "CudaMPIDKernelSources.h"
+#include "PhyNEOCudaKernels.h"
+#include "CudaPhyNEOKernelSources.h"
 #include "openmm/internal/ContextImpl.h"
-#include "openmm/internal/MPIDForceImpl.h"
+#include "openmm/internal/PhyNEOForceImpl.h"
 #include "openmm/internal/NonbondedForceImpl.h"
 #include "CudaBondedUtilities.h"
 #include "CudaFFT3D.h"
@@ -58,9 +58,9 @@ using namespace std;
  *                             MPIDMultipole                                *
  * -------------------------------------------------------------------------- */
 
-class CudaCalcMPIDForceKernel::ForceInfo : public CudaForceInfo {
+class CudaCalcPhyNEOForceKernel::ForceInfo : public CudaForceInfo {
 public:
-    ForceInfo(const MPIDForce& force) : force(force) {
+    ForceInfo(const PhyNEOForce& force) : force(force) {
     }
     bool areParticlesIdentical(int particle1, int particle2) {
         double charge1, charge2, thole1, thole2;
@@ -94,17 +94,17 @@ public:
     void getParticlesInGroup(int index, vector<int>& particles) {
         int particle = index/7;
         int type = index-7*particle;
-        force.getCovalentMap(particle, MPIDForce::CovalentType(type), particles);
+        force.getCovalentMap(particle, PhyNEOForce::CovalentType(type), particles);
     }
     bool areGroupsIdentical(int group1, int group2) {
         return ((group1%7) == (group2%7));
     }
 private:
-    const MPIDForce& force;
+    const PhyNEOForce& force;
 };
 
-CudaCalcMPIDForceKernel::CudaCalcMPIDForceKernel(std::string name, const Platform& platform, CudaContext& cu, const System& system) : 
-        CalcMPIDForceKernel(name, platform), cu(cu), system(system), hasInitializedScaleFactors(false), hasInitializedFFT(false), multipolesAreValid(false), hasCreatedEvent(false),
+CudaCalcPhyNEOForceKernel::CudaCalcPhyNEOForceKernel(std::string name, const Platform& platform, CudaContext& cu, const System& system) : 
+        CalcPhyNEOForceKernel(name, platform), cu(cu), system(system), hasInitializedScaleFactors(false), hasInitializedFFT(false), multipolesAreValid(false), hasCreatedEvent(false),
         multipoleParticles(NULL), molecularDipoles(NULL), molecularQuadrupoles(NULL), molecularOctopoles(NULL), labFramePolarizabilities(NULL),  labFrameDipoles(NULL), labFrameQuadrupoles(NULL), labFrameOctopoles(NULL), sphericalDipoles(NULL), sphericalQuadrupoles(NULL), sphericalOctopoles(NULL),
         fracDipoles(NULL), fracQuadrupoles(NULL), fracOctopoles(NULL), field(NULL), inducedField(NULL), torque(NULL), dampingAndThole(NULL), inducedDipole(NULL),
         diisCoefficients(NULL), inducedDipoleErrors(NULL), prevDipoles(NULL),
@@ -115,7 +115,7 @@ CudaCalcMPIDForceKernel::CudaCalcMPIDForceKernel(std::string name, const Platfor
         pmePhid(NULL), pmePhip(NULL), pmePhidp(NULL), pmeCphi(NULL), lastPositions(NULL), sort(NULL) {
 }
 
-CudaCalcMPIDForceKernel::~CudaCalcMPIDForceKernel() {
+CudaCalcPhyNEOForceKernel::~CudaCalcPhyNEOForceKernel() {
     cu.setAsCurrent();
     if (multipoleParticles != NULL)
         delete multipoleParticles;
@@ -207,7 +207,7 @@ CudaCalcMPIDForceKernel::~CudaCalcMPIDForceKernel() {
         cuEventDestroy(syncEvent);
 }
 
-void CudaCalcMPIDForceKernel::initialize(const System& system, const MPIDForce& force) {
+void CudaCalcPhyNEOForceKernel::initialize(const System& system, const PhyNEOForce& force) {
     cu.setAsCurrent();
 
     // Initialize multipole parameters.
@@ -311,16 +311,16 @@ void CudaCalcMPIDForceKernel::initialize(const System& system, const MPIDForce& 
     field = new CudaArray(cu, 3*paddedNumAtoms, sizeof(long long), "field");
     torque = new CudaArray(cu, 3*paddedNumAtoms, sizeof(long long), "torque");
     inducedDipole = new CudaArray(cu, 3*paddedNumAtoms, elementSize, "inducedDipole");
-    if (polarizationType == MPIDForce::Mutual) {
+    if (polarizationType == PhyNEOForce::Mutual) {
         inducedDipoleErrors = new CudaArray(cu, cu.getNumThreadBlocks(), sizeof(float2), "inducedDipoleErrors");
         prevDipoles = new CudaArray(cu, 3*numMultipoles*MaxPrevDIISDipoles, elementSize, "prevDipoles");
         prevErrors = new CudaArray(cu, 3*numMultipoles*MaxPrevDIISDipoles, elementSize, "prevErrors");
         diisMatrix = new CudaArray(cu, MaxPrevDIISDipoles*MaxPrevDIISDipoles, elementSize, "diisMatrix");
         diisCoefficients = new CudaArray(cu, MaxPrevDIISDipoles+1, sizeof(float), "diisMatrix");
-        CHECK_RESULT(cuEventCreate(&syncEvent, CU_EVENT_DISABLE_TIMING), "Error creating event for MPIDForce");
+        CHECK_RESULT(cuEventCreate(&syncEvent, CU_EVENT_DISABLE_TIMING), "Error creating event for PhyNEOForce");
         hasCreatedEvent = true;
     }
-    else if (polarizationType == MPIDForce::Extrapolated) {
+    else if (polarizationType == PhyNEOForce::Extrapolated) {
         int numOrders = force.getExtrapolationCoefficients().size();
         extrapolatedDipole = new CudaArray(cu, 3*numMultipoles*numOrders, elementSize, "extrapolatedDipole");
         inducedDipoleFieldGradient = new CudaArray(cu, 6*paddedNumAtoms, sizeof(long long), "inducedDipoleFieldGradient");
@@ -338,21 +338,21 @@ void CudaCalcMPIDForceKernel::initialize(const System& system, const MPIDForce& 
         vector<int> atoms;
         set<int> allAtoms;
         allAtoms.insert(i);
-        force.getCovalentMap(i, MPIDForce::Covalent12, atoms);
+        force.getCovalentMap(i, PhyNEOForce::Covalent12, atoms);
         allAtoms.insert(atoms.begin(), atoms.end());
-        force.getCovalentMap(i, MPIDForce::Covalent13, atoms);
+        force.getCovalentMap(i, PhyNEOForce::Covalent13, atoms);
         allAtoms.insert(atoms.begin(), atoms.end());
         for (int atom : allAtoms)
             covalentFlagValues.push_back(make_int3(i, atom, 0));
-        force.getCovalentMap(i, MPIDForce::Covalent14, atoms);
+        force.getCovalentMap(i, PhyNEOForce::Covalent14, atoms);
         allAtoms.insert(atoms.begin(), atoms.end());
         for (int atom : atoms)
             covalentFlagValues.push_back(make_int3(i, atom, 1));
-        force.getCovalentMap(i, MPIDForce::Covalent15, atoms);
+        force.getCovalentMap(i, PhyNEOForce::Covalent15, atoms);
         for (int atom : atoms)
             covalentFlagValues.push_back(make_int3(i, atom, 2));
         allAtoms.insert(atoms.begin(), atoms.end());
-        force.getCovalentMap(i, MPIDForce::PolarizationCovalent11, atoms);
+        force.getCovalentMap(i, PhyNEOForce::PolarizationCovalent11, atoms);
         allAtoms.insert(atoms.begin(), atoms.end());
         exclusions[i].insert(exclusions[i].end(), allAtoms.begin(), allAtoms.end());
 
@@ -360,7 +360,7 @@ void CudaCalcMPIDForceKernel::initialize(const System& system, const MPIDForce& 
         // and PolarizationCovalent12 maps, the latter takes precedence.
 
         vector<int> atoms12;
-        force.getCovalentMap(i, MPIDForce::PolarizationCovalent12, atoms12);
+        force.getCovalentMap(i, PhyNEOForce::PolarizationCovalent12, atoms12);
         for (int atom : atoms)
             if (find(atoms12.begin(), atoms12.end(), atom) == atoms12.end())
                 polarizationFlagValues.push_back(make_int2(i, atom));
@@ -376,23 +376,23 @@ void CudaCalcMPIDForceKernel::initialize(const System& system, const MPIDForce& 
 
     // Record other options.
 
-    if (polarizationType == MPIDForce::Mutual) {
+    if (polarizationType == PhyNEOForce::Mutual) {
         maxInducedIterations = force.getMutualInducedMaxIterations();
         inducedEpsilon = force.getMutualInducedTargetEpsilon();
     }
     else
         maxInducedIterations = 0;
-    if (polarizationType != MPIDForce::Direct) {
+    if (polarizationType != PhyNEOForce::Direct) {
         inducedField = new CudaArray(cu, 3*paddedNumAtoms, sizeof(long long), "inducedField");
     }
-    usePME = (force.getNonbondedMethod() == MPIDForce::PME);
+    usePME = (force.getNonbondedMethod() == PhyNEOForce::PME);
 
     // Create the kernels.
 
     bool useShuffle = (cu.getComputeCapability() >= 3.0 && !cu.getUseDoublePrecision());
     double fixedThreadMemory = 26*elementSize+2*sizeof(float)+3*sizeof(int)/(double) cu.TileSize;
     double inducedThreadMemory = 11*elementSize+sizeof(float);
-    if (polarizationType == MPIDForce::Extrapolated)
+    if (polarizationType == PhyNEOForce::Extrapolated)
         inducedThreadMemory += 9*elementSize;
     double electrostaticsThreadMemory = 0;
     if (!useShuffle)
@@ -403,11 +403,11 @@ void CudaCalcMPIDForceKernel::initialize(const System& system, const MPIDForce& 
     defines["NUM_BLOCKS"] = cu.intToString(cu.getNumAtomBlocks());
     defines["ENERGY_SCALE_FACTOR"] = cu.doubleToString(138.9354558456);
     defines["DEFAULT_THOLE_WIDTH"] = cu.doubleToString(force.getDefaultTholeWidth());
-    if (polarizationType == MPIDForce::Direct)
+    if (polarizationType == PhyNEOForce::Direct)
         defines["DIRECT_POLARIZATION"] = "";
-    else if (polarizationType == MPIDForce::Mutual)
+    else if (polarizationType == PhyNEOForce::Mutual)
         defines["MUTUAL_POLARIZATION"] = "";
-    else if (polarizationType == MPIDForce::Extrapolated)
+    else if (polarizationType == PhyNEOForce::Extrapolated)
         defines["EXTRAPOLATED_POLARIZATION"] = "";
     if (useShuffle)
         defines["USE_SHUFFLE"] = "";
@@ -462,18 +462,18 @@ void CudaCalcMPIDForceKernel::initialize(const System& system, const MPIDForce& 
     int maxThreads = cu.getNonbondedUtilities().getForceThreadBlockSize();
     fixedFieldThreads = min(maxThreads, cu.computeThreadBlockSize(fixedThreadMemory));
     inducedFieldThreads = min(maxThreads, cu.computeThreadBlockSize(inducedThreadMemory));
-    CUmodule module = cu.createModule(CudaMPIDKernelSources::vectorOps+CudaMPIDKernelSources::multipoles, defines);
+    CUmodule module = cu.createModule(CudaPhyNEOKernelSources::vectorOps+CudaPhyNEOKernelSources::multipoles, defines);
     computeMomentsKernel = cu.getKernel(module, "computeLabFrameMoments");
     recordInducedDipolesKernel = cu.getKernel(module, "recordInducedDipoles");
     mapTorqueKernel = cu.getKernel(module, "mapTorqueToForce");
     computePotentialKernel = cu.getKernel(module, "computePotentialAtPoints");
     defines["THREAD_BLOCK_SIZE"] = cu.intToString(fixedFieldThreads);
-    module = cu.createModule(CudaMPIDKernelSources::vectorOps+CudaMPIDKernelSources::multipoleFixedField, defines);
+    module = cu.createModule(CudaPhyNEOKernelSources::vectorOps+CudaPhyNEOKernelSources::multipoleFixedField, defines);
     computeFixedFieldKernel = cu.getKernel(module, "computeFixedField");
-    if (polarizationType != MPIDForce::Direct) {
+    if (polarizationType != PhyNEOForce::Direct) {
         defines["THREAD_BLOCK_SIZE"] = cu.intToString(inducedFieldThreads);
         defines["MAX_PREV_DIIS_DIPOLES"] = cu.intToString(MaxPrevDIISDipoles);
-        module = cu.createModule(CudaMPIDKernelSources::vectorOps+CudaMPIDKernelSources::multipoleInducedField, defines);
+        module = cu.createModule(CudaPhyNEOKernelSources::vectorOps+CudaPhyNEOKernelSources::multipoleInducedField, defines);
         computeInducedFieldKernel = cu.getKernel(module, "computeInducedField");
         updateInducedFieldKernel = cu.getKernel(module, "updateInducedFieldByDIIS");
         recordDIISDipolesKernel = cu.getKernel(module, "recordInducedDipolesForDIIS");
@@ -485,12 +485,12 @@ void CudaCalcMPIDForceKernel::initialize(const System& system, const MPIDForce& 
         addExtrapolatedGradientKernel = cu.getKernel(module, "addExtrapolatedFieldGradientToForce");
     }
     stringstream electrostaticsSource;
-    electrostaticsSource << CudaMPIDKernelSources::vectorOps;
-    electrostaticsSource << CudaMPIDKernelSources::sphericalMultipoles;
+    electrostaticsSource << CudaPhyNEOKernelSources::vectorOps;
+    electrostaticsSource << CudaPhyNEOKernelSources::sphericalMultipoles;
     if (usePME)
-        electrostaticsSource << CudaMPIDKernelSources::pmeMultipoleElectrostatics;
+        electrostaticsSource << CudaPhyNEOKernelSources::pmeMultipoleElectrostatics;
     else
-        electrostaticsSource << CudaMPIDKernelSources::multipoleElectrostatics;
+        electrostaticsSource << CudaPhyNEOKernelSources::multipoleElectrostatics;
     electrostaticsThreadMemory = 30*elementSize+3*sizeof(float)+3*sizeof(int)/(double) cu.TileSize;
     electrostaticsThreads = min(maxThreads, cu.computeThreadBlockSize(electrostaticsThreadMemory));
     defines["THREAD_BLOCK_SIZE"] = cu.intToString(electrostaticsThreads);
@@ -513,13 +513,13 @@ void CudaCalcMPIDForceKernel::initialize(const System& system, const MPIDForce& 
         pmeDefines["GRID_SIZE_Z"] = cu.intToString(gridSizeZ);
         pmeDefines["M_PI"] = cu.doubleToString(M_PI);
         pmeDefines["SQRT_PI"] = cu.doubleToString(sqrt(M_PI));
-        if (polarizationType == MPIDForce::Direct)
+        if (polarizationType == PhyNEOForce::Direct)
             pmeDefines["DIRECT_POLARIZATION"] = "";
-        else if (polarizationType == MPIDForce::Mutual)
+        else if (polarizationType == PhyNEOForce::Mutual)
             pmeDefines["MUTUAL_POLARIZATION"] = "";
-        else if (polarizationType == MPIDForce::Extrapolated)
+        else if (polarizationType == PhyNEOForce::Extrapolated)
             pmeDefines["EXTRAPOLATED_POLARIZATION"] = "";
-        CUmodule module = cu.createModule(CudaMPIDKernelSources::vectorOps+CudaMPIDKernelSources::multipolePme, pmeDefines);
+        CUmodule module = cu.createModule(CudaPhyNEOKernelSources::vectorOps+CudaPhyNEOKernelSources::multipolePme, pmeDefines);
         pmeTransformMultipolesKernel = cu.getKernel(module, "transformMultipolesToFractionalCoordinates");
         pmeTransformPotentialKernel = cu.getKernel(module, "transformPotentialToCartesianCoordinates");
         pmeSpreadFixedMultipolesKernel = cu.getKernel(module, "gridSpreadFixedMultipoles");
@@ -661,7 +661,7 @@ void CudaCalcMPIDForceKernel::initialize(const System& system, const MPIDForce& 
     cu.addForce(new ForceInfo(force));
 }
 
-void CudaCalcMPIDForceKernel::initializeScaleFactors() {
+void CudaCalcPhyNEOForceKernel::initializeScaleFactors() {
     hasInitializedScaleFactors = true;
     CudaNonbondedUtilities& nb = cu.getNonbondedUtilities();
 
@@ -708,7 +708,7 @@ void CudaCalcMPIDForceKernel::initializeScaleFactors() {
 
 }
 
-double CudaCalcMPIDForceKernel::execute(ContextImpl& context, bool includeForces, bool includeEnergy) {
+double CudaCalcPhyNEOForceKernel::execute(ContextImpl& context, bool includeForces, bool includeEnergy) {
     if (!hasInitializedScaleFactors) {
         initializeScaleFactors();
     }
@@ -739,7 +739,7 @@ double CudaCalcMPIDForceKernel::execute(ContextImpl& context, bool includeForces
 
         // Iterate until the dipoles converge.
 
-        if (polarizationType == MPIDForce::Extrapolated)
+        if (polarizationType == PhyNEOForce::Extrapolated)
             computeExtrapolatedDipoles(NULL);
         for (int i = 0; i < maxInducedIterations; i++) {
             computeInducedField(NULL);
@@ -856,7 +856,7 @@ double CudaCalcMPIDForceKernel::execute(ContextImpl& context, bool includeForces
 
         // Iterate until the dipoles converge.
 
-        if (polarizationType == MPIDForce::Extrapolated)
+        if (polarizationType == PhyNEOForce::Extrapolated)
             computeExtrapolatedDipoles(recipBoxVectorPointer);
         for (int i = 0; i < maxInducedIterations; i++) {
             computeInducedField(recipBoxVectorPointer);
@@ -885,7 +885,7 @@ double CudaCalcMPIDForceKernel::execute(ContextImpl& context, bool includeForces
     }
 
     // If using extrapolated polarization, add in force contributions from µ(m) T µ(n).
-    if (polarizationType == MPIDForce::Extrapolated) {
+    if (polarizationType == PhyNEOForce::Extrapolated) {
         void* extrapolatedArgs[] = {&cu.getForce().getDevicePointer(), &torque->getDevicePointer(),
         &dampingAndThole->getDevicePointer(), &extrapolatedDipole->getDevicePointer(),
             &extrapolatedDipoleField->getDevicePointer(), &extrapolatedDipoleFieldGradient->getDevicePointer()};
@@ -905,7 +905,7 @@ double CudaCalcMPIDForceKernel::execute(ContextImpl& context, bool includeForces
     return 0.0;
 }
 
-void CudaCalcMPIDForceKernel::computeInducedField(void** recipBoxVectorPointer) {
+void CudaCalcPhyNEOForceKernel::computeInducedField(void** recipBoxVectorPointer) {
     CudaNonbondedUtilities& nb = cu.getNonbondedUtilities();
     int startTileIndex = nb.getStartTileIndex();
     int numTileIndices = nb.getNumTiles();
@@ -919,7 +919,7 @@ void CudaCalcMPIDForceKernel::computeInducedField(void** recipBoxVectorPointer) 
     computeInducedFieldArgs.push_back(&inducedDipole->getDevicePointer());
     computeInducedFieldArgs.push_back(&startTileIndex);
     computeInducedFieldArgs.push_back(&numTileIndices);
-    if (polarizationType == MPIDForce::Extrapolated) {
+    if (polarizationType == PhyNEOForce::Extrapolated) {
         computeInducedFieldArgs.push_back(&inducedDipoleFieldGradient->getDevicePointer());
     }
     if (pmeGrid != NULL) {
@@ -936,7 +936,7 @@ void CudaCalcMPIDForceKernel::computeInducedField(void** recipBoxVectorPointer) 
     }
     computeInducedFieldArgs.push_back(&dampingAndThole->getDevicePointer());
     cu.clearBuffer(*inducedField);
-    if (polarizationType == MPIDForce::Extrapolated) {
+    if (polarizationType == PhyNEOForce::Extrapolated) {
         cu.clearBuffer(*inducedDipoleFieldGradient);
     }
     if (pmeGrid == NULL)
@@ -968,7 +968,7 @@ void CudaCalcMPIDForceKernel::computeInducedField(void** recipBoxVectorPointer) 
             &pmePhidp->getDevicePointer(), &cu.getPosq().getDevicePointer(), cu.getPeriodicBoxVecXPointer(), cu.getPeriodicBoxVecYPointer(),
             cu.getPeriodicBoxVecZPointer(), recipBoxVectorPointer[0], recipBoxVectorPointer[1], recipBoxVectorPointer[2]};
         cu.executeKernel(pmeInducedPotentialKernel, pmeInducedPotentialArgs, cu.getNumAtoms());
-        if (polarizationType == MPIDForce::Extrapolated) {
+        if (polarizationType == PhyNEOForce::Extrapolated) {
             void* pmeRecordInducedFieldDipolesArgs[] = {&pmePhidp->getDevicePointer(),
                 &inducedField->getDevicePointer(),  &inducedDipole->getDevicePointer(),
                 &inducedDipoleFieldGradient->getDevicePointer(),
@@ -984,7 +984,7 @@ void CudaCalcMPIDForceKernel::computeInducedField(void** recipBoxVectorPointer) 
     }
 }
 
-bool CudaCalcMPIDForceKernel::iterateDipolesByDIIS(int iteration) {
+bool CudaCalcPhyNEOForceKernel::iterateDipolesByDIIS(int iteration) {
     bool trueValue = true, falseValue = false;
     int elementSize = (cu.getUseDoublePrecision() ? sizeof(double) : sizeof(float));
 
@@ -1029,7 +1029,7 @@ bool CudaCalcMPIDForceKernel::iterateDipolesByDIIS(int iteration) {
     return false;
 }
 
-void CudaCalcMPIDForceKernel::computeExtrapolatedDipoles(void** recipBoxVectorPointer) {
+void CudaCalcPhyNEOForceKernel::computeExtrapolatedDipoles(void** recipBoxVectorPointer) {
     // Start by storing the direct dipoles as PT0
 
     void* initArgs[] = {&inducedDipole->getDevicePointer(), &extrapolatedDipole->getDevicePointer(), &inducedDipoleFieldGradient->getDevicePointer()};
@@ -1053,7 +1053,7 @@ void CudaCalcMPIDForceKernel::computeExtrapolatedDipoles(void** recipBoxVectorPo
     computeInducedField(recipBoxVectorPointer);
 }
 
-void CudaCalcMPIDForceKernel::ensureMultipolesValid(ContextImpl& context) {
+void CudaCalcPhyNEOForceKernel::ensureMultipolesValid(ContextImpl& context) {
     if (multipolesAreValid) {
         int numParticles = cu.getNumAtoms();
         if (cu.getUseDoublePrecision()) {
@@ -1082,7 +1082,7 @@ void CudaCalcMPIDForceKernel::ensureMultipolesValid(ContextImpl& context) {
 }
 
 
-void CudaCalcMPIDForceKernel::getLabFramePermanentDipoles(ContextImpl& context, vector<Vec3>& dipoles) {
+void CudaCalcPhyNEOForceKernel::getLabFramePermanentDipoles(ContextImpl& context, vector<Vec3>& dipoles) {
     ensureMultipolesValid(context);
     int numParticles = cu.getNumAtoms();
     dipoles.resize(numParticles);
@@ -1102,7 +1102,7 @@ void CudaCalcMPIDForceKernel::getLabFramePermanentDipoles(ContextImpl& context, 
 }
 
 
-void CudaCalcMPIDForceKernel::getInducedDipoles(ContextImpl& context, vector<Vec3>& dipoles) {
+void CudaCalcPhyNEOForceKernel::getInducedDipoles(ContextImpl& context, vector<Vec3>& dipoles) {
     ensureMultipolesValid(context);
     int numParticles = cu.getNumAtoms();
     dipoles.resize(numParticles);
@@ -1122,7 +1122,7 @@ void CudaCalcMPIDForceKernel::getInducedDipoles(ContextImpl& context, vector<Vec
 }
 
 
-void CudaCalcMPIDForceKernel::getTotalDipoles(ContextImpl& context, vector<Vec3>& dipoles) {
+void CudaCalcPhyNEOForceKernel::getTotalDipoles(ContextImpl& context, vector<Vec3>& dipoles) {
     ensureMultipolesValid(context);
     int numParticles = cu.getNumAtoms();
     dipoles.resize(numParticles);
@@ -1163,7 +1163,7 @@ void CudaCalcMPIDForceKernel::getTotalDipoles(ContextImpl& context, vector<Vec3>
     }
 }
 
-void CudaCalcMPIDForceKernel::getElectrostaticPotential(ContextImpl& context, const vector<Vec3>& inputGrid, vector<double>& outputElectrostaticPotential) {
+void CudaCalcPhyNEOForceKernel::getElectrostaticPotential(ContextImpl& context, const vector<Vec3>& inputGrid, vector<double>& outputElectrostaticPotential) {
     ensureMultipolesValid(context);
     int numPoints = inputGrid.size();
     int elementSize = (cu.getUseDoublePrecision() ? sizeof(double) : sizeof(float));
@@ -1205,7 +1205,7 @@ void CudaCalcMPIDForceKernel::getElectrostaticPotential(ContextImpl& context, co
 }
 
 template <class T, class T4, class M4>
-void CudaCalcMPIDForceKernel::computeSystemMultipoleMoments(ContextImpl& context, vector<double>& outputMultipoleMoments) {
+void CudaCalcPhyNEOForceKernel::computeSystemMultipoleMoments(ContextImpl& context, vector<double>& outputMultipoleMoments) {
     // Compute the local coordinates relative to the center of mass.
     int numAtoms = cu.getNumAtoms();
     vector<T4> posq;
@@ -1317,7 +1317,7 @@ void CudaCalcMPIDForceKernel::computeSystemMultipoleMoments(ContextImpl& context
 }
 
 
-void CudaCalcMPIDForceKernel::getSystemMultipoleMoments(ContextImpl& context, vector<double>& outputMultipoleMoments) {
+void CudaCalcPhyNEOForceKernel::getSystemMultipoleMoments(ContextImpl& context, vector<double>& outputMultipoleMoments) {
     ensureMultipolesValid(context);
     if (cu.getUseDoublePrecision())
         computeSystemMultipoleMoments<double, double4, double4>(context, outputMultipoleMoments);
@@ -1327,7 +1327,7 @@ void CudaCalcMPIDForceKernel::getSystemMultipoleMoments(ContextImpl& context, ve
         computeSystemMultipoleMoments<float, float4, float4>(context, outputMultipoleMoments);
 }
 
-void CudaCalcMPIDForceKernel::copyParametersToContext(ContextImpl& context, const MPIDForce& force) {
+void CudaCalcPhyNEOForceKernel::copyParametersToContext(ContextImpl& context, const PhyNEOForce& force) {
     // Make sure the new parameters are acceptable.
     
     cu.setAsCurrent();
@@ -1409,7 +1409,7 @@ void CudaCalcMPIDForceKernel::copyParametersToContext(ContextImpl& context, cons
     multipolesAreValid = false;
 }
 
-void CudaCalcMPIDForceKernel::getPMEParameters(double& alpha, int& nx, int& ny, int& nz) const {
+void CudaCalcPhyNEOForceKernel::getPMEParameters(double& alpha, int& nx, int& ny, int& nz) const {
     if (!usePME)
         throw OpenMMException("getPMEParametersInContext: This Context is not using PME");
     alpha = this->alpha;

@@ -1,8 +1,8 @@
-#ifndef MPID_OPENMM_CUDAKERNELS_H_
-#define MPID_OPENMM_CUDAKERNELS_H_
+#ifndef PhyNEO_OPENMM_CUDAKERNELS_H_
+#define PhyNEO_OPENMM_CUDAKERNELS_H_
 
 /* -------------------------------------------------------------------------- *
- *                              OpenMMMPID                                  *
+ *                              OpenMMPhyNEO                                  *
  * -------------------------------------------------------------------------- *
  * This is part of the OpenMM molecular simulation toolkit originating from   *
  * Simbios, the NIH National Center for Physics-Based Simulation of           *
@@ -27,7 +27,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.      *
  * -------------------------------------------------------------------------- */
 
-#include "openmm/mpidKernels.h"
+#include "openmm/phyneoKernels.h"
 #include "openmm/kernels.h"
 #include "openmm/System.h"
 #include "CudaArray.h"
@@ -38,19 +38,19 @@
 namespace OpenMM {
 
 /**
- * This kernel is invoked by MPIDForce to calculate the forces acting on the system and the energy of the system.
+ * This kernel is invoked by PhyNEOForce to calculate the forces acting on the system and the energy of the system.
  */
-class CudaCalcMPIDForceKernel : public CalcMPIDForceKernel {
+class CudaCalcPhyNEOForceKernel : public CalcPhyNEOForceKernel {
 public:
-    CudaCalcMPIDForceKernel(std::string name, const Platform& platform, CudaContext& cu, const System& system);
-    ~CudaCalcMPIDForceKernel();
+    CudaCalcPhyNEOForceKernel(std::string name, const Platform& platform, CudaContext& cu, const System& system);
+    ~CudaCalcPhyNEOForceKernel();
     /**
      * Initialize the kernel.
-     * 
+     *
      * @param system     the System this kernel will be applied to
-     * @param force      the MPIDForce this kernel will be used for
+     * @param force      the PhyNEOForce this kernel will be used for
      */
-    void initialize(const System& system, const MPIDForce& force);
+    void initialize(const System& system, const PhyNEOForce& force);
     /**
      * Execute the kernel to calculate the forces and/or energy.
      *
@@ -62,21 +62,21 @@ public:
     double execute(ContextImpl& context, bool includeForces, bool includeEnergy);
      /**
      * Get the LabFrame dipole moments of all particles.
-     * 
+     *
      * @param context    the Context for which to get the induced dipoles
      * @param dipoles    the induced dipole moment of particle i is stored into the i'th element
      */
     void getLabFramePermanentDipoles(ContextImpl& context, std::vector<Vec3>& dipoles);
     /**
      * Get the induced dipole moments of all particles.
-     * 
+     *
      * @param context    the Context for which to get the induced dipoles
      * @param dipoles    the induced dipole moment of particle i is stored into the i'th element
      */
     void getInducedDipoles(ContextImpl& context, std::vector<Vec3>& dipoles);
     /**
      * Get the total dipole moments of all particles.
-     * 
+     *
      * @param context    the Context for which to get the induced dipoles
      * @param dipoles    the induced dipole moment of particle i is stored into the i'th element
      */
@@ -86,12 +86,12 @@ public:
      *
      * @param context        the context in which to execute this kernel
      * @param inputGrid      input grid coordinates
-     * @param outputElectrostaticPotential output potential 
+     * @param outputElectrostaticPotential output potential
      */
     void getElectrostaticPotential(ContextImpl& context, const std::vector< Vec3 >& inputGrid,
                                    std::vector< double >& outputElectrostaticPotential);
 
-   /** 
+   /**
      * Get the system multipole moments
      *
      * @param context      context
@@ -106,12 +106,12 @@ public:
      * Copy changed parameters over to a context.
      *
      * @param context    the context to copy parameters to
-     * @param force      the MPIDForce to copy the parameters from
+     * @param force      the PhyNEOForce to copy the parameters from
      */
-    void copyParametersToContext(ContextImpl& context, const MPIDForce& force);
+    void copyParametersToContext(ContextImpl& context, const PhyNEOForce& force);
     /**
      * Get the parameters being used for PME.
-     * 
+     *
      * @param alpha   the separation parameter
      * @param nx      the number of grid points along the X axis
      * @param ny      the number of grid points along the Y axis
@@ -141,7 +141,7 @@ private:
     int gridSizeX, gridSizeY, gridSizeZ;
     double alpha, inducedEpsilon;
     bool usePME, hasQuadrupoles, hasOctopoles, hasInitializedScaleFactors, hasInitializedFFT, multipolesAreValid, hasCreatedEvent;
-    MPIDForce::PolarizationType polarizationType;
+    PhyNEOForce::PolarizationType polarizationType;
     CudaContext& cu;
     const System& system;
     std::vector<int3> covalentFlagValues;
@@ -204,4 +204,4 @@ private:
 
 } // namespace OpenMM
 
-#endif /*MPID_OPENMM_CUDAKERNELS_H*/
+#endif /*PhyNEO_OPENMM_CUDAKERNELS_H*/

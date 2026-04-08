@@ -1,5 +1,5 @@
 /* -------------------------------------------------------------------------- *
- *                                   OpenMMMPID                             *
+ *                                   OpenMMPhyNEO                             *
  * -------------------------------------------------------------------------- *
  * This is part of the OpenMM molecular simulation toolkit originating from   *
  * Simbios, the NIH National Center for Physics-Based Simulation of           *
@@ -30,17 +30,17 @@
  * -------------------------------------------------------------------------- */
 
 /**
- * This tests the CUDA implementation of MPIDForce.
+ * This tests the CUDA implementation of PhyNEOForce.
  */
 
 #include "openmm/internal/AssertionUtilities.h"
 #include "openmm/Context.h"
-#include "OpenMMMPID.h"
+#include "OpenMMPhyNEO.h"
 #include "openmm/NonbondedForce.h"
 #include "openmm/System.h"
 #include "openmm/Units.h"
 #include "openmm/VerletIntegrator.h"
-#include "openmm/MPIDForce.h"
+#include "openmm/PhyNEOForce.h"
 #include "openmm/LangevinIntegrator.h"
 #include "openmm/Vec3.h"
 #include <iostream>
@@ -57,11 +57,11 @@
 using namespace OpenMM;
 using namespace std;
 
-extern "C" void registerMPIDCudaKernelFactories();
+extern "C" void registerPhyNEOCudaKernelFactories();
 
 const double TOL = 1e-4;
 
-void make_charge_square(double boxEdgeLength, vector<Vec3> &positions, MPIDForce *forceField, System &system)
+void make_charge_square(double boxEdgeLength, vector<Vec3> &positions, PhyNEOForce *forceField, System &system)
 {
     positions.clear();
 
@@ -71,33 +71,33 @@ void make_charge_square(double boxEdgeLength, vector<Vec3> &positions, MPIDForce
 
     // Atom 0
     positions.push_back(Vec3(0.1, 0.0, 0.0));
-    forceField->addMultipole(1.0, {0,0,0}, {0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0}, MPIDForce::NoAxisType, 0, 0, 0, 0.0, {0.0, 0.0, 0.0});
+    forceField->addMultipole(1.0, {0,0,0}, {0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0}, PhyNEOForce::NoAxisType, 0, 0, 0, 0.0, {0.0, 0.0, 0.0});
     system.addParticle(1.0);
-    forceField->setCovalentMap(0, MPIDForce::Covalent12, {1});
-    forceField->setCovalentMap(0, MPIDForce::Covalent13, {2});
-    forceField->setCovalentMap(0, MPIDForce::Covalent14, {3});
+    forceField->setCovalentMap(0, PhyNEOForce::Covalent12, {1});
+    forceField->setCovalentMap(0, PhyNEOForce::Covalent13, {2});
+    forceField->setCovalentMap(0, PhyNEOForce::Covalent14, {3});
 
     // Atom 1
     positions.push_back(Vec3(0.0, 0.0, 0.0));
-    forceField->addMultipole(1.0, {0,0,0}, {0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0}, MPIDForce::NoAxisType, 0, 0, 0, 0.0, {0.0, 0.0, 0.0});
+    forceField->addMultipole(1.0, {0,0,0}, {0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0}, PhyNEOForce::NoAxisType, 0, 0, 0, 0.0, {0.0, 0.0, 0.0});
     system.addParticle(1.0);
-    forceField->setCovalentMap(1, MPIDForce::Covalent12, {0, 2});
-    forceField->setCovalentMap(1, MPIDForce::Covalent13, {3});
+    forceField->setCovalentMap(1, PhyNEOForce::Covalent12, {0, 2});
+    forceField->setCovalentMap(1, PhyNEOForce::Covalent13, {3});
 
     // Atom 2
     positions.push_back(Vec3(0.0, 0.1, 0.0));
-    forceField->addMultipole(-1.0, {0,0,0}, {0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0}, MPIDForce::NoAxisType, 0, 0, 0, 0.0, {0.0, 0.0, 0.0});
+    forceField->addMultipole(-1.0, {0,0,0}, {0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0}, PhyNEOForce::NoAxisType, 0, 0, 0, 0.0, {0.0, 0.0, 0.0});
     system.addParticle(1.0);
-    forceField->setCovalentMap(2, MPIDForce::Covalent12, {1, 3});
-    forceField->setCovalentMap(2, MPIDForce::Covalent13, {0});
+    forceField->setCovalentMap(2, PhyNEOForce::Covalent12, {1, 3});
+    forceField->setCovalentMap(2, PhyNEOForce::Covalent13, {0});
 
     // Atom 3
     positions.push_back(Vec3(0.1, 0.1, 0.0));
-    forceField->addMultipole(-1.0, {0,0,0}, {0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0}, MPIDForce::NoAxisType, 0, 0, 0, 0.0, {0.0, 0.0, 0.0});
+    forceField->addMultipole(-1.0, {0,0,0}, {0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0}, PhyNEOForce::NoAxisType, 0, 0, 0, 0.0, {0.0, 0.0, 0.0});
     system.addParticle(1.0);
-    forceField->setCovalentMap(3, MPIDForce::Covalent12, {2});
-    forceField->setCovalentMap(3, MPIDForce::Covalent13, {1});
-    forceField->setCovalentMap(3, MPIDForce::Covalent14, {0});
+    forceField->setCovalentMap(3, PhyNEOForce::Covalent12, {2});
+    forceField->setCovalentMap(3, PhyNEOForce::Covalent13, {1});
+    forceField->setCovalentMap(3, PhyNEOForce::Covalent14, {0});
 
     system.setDefaultPeriodicBoxVectors(Vec3(boxEdgeLength, 0, 0),
                                         Vec3(0, boxEdgeLength, 0),
@@ -106,7 +106,7 @@ void make_charge_square(double boxEdgeLength, vector<Vec3> &positions, MPIDForce
 }
 
 
-void make_waterbox(int natoms, double boxEdgeLength, MPIDForce *forceField,  vector<Vec3> &positions, System &system,
+void make_waterbox(int natoms, double boxEdgeLength, PhyNEOForce *forceField,  vector<Vec3> &positions, System &system,
                    bool do_charge = true, bool do_dpole = true, bool do_qpole = true, bool do_opole = true, bool do_pol = true)
 {
     std::map < std::string, double > tholemap;
@@ -115,16 +115,16 @@ void make_waterbox(int natoms, double boxEdgeLength, MPIDForce *forceField,  vec
     std::map < std::string, std::vector<double> > dipolemap;
     std::map < std::string, std::vector<double> > quadrupolemap;
     std::map < std::string, std::vector<double> > octopolemap;
-    std::map < std::string, MPIDForce::MultipoleAxisTypes > axesmap;
+    std::map < std::string, PhyNEOForce::MultipoleAxisTypes > axesmap;
     std::map < std::string, std::vector<int> > anchormap;
     std::map < std::string, double > massmap;
     std::map < std::string, std::vector<int> > polgrpmap;
     std::map < std::string, std::vector<int> > cov12map;
     std::map < std::string, std::vector<int> > cov13map;
 
-    axesmap["O"]  = MPIDForce::Bisector;
-    axesmap["H1"] = MPIDForce::ZThenX;
-    axesmap["H2"] = MPIDForce::ZThenX;
+    axesmap["O"]  = PhyNEOForce::Bisector;
+    axesmap["H1"] = PhyNEOForce::ZThenX;
+    axesmap["H2"] = PhyNEOForce::ZThenX;
 
     chargemap["O"]  = -0.51966;
     chargemap["H1"] = 0.25983;
@@ -640,26 +640,26 @@ void make_waterbox(int natoms, double boxEdgeLength, MPIDForce *forceField,  vec
         for(int i=0; i < polgrps.size(); ++i)
             tmppol.push_back(polgrps[i]+atom);
         if(!tmppol.empty())
-           forceField->setCovalentMap(atom, MPIDForce::PolarizationCovalent11, tmppol);
+           forceField->setCovalentMap(atom, PhyNEOForce::PolarizationCovalent11, tmppol);
         // 1-2 covalent groups
         std::vector<int> tmp12;
         std::vector<int>& cov12s = cov12map[element];
         for(int i=0; i < cov12s.size(); ++i)
             tmp12.push_back(cov12s[i]+atom);
         if(!tmp12.empty())
-           forceField->setCovalentMap(atom, MPIDForce::Covalent12, tmp12);
+           forceField->setCovalentMap(atom, PhyNEOForce::Covalent12, tmp12);
         // 1-3 covalent groups
         std::vector<int> tmp13;
         std::vector<int>& cov13s = cov13map[element];
         for(int i=0; i < cov13s.size(); ++i)
             tmp13.push_back(cov13s[i]+atom);
         if(!tmp13.empty())
-           forceField->setCovalentMap(atom, MPIDForce::Covalent13, tmp13);
+           forceField->setCovalentMap(atom, PhyNEOForce::Covalent13, tmp13);
     }
 }
 
 
-void make_methanolbox(int natoms, double boxEdgeLength, MPIDForce *forceField,  vector<Vec3> &positions, System &system,
+void make_methanolbox(int natoms, double boxEdgeLength, PhyNEOForce *forceField,  vector<Vec3> &positions, System &system,
                       bool do_charge = true, bool do_dpole  = true, bool do_qpole = true, bool do_opole = true, bool do_pol = true)
 {
     std::map < std::string, double > tholemap;
@@ -668,7 +668,7 @@ void make_methanolbox(int natoms, double boxEdgeLength, MPIDForce *forceField,  
     std::map < std::string, std::vector<double> > dipolemap;
     std::map < std::string, std::vector<double> > quadrupolemap;
     std::map < std::string, std::vector<double> > octopolemap;
-    std::map < std::string, MPIDForce::MultipoleAxisTypes > axesmap;
+    std::map < std::string, PhyNEOForce::MultipoleAxisTypes > axesmap;
     std::map < std::string, std::vector<int> > anchormap;
     std::map < std::string, double > massmap;
     std::map < std::string, std::vector<int> > cov12map;
@@ -682,12 +682,12 @@ void make_methanolbox(int natoms, double boxEdgeLength, MPIDForce *forceField,  
     massmap["H1B"] = 1.0080000;
     massmap["H1C"] = 1.0080000;
 
-    axesmap["C1"]  = MPIDForce::ZOnly;
-    axesmap["O1"]  = MPIDForce::ZThenX;
-    axesmap["HO1"] = MPIDForce::ZOnly;
-    axesmap["H1A"] = MPIDForce::ZOnly;
-    axesmap["H1B"] = MPIDForce::ZOnly;
-    axesmap["H1C"] = MPIDForce::ZOnly;
+    axesmap["C1"]  = PhyNEOForce::ZOnly;
+    axesmap["O1"]  = PhyNEOForce::ZThenX;
+    axesmap["HO1"] = PhyNEOForce::ZOnly;
+    axesmap["H1A"] = PhyNEOForce::ZOnly;
+    axesmap["H1B"] = PhyNEOForce::ZOnly;
+    axesmap["H1C"] = PhyNEOForce::ZOnly;
 
 
     chargemap["C1"]  = -0.140;
@@ -868,14 +868,14 @@ void make_methanolbox(int natoms, double boxEdgeLength, MPIDForce *forceField,  
         for(int i=0; i < cov12s.size(); ++i)
             tmp12.push_back(cov12s[i]+atom);
         if(!tmp12.empty())
-           forceField->setCovalentMap(atom, MPIDForce::Covalent12, tmp12);
+           forceField->setCovalentMap(atom, PhyNEOForce::Covalent12, tmp12);
         // 1-3 covalent groups
         std::vector<int> tmp13;
         std::vector<int>& cov13s = cov13map[element];
         for(int i=0; i < cov13s.size(); ++i)
             tmp13.push_back(cov13s[i]+atom);
         if(!tmp13.empty())
-           forceField->setCovalentMap(atom, MPIDForce::Covalent13, tmp13);
+           forceField->setCovalentMap(atom, PhyNEOForce::Covalent13, tmp13);
     }
 }
 
@@ -977,7 +977,7 @@ void testMethanolDimerEnergyAndForcesPMEDirect() {
     double boxEdgeLength = 24.61817*OpenMM::NmPerAngstrom;
     const double alpha = 4.5;
     const int grid = 64;
-    MPIDForce* forceField = new MPIDForce();
+    PhyNEOForce* forceField = new PhyNEOForce();
 
     vector<Vec3> positions;
     System system;
@@ -991,11 +991,11 @@ void testMethanolDimerEnergyAndForcesPMEDirect() {
     bool do_pol    = true;
     make_methanolbox(numAtoms, boxEdgeLength, forceField,  positions,  system,
                      do_charge, do_dpole, do_qpole, do_opole, do_pol);
-    forceField->setNonbondedMethod(OpenMM::MPIDForce::PME);
+    forceField->setNonbondedMethod(OpenMM::PhyNEOForce::PME);
     forceField->setPMEParameters(alpha, grid, grid, grid);
     forceField->setDefaultTholeWidth(3.0);
     forceField->setCutoffDistance(cutoff);
-    forceField->setPolarizationType(MPIDForce::Direct);
+    forceField->setPolarizationType(PhyNEOForce::Direct);
     system.addForce(forceField);
 
     VerletIntegrator integrator(0.01);
@@ -1031,7 +1031,7 @@ void testMethanolDimerEnergyAndForcesPMEDirect() {
 void testMethanolDimerEnergyAndForcesNoCutDirect() {
     // Methanol box with anisotropic induced dipoles
     double boxEdgeLength = 24.61817*OpenMM::NmPerAngstrom;
-    MPIDForce* forceField = new MPIDForce();
+    PhyNEOForce* forceField = new PhyNEOForce();
 
     vector<Vec3> positions;
     System system;
@@ -1045,9 +1045,9 @@ void testMethanolDimerEnergyAndForcesNoCutDirect() {
     bool do_pol    = true;
     make_methanolbox(numAtoms, boxEdgeLength, forceField,  positions,  system,
                      do_charge, do_dpole, do_qpole, do_opole, do_pol);
-    forceField->setNonbondedMethod(OpenMM::MPIDForce::NoCutoff);
+    forceField->setNonbondedMethod(OpenMM::PhyNEOForce::NoCutoff);
     forceField->setDefaultTholeWidth(3.0);
-    forceField->setPolarizationType(MPIDForce::Direct);
+    forceField->setPolarizationType(PhyNEOForce::Direct);
     system.addForce(forceField);
 
     VerletIntegrator integrator(0.01);
@@ -1086,7 +1086,7 @@ void testMethanolDimerEnergyAndForcesPMEMutual() {
     double boxEdgeLength = 24.61817*OpenMM::NmPerAngstrom;
     const double alpha = 4.5;
     const int grid = 64;
-    MPIDForce* forceField = new MPIDForce();
+    PhyNEOForce* forceField = new PhyNEOForce();
 
     vector<Vec3> positions;
     System system;
@@ -1100,11 +1100,11 @@ void testMethanolDimerEnergyAndForcesPMEMutual() {
     bool do_pol    = true;
     make_methanolbox(numAtoms, boxEdgeLength, forceField,  positions,  system,
                      do_charge, do_dpole, do_qpole, do_opole, do_pol);
-    forceField->setNonbondedMethod(OpenMM::MPIDForce::PME);
+    forceField->setNonbondedMethod(OpenMM::PhyNEOForce::PME);
     forceField->setPMEParameters(alpha, grid, grid, grid);
     forceField->setDefaultTholeWidth(3.0);
     forceField->setCutoffDistance(cutoff);
-    forceField->setPolarizationType(MPIDForce::Mutual);
+    forceField->setPolarizationType(PhyNEOForce::Mutual);
     forceField->setMutualInducedTargetEpsilon(1e-9);
     system.addForce(forceField);
 
@@ -1141,7 +1141,7 @@ void testMethanolDimerEnergyAndForcesPMEMutual() {
 void testMethanolDimerEnergyAndForcesNoCutMutual() {
     // Methanol box with anisotropic induced dipoles
     double boxEdgeLength = 24.61817*OpenMM::NmPerAngstrom;
-    MPIDForce* forceField = new MPIDForce();
+    PhyNEOForce* forceField = new PhyNEOForce();
 
     vector<Vec3> positions;
     System system;
@@ -1155,9 +1155,9 @@ void testMethanolDimerEnergyAndForcesNoCutMutual() {
     bool do_pol    = true;
     make_methanolbox(numAtoms, boxEdgeLength, forceField,  positions,  system,
                      do_charge, do_dpole, do_qpole, do_opole, do_pol);
-    forceField->setNonbondedMethod(OpenMM::MPIDForce::NoCutoff);
+    forceField->setNonbondedMethod(OpenMM::PhyNEOForce::NoCutoff);
     forceField->setDefaultTholeWidth(3.0);
-    forceField->setPolarizationType(MPIDForce::Mutual);
+    forceField->setPolarizationType(PhyNEOForce::Mutual);
     forceField->setMutualInducedTargetEpsilon(1e-9);
     system.addForce(forceField);
 
@@ -1197,7 +1197,7 @@ void testMethanolDimerEnergyAndForcesPMEExtrapolated() {
     double boxEdgeLength = 24.61817*OpenMM::NmPerAngstrom;
     const double alpha = 4.5;
     const int grid = 64;
-    MPIDForce* forceField = new MPIDForce();
+    PhyNEOForce* forceField = new PhyNEOForce();
 
     vector<Vec3> positions;
     System system;
@@ -1211,11 +1211,11 @@ void testMethanolDimerEnergyAndForcesPMEExtrapolated() {
     bool do_pol    = true;
     make_methanolbox(numAtoms, boxEdgeLength, forceField,  positions,  system,
                      do_charge, do_dpole, do_qpole, do_opole, do_pol);
-    forceField->setNonbondedMethod(OpenMM::MPIDForce::PME);
+    forceField->setNonbondedMethod(OpenMM::PhyNEOForce::PME);
     forceField->setPMEParameters(alpha, grid, grid, grid);
     forceField->setDefaultTholeWidth(3.0);
     forceField->setCutoffDistance(cutoff);
-    forceField->setPolarizationType(MPIDForce::Extrapolated);
+    forceField->setPolarizationType(PhyNEOForce::Extrapolated);
     system.addForce(forceField);
 
     VerletIntegrator integrator(0.01);
@@ -1251,7 +1251,7 @@ void testMethanolDimerEnergyAndForcesPMEExtrapolated() {
 void testMethanolDimerEnergyAndForcesNoCutExtrapolated() {
     // Methanol box with anisotropic induced dipoles
     double boxEdgeLength = 24.61817*OpenMM::NmPerAngstrom;
-    MPIDForce* forceField = new MPIDForce();
+    PhyNEOForce* forceField = new PhyNEOForce();
 
     vector<Vec3> positions;
     System system;
@@ -1265,9 +1265,9 @@ void testMethanolDimerEnergyAndForcesNoCutExtrapolated() {
     bool do_pol    = true;
     make_methanolbox(numAtoms, boxEdgeLength, forceField,  positions,  system,
                      do_charge, do_dpole, do_qpole, do_opole, do_pol);
-    forceField->setNonbondedMethod(OpenMM::MPIDForce::NoCutoff);
+    forceField->setNonbondedMethod(OpenMM::PhyNEOForce::NoCutoff);
     forceField->setDefaultTholeWidth(3.0);
-    forceField->setPolarizationType(MPIDForce::Extrapolated);
+    forceField->setPolarizationType(PhyNEOForce::Extrapolated);
     system.addForce(forceField);
 
     VerletIntegrator integrator(0.01);
@@ -1305,7 +1305,7 @@ void testWaterDimerEnergyAndForcesNoCutDirect() {
     const double cutoff = 6.0*OpenMM::NmPerAngstrom;
     double boxEdgeLength = 20*OpenMM::NmPerAngstrom;
     const int grid = 64;
-    MPIDForce* forceField = new MPIDForce();
+    PhyNEOForce* forceField = new PhyNEOForce();
 
     vector<Vec3> positions;
     System system;
@@ -1319,9 +1319,9 @@ void testWaterDimerEnergyAndForcesNoCutDirect() {
     bool do_pol    = true;
     make_waterbox(numAtoms, boxEdgeLength, forceField,  positions, system,
                   do_charge, do_dpole, do_qpole, do_opole, do_pol);
-    forceField->setNonbondedMethod(OpenMM::MPIDForce::NoCutoff);
+    forceField->setNonbondedMethod(OpenMM::PhyNEOForce::NoCutoff);
     forceField->setDefaultTholeWidth(3.0);
-    forceField->setPolarizationType(MPIDForce::Direct);
+    forceField->setPolarizationType(PhyNEOForce::Direct);
     system.addForce(forceField);
 
     VerletIntegrator integrator(0.01);
@@ -1355,7 +1355,7 @@ void testWaterDimerEnergyAndForcesPMEDirect() {
     double boxEdgeLength = 20*OpenMM::NmPerAngstrom;
     const double alpha = 3.0001;
     const int grid = 64;
-    MPIDForce* forceField = new MPIDForce();
+    PhyNEOForce* forceField = new PhyNEOForce();
 
     vector<Vec3> positions;
     System system;
@@ -1369,11 +1369,11 @@ void testWaterDimerEnergyAndForcesPMEDirect() {
     bool do_pol    = true;
     make_waterbox(numAtoms, boxEdgeLength, forceField,  positions, system,
                   do_charge, do_dpole, do_qpole, do_opole, do_pol);
-    forceField->setNonbondedMethod(OpenMM::MPIDForce::PME);
+    forceField->setNonbondedMethod(OpenMM::PhyNEOForce::PME);
     forceField->setPMEParameters(alpha, grid, grid, grid);
     forceField->setDefaultTholeWidth(3.0);
     forceField->setCutoffDistance(cutoff);
-    forceField->setPolarizationType(MPIDForce::Direct);
+    forceField->setPolarizationType(PhyNEOForce::Direct);
     system.addForce(forceField);
 
     VerletIntegrator integrator(0.01);
@@ -1405,7 +1405,7 @@ void testWaterDimerEnergyAndForcesNoCutMutual() {
     // Water box with isotropic induced dipoles
     const double cutoff = 6.0*OpenMM::NmPerAngstrom;
     double boxEdgeLength = 20*OpenMM::NmPerAngstrom;
-    MPIDForce* forceField = new MPIDForce();
+    PhyNEOForce* forceField = new PhyNEOForce();
 
     vector<Vec3> positions;
 
@@ -1420,9 +1420,9 @@ void testWaterDimerEnergyAndForcesNoCutMutual() {
     bool do_pol    = true;
     make_waterbox(numAtoms, boxEdgeLength, forceField,  positions, system,
                   do_charge, do_dpole, do_qpole, do_opole, do_pol);
-    forceField->setNonbondedMethod(OpenMM::MPIDForce::NoCutoff);
+    forceField->setNonbondedMethod(OpenMM::PhyNEOForce::NoCutoff);
     forceField->setDefaultTholeWidth(3.0);
-    forceField->setPolarizationType(MPIDForce::Mutual);
+    forceField->setPolarizationType(PhyNEOForce::Mutual);
     forceField->setMutualInducedTargetEpsilon(1e-8);
     system.addForce(forceField);
 
@@ -1455,7 +1455,7 @@ void testWaterDimerEnergyAndForcesPMEMutual() {
     double boxEdgeLength = 20*OpenMM::NmPerAngstrom;
     const double alpha = 3;
     const int grid = 64;
-    MPIDForce* forceField = new MPIDForce();
+    PhyNEOForce* forceField = new PhyNEOForce();
 
     vector<Vec3> positions;
 
@@ -1470,11 +1470,11 @@ void testWaterDimerEnergyAndForcesPMEMutual() {
     bool do_pol    = true;
     make_waterbox(numAtoms, boxEdgeLength, forceField,  positions, system,
                   do_charge, do_dpole, do_qpole, do_opole, do_pol);
-    forceField->setNonbondedMethod(OpenMM::MPIDForce::PME);
+    forceField->setNonbondedMethod(OpenMM::PhyNEOForce::PME);
     forceField->setPMEParameters(alpha, grid, grid, grid);
     forceField->setDefaultTholeWidth(3.0);
     forceField->setCutoffDistance(cutoff);
-    forceField->setPolarizationType(MPIDForce::Mutual);
+    forceField->setPolarizationType(PhyNEOForce::Mutual);
     forceField->setMutualInducedTargetEpsilon(1e-8);
     system.addForce(forceField);
 
@@ -1509,7 +1509,7 @@ void testWaterDimerEnergyAndForcesPMEExtrapolated() {
     double boxEdgeLength = 20*OpenMM::NmPerAngstrom;
     const double alpha = 3.0;
     const int grid = 64;
-    MPIDForce* forceField = new MPIDForce();
+    PhyNEOForce* forceField = new PhyNEOForce();
 
     vector<Vec3> positions;
 
@@ -1524,11 +1524,11 @@ void testWaterDimerEnergyAndForcesPMEExtrapolated() {
     bool do_pol    = true;
     make_waterbox(numAtoms, boxEdgeLength, forceField,  positions, system,
                   do_charge, do_dpole, do_qpole, do_opole, do_pol);
-    forceField->setNonbondedMethod(OpenMM::MPIDForce::PME);
+    forceField->setNonbondedMethod(OpenMM::PhyNEOForce::PME);
     forceField->setPMEParameters(alpha, grid, grid, grid);
     forceField->setDefaultTholeWidth(3.0);
     forceField->setCutoffDistance(cutoff);
-    forceField->setPolarizationType(MPIDForce::Extrapolated);
+    forceField->setPolarizationType(PhyNEOForce::Extrapolated);
     system.addForce(forceField);
 
     VerletIntegrator integrator(0.01);
@@ -1559,7 +1559,7 @@ void testWaterDimerEnergyAndForcesPMEExtrapolated() {
 void testWaterDimerEnergyAndForcesNoCutExtrapolated() {
     // Water box with isotropic induced dipoles
     double boxEdgeLength = 20*OpenMM::NmPerAngstrom;
-    MPIDForce* forceField = new MPIDForce();
+    PhyNEOForce* forceField = new PhyNEOForce();
 
     vector<Vec3> positions;
 
@@ -1574,9 +1574,9 @@ void testWaterDimerEnergyAndForcesNoCutExtrapolated() {
     bool do_pol    = true;
     make_waterbox(numAtoms, boxEdgeLength, forceField,  positions, system,
                   do_charge, do_dpole, do_qpole, do_opole, do_pol);
-    forceField->setNonbondedMethod(OpenMM::MPIDForce::NoCutoff);
+    forceField->setNonbondedMethod(OpenMM::PhyNEOForce::NoCutoff);
     forceField->setDefaultTholeWidth(3.0);
-    forceField->setPolarizationType(MPIDForce::Extrapolated);
+    forceField->setPolarizationType(PhyNEOForce::Extrapolated);
     system.addForce(forceField);
 
     VerletIntegrator integrator(0.01);
@@ -1606,9 +1606,9 @@ void testWaterDimerEnergyAndForcesNoCutExtrapolated() {
 void test14ScalingNoCutoff() {
     // Water box with isotropic induced dipoles
     double boxEdgeLength = 20*OpenMM::NmPerAngstrom;
-    MPIDForce* forceField1 = new MPIDForce();
-    MPIDForce* forceField2 = new MPIDForce();
-    MPIDForce* forceField3 = new MPIDForce();
+    PhyNEOForce* forceField1 = new PhyNEOForce();
+    PhyNEOForce* forceField2 = new PhyNEOForce();
+    PhyNEOForce* forceField3 = new PhyNEOForce();
     vector<Vec3> positions;
 
     double energy;
@@ -1616,7 +1616,7 @@ void test14ScalingNoCutoff() {
     State state;
 
     make_charge_square(boxEdgeLength, positions, forceField1, system1);
-    forceField1->setNonbondedMethod(OpenMM::MPIDForce::NoCutoff);
+    forceField1->setNonbondedMethod(OpenMM::PhyNEOForce::NoCutoff);
     system1.addForce(forceField1);
     VerletIntegrator integrator1(0.01);
     Context context1(system1, integrator1, Platform::getPlatformByName("CUDA"));
@@ -1626,7 +1626,7 @@ void test14ScalingNoCutoff() {
     ASSERT_EQUAL_TOL(energy, -1389.35, 1E-5);
 
     make_charge_square(boxEdgeLength, positions, forceField2, system2);
-    forceField2->setNonbondedMethod(OpenMM::MPIDForce::NoCutoff);
+    forceField2->setNonbondedMethod(OpenMM::PhyNEOForce::NoCutoff);
     forceField2->set14ScaleFactor(0.5);
     system2.addForce(forceField2);
     VerletIntegrator integrator2(0.01);
@@ -1637,7 +1637,7 @@ void test14ScalingNoCutoff() {
     ASSERT_EQUAL_TOL(energy, -1389.35/2, 1E-5);
 
     make_charge_square(boxEdgeLength, positions, forceField3, system3);
-    forceField3->setNonbondedMethod(OpenMM::MPIDForce::NoCutoff);
+    forceField3->setNonbondedMethod(OpenMM::PhyNEOForce::NoCutoff);
     forceField3->set14ScaleFactor(0.0);
     system3.addForce(forceField3);
     VerletIntegrator integrator3(0.01);
@@ -1653,9 +1653,9 @@ void test14ScalingPME() {
     const double cutoff = 4.0*OpenMM::NmPerAngstrom;
     double boxEdgeLength = 30*OpenMM::NmPerAngstrom;
     const int grid = 64;
-    MPIDForce* forceField1 = new MPIDForce();
-    MPIDForce* forceField2 = new MPIDForce();
-    MPIDForce* forceField3 = new MPIDForce();
+    PhyNEOForce* forceField1 = new PhyNEOForce();
+    PhyNEOForce* forceField2 = new PhyNEOForce();
+    PhyNEOForce* forceField3 = new PhyNEOForce();
     vector<Vec3> positions;
 
     double energy;
@@ -1663,7 +1663,7 @@ void test14ScalingPME() {
     State state;
 
     make_charge_square(boxEdgeLength, positions, forceField1, system1);
-    forceField1->setNonbondedMethod(OpenMM::MPIDForce::PME);
+    forceField1->setNonbondedMethod(OpenMM::PhyNEOForce::PME);
     forceField1->setCutoffDistance(cutoff);
     forceField1->setPMEParameters(0.001, grid, grid, grid);
     system1.addForce(forceField1);
@@ -1675,7 +1675,7 @@ void test14ScalingPME() {
     ASSERT_EQUAL_TOL(energy, -1389.35, 1E-3);
 
     make_charge_square(boxEdgeLength, positions, forceField2, system2);
-    forceField2->setNonbondedMethod(OpenMM::MPIDForce::PME);
+    forceField2->setNonbondedMethod(OpenMM::PhyNEOForce::PME);
     forceField2->setCutoffDistance(cutoff);
     forceField2->setPMEParameters(0.001, grid, grid, grid);
     forceField2->set14ScaleFactor(0.5);
@@ -1688,7 +1688,7 @@ void test14ScalingPME() {
     ASSERT_EQUAL_TOL(energy, -1389.35/2, 1E-3);
 
     make_charge_square(boxEdgeLength, positions, forceField3, system3);
-    forceField3->setNonbondedMethod(OpenMM::MPIDForce::PME);
+    forceField3->setNonbondedMethod(OpenMM::PhyNEOForce::PME);
     forceField3->setCutoffDistance(cutoff);
     forceField3->setPMEParameters(0.001, grid, grid, grid);
     forceField3->set14ScaleFactor(0.0);
@@ -1705,8 +1705,8 @@ void test14ScalingPME() {
 
 int main(int argc, char* argv[]) {
     try {
-        std::cout << "TestCudaMPIDForce running test..." << std::endl;
-        registerMPIDCudaKernelFactories();
+        std::cout << "TestCudaPhyNEOForce running test..." << std::endl;
+        registerPhyNEOCudaKernelFactories();
         if (argc > 1)
             Platform::getPlatformByName("CUDA").setPropertyDefaultValue("Precision", std::string(argv[1]));
 

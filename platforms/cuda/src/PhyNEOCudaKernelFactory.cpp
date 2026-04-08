@@ -1,5 +1,5 @@
 /* -------------------------------------------------------------------------- *
- *                              OpenMMMPID                                  *
+ *                              PhyNEOMPD                                  *
  * -------------------------------------------------------------------------- *
  * This is part of the OpenMM molecular simulation toolkit originating from   *
  * Simbios, the NIH National Center for Physics-Based Simulation of           *
@@ -24,8 +24,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.      *
  * -------------------------------------------------------------------------- */
 
-#include "MPIDCudaKernelFactory.h"
-#include "MPIDCudaKernels.h"
+#include "PhyNEOCudaKernelFactory.h"
+#include "PhyNEOCudaKernels.h"
 #include "CudaPlatform.h"
 #include "openmm/internal/ContextImpl.h"
 #include "openmm/OpenMMException.h"
@@ -47,15 +47,15 @@ extern "C" OPENMM_EXPORT void registerKernelFactories() {
 #endif
     try {
         Platform& platform = Platform::getPlatformByName("CUDA");
-        MPIDCudaKernelFactory* factory = new MPIDCudaKernelFactory();
-        platform.registerKernelFactory(CalcMPIDForceKernel::Name(), factory);
+        PhyNEOCudaKernelFactory* factory = new PhyNEOCudaKernelFactory();
+        platform.registerKernelFactory(CalcPhyNEOForceKernel::Name(), factory);
     }
     catch (...) {
         // Ignore.  The CUDA platform isn't available.
     }
 }
 
-extern "C" OPENMM_EXPORT void registerMPIDCudaKernelFactories() {
+extern "C" OPENMM_EXPORT void registerPhyNEOCudaKernelFactories() {
     try {
         Platform::getPlatformByName("CUDA");
     }
@@ -65,12 +65,12 @@ extern "C" OPENMM_EXPORT void registerMPIDCudaKernelFactories() {
     registerKernelFactories();
 }
 
-KernelImpl* MPIDCudaKernelFactory::createKernelImpl(std::string name, const Platform& platform, ContextImpl& context) const {
+KernelImpl* PhyNEOCudaKernelFactory::createKernelImpl(std::string name, const Platform& platform, ContextImpl& context) const {
     CudaPlatform::PlatformData& data = *static_cast<CudaPlatform::PlatformData*>(context.getPlatformData());
     CudaContext& cu = *data.contexts[0];
 
-    if (name == CalcMPIDForceKernel::Name())
-        return new CudaCalcMPIDForceKernel(name, platform, cu, context.getSystem());
+    if (name == CalcPhyNEOForceKernel::Name())
+        return new CudaCalcPhyNEOForceKernel(name, platform, cu, context.getSystem());
 
     throw OpenMMException((std::string("Tried to create kernel with illegal kernel name '")+name+"'").c_str());
 }

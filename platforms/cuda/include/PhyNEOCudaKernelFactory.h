@@ -1,8 +1,8 @@
-#ifndef MPID_OPENMM_CUDAKERNELFACTORY_H_
-#define MPID_OPENMM_CUDAKERNELFACTORY_H_
+#ifndef PhyNEO_OPENMM_CUDAKERNELFACTORY_H_
+#define PhyNEO_OPENMM_CUDAKERNELFACTORY_H_
 
 /* -------------------------------------------------------------------------- *
- *                            OpenMMMPID                                    *
+ *                            PhyNEOMPD                                    *
  * -------------------------------------------------------------------------- *
  * This is part of the OpenMM molecular simulation toolkit originating from   *
  * Simbios, the NIH National Center for Physics-Based Simulation of           *
@@ -32,14 +32,14 @@
 namespace OpenMM {
 
 /**
- * This KernelFactory creates all kernels for MPIDCudaPlatform.
+ * This KernelFactory creates all kernels for PhyNEOCudaPlatform.
  */
 
-class MPIDCudaKernelFactory : public KernelFactory {
+class PhyNEOCudaKernelFactory : public KernelFactory {
 public:
     KernelImpl* createKernelImpl(std::string name, const Platform& platform, ContextImpl& context) const;
 };
 
 } // namespace OpenMM
 
-#endif /*MPID_OPENMM_CUDAKERNELFACTORY_H_*/
+#endif /*PhyNEO_OPENMM_CUDAKERNELFACTORY_H_*/
