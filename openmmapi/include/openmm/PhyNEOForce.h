@@ -469,6 +469,26 @@ public:
      */
     double get14ScaleFactor() const;
 
+    /**
+     * Set the multipole scale factors (mScales, pScales, dScales) for 1-2 through 1-6 interactions.
+     * These arrays are used to scale the damped inverse distances for permanent-permanent,
+     * permanent-induced, and damped-dispersion interactions respectively.
+     *
+     * @param mScales vector of 5 scale factors for permanent-permanent interactions (indices 0-4 for 1-2 to 1-6)
+     * @param pScales vector of 5 scale factors for permanent-induced interactions (indices 0-4 for 1-2 to 1-6)
+     * @param dScales vector of 5 scale factors for damped-dispersion interactions (indices 0-4 for 1-2 to 1-6)
+     */
+    void setMultipoleScaleFactors(const std::vector<double>& mScales, const std::vector<double>& pScales, const std::vector<double>& dScales);
+
+    /**
+     * Get the multipole scale factors.
+     *
+     * @param mScales vector to store mScales (5 values for 1-2 to 1-6)
+     * @param pScales vector to store pScales (5 values for 1-2 to 1-6)
+     * @param dScales vector to store dScales (5 values for 1-2 to 1-6)
+     */
+    void getMultipoleScaleFactors(std::vector<double>& mScales, std::vector<double>& pScales, std::vector<double>& dScales) const;
+
 protected:
     ForceImpl* createImpl() const;
 private:
@@ -486,6 +506,9 @@ private:
     double ewaldErrorTol;
     class MultipoleInfo;
     std::vector<MultipoleInfo> multipoles;
+    std::vector<double> mScales;
+    std::vector<double> pScales;
+    std::vector<double> dScales;
 };
 
 /**

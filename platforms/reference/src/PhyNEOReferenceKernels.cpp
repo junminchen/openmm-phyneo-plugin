@@ -173,6 +173,9 @@ void ReferenceCalcPhyNEOForceKernel::initialize(const System& system, const PhyN
     }
     scaleFactor14 = force.get14ScaleFactor();
 
+    // Get multipole scale factors
+    force.getMultipoleScaleFactors(mScales, pScales, dScales);
+
     return;
 }
 
@@ -217,6 +220,7 @@ PhyNEOReferenceForce* ReferenceCalcPhyNEOForceKernel::setupPhyNEOReferenceForce(
         throw OpenMMException("Polarization type not recognzied.");
     }
     mpidReferenceForce->set14ScaleFactor(scaleFactor14);
+    mpidReferenceForce->setMultipoleScaleFactors(mScales, pScales, dScales);
 
     return mpidReferenceForce;
 

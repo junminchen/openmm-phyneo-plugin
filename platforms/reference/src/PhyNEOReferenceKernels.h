@@ -156,6 +156,9 @@ private:
     double scaleFactor14;
     double cutoffDistance;
     std::vector<int> pmeGridDimension;
+    std::vector<double> mScales;
+    std::vector<double> pScales;
+    std::vector<double> dScales;
 
     const System& system;
 };

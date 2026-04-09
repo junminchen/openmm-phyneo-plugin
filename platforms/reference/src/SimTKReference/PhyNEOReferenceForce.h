@@ -573,6 +573,16 @@ public:
     double get14ScaleFactor() const;
 
     /**
+     * Set the multipole scale factors (mScales, pScales, dScales) for 1-2 through 1-6 interactions.
+     * These override the default values set during initialize().
+     *
+     * @param mScales vector of 5 scale factors for permanent-permanent interactions (indices 0-4 for 1-2 to 1-6)
+     * @param pScales vector of 5 scale factors for permanent-induced interactions (indices 0-4 for 1-2 to 1-6)
+     * @param dScales vector of 5 scale factors for damped-dispersion interactions (indices 0-4 for 1-2 to 1-6)
+     */
+    void setMultipoleScaleFactors(const std::vector<double>& mScales, const std::vector<double>& pScales, const std::vector<double>& dScales);
+
+    /**
      * Set the maximum number of iterations to be executed in converging mutual induced dipoles.
      *
      * @param maximumMutualInducedDipoleIterations maximum number of iterations to be executed in converging mutual induced dipoles
@@ -863,11 +873,12 @@ protected:
     double _electric;
     double _dielectric;
 
-    enum ScaleType { M_SCALE, P_SCALE, LAST_SCALE_TYPE_INDEX };
+    enum ScaleType { M_SCALE, P_SCALE, D_SCALE, LAST_SCALE_TYPE_INDEX };
     std::vector<  std::vector< MapIntRealOpenMM > > _scaleMaps;
     std::vector<unsigned int> _maxScaleIndex;
     double _mScale[5];
     double _pScale[5];
+    double _dScale[5];
 
     std::vector<TransformedMultipole> _transformed;
     std::vector<Vec3> _fixedMultipoleField;

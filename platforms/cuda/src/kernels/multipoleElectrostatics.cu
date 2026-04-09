@@ -645,7 +645,9 @@ extern "C" __global__ void computeElectrostatics(
         const unsigned int* __restrict__ interactingAtoms,
 #endif
         const real* __restrict__ sphericalDipole, const real* __restrict__ sphericalQuadrupole,  const real* __restrict__ sphericalOctopole, const real* __restrict__ inducedDipole,
-        const float2* __restrict__ dampingAndThole) {
+        const float2* __restrict__ dampingAndThole,
+        const float* __restrict__ mScaleFactors,
+        const float* __restrict__ pScaleFactors) {
     const unsigned int totalWarps = (blockDim.x*gridDim.x)/TILE_SIZE;
     const unsigned int warp = (blockIdx.x*blockDim.x+threadIdx.x)/TILE_SIZE;
     const unsigned int tgx = threadIdx.x & (TILE_SIZE-1);
@@ -698,8 +700,9 @@ extern "C" __global__ void computeElectrostatics(
             for (unsigned int j = 0; j < TILE_SIZE; j++) {
                 int atom2 = y*TILE_SIZE+j;
                 if (atom1 != atom2 && atom1 < NUM_ATOMS && atom2 < NUM_ATOMS) {
-                    float p = computePScaleFactor(covalent, j);
-                    float m = computeMScaleFactor(covalent, j);
+                    // Use precomputed scale factors indexed by actual atom indices
+                    float m = mScaleFactors[atom1*NUM_ATOMS+atom2];
+                    float p = pScaleFactors[atom1*NUM_ATOMS+atom2];
                     computeOneInteraction(data, localData[tbx+j], true, p, m, 0.5f, energy);
                 }
             }
@@ -723,8 +726,9 @@ extern "C" __global__ void computeElectrostatics(
             for (j = 0; j < TILE_SIZE; j++) {
                 int atom2 = y*TILE_SIZE+tj;
                 if (atom1 < NUM_ATOMS && atom2 < NUM_ATOMS) {
-                    float p = computePScaleFactor(covalent, tj);
-                    float m = computeMScaleFactor(covalent, tj);
+                    // Use precomputed scale factors indexed by actual atom indices
+                    float m = mScaleFactors[atom1*NUM_ATOMS+atom2];
+                    float p = pScaleFactors[atom1*NUM_ATOMS+atom2];
                     computeOneInteraction(data, localData[tbx+tj], true, p, m, 1, energy);
                 }
                 tj = (tj + 1) & (TILE_SIZE - 1);

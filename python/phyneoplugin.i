@@ -420,6 +420,26 @@ public:
     double get14ScaleFactor() const;
 
     /**
+     * Set the multipole scale factors (mScales, pScales, dScales) for 1-2 through 1-6 interactions.
+     * These arrays are used to scale the damped inverse distances for permanent-permanent,
+     * permanent-induced, and damped-dispersion interactions respectively.
+     *
+     * @param mScales vector of 5 scale factors for permanent-permanent interactions (indices 0-4 for 1-2 to 1-6)
+     * @param pScales vector of 5 scale factors for permanent-induced interactions (indices 0-4 for 1-2 to 1-6)
+     * @param dScales vector of 5 scale factors for damped-dispersion interactions (indices 0-4 for 1-2 to 1-6)
+     */
+    void setMultipoleScaleFactors(const std::vector<double> &mScales, const std::vector<double> &pScales, const std::vector<double> &dScales);
+
+    /**
+     * Get the multipole scale factors.
+     *
+     * @param mScales vector to store mScales (5 values for 1-2 to 1-6)
+     * @param pScales vector to store pScales (5 values for 1-2 to 1-6)
+     * @param dScales vector to store dScales (5 values for 1-2 to 1-6)
+     */
+    void getMultipoleScaleFactors(std::vector<double> &mScales, std::vector<double> &pScales, std::vector<double> &dScales) const;
+
+    /**
      * Set the coefficients for the mu_0, mu_1, mu_2, ..., mu_n terms in the extrapolation
      * algorithm for induced dipoles.
      *
@@ -767,13 +787,16 @@ class PhyNEOGenerator(object):
         """
 
         # Parse scale factors for 12-16 interactions
-        mScales = []
-        pScales = []
-        dScales = []
-        for i in range(2, 7):  # indices 12, 13, 14, 15, 16
-            mScales.append(float(element.get(f'mScale1{i}', 1.0)))
-            pScales.append(float(element.get(f'pScale1{i}', 1.0)))
-            dScales.append(float(element.get(f'dScale1{i}', 1.0)))
+        # mScales[0] corresponds to 1-1 interaction (not used in XML, default 1.0)
+        # mScales[1] corresponds to 1-2 interaction (mScale12)
+        # etc.
+        mScales = [1.0]  # 1-1 (not used in XML)
+        pScales = [1.0]
+        dScales = [1.0]
+        for i in range(12, 17):  # indices 12, 13, 14, 15, 16
+            mScales.append(float(element.get(f'mScale{i}', 1.0)))
+            pScales.append(float(element.get(f'pScale{i}', 1.0)))
+            dScales.append(float(element.get(f'dScale{i}', 1.0)))
 
         lmax = int(element.get('lmax', 2))
 
@@ -900,13 +923,16 @@ class PhyNEOGenerator(object):
         """
 
         # Parse scale factors for 12-16 interactions
-        mScales = []
-        pScales = []
-        dScales = []
-        for i in range(2, 7):  # indices 12, 13, 14, 15, 16
-            mScales.append(float(element.get(f'mScale1{i}', 1.0)))
-            pScales.append(float(element.get(f'pScale1{i}', 1.0)))
-            dScales.append(float(element.get(f'dScale1{i}', 1.0)))
+        # mScales[0] corresponds to 1-1 interaction (not used in XML, default 1.0)
+        # mScales[1] corresponds to 1-2 interaction (mScale12)
+        # etc.
+        mScales = [1.0]  # 1-1 (not used in XML)
+        pScales = [1.0]
+        dScales = [1.0]
+        for i in range(12, 17):  # indices 12, 13, 14, 15, 16
+            mScales.append(float(element.get(f'mScale{i}', 1.0)))
+            pScales.append(float(element.get(f'pScale{i}', 1.0)))
+            dScales.append(float(element.get(f'dScale{i}', 1.0)))
 
         lmax = int(element.get('lmax', 2))
 
@@ -978,6 +1004,10 @@ class PhyNEOGenerator(object):
         else:
             if myval is not None:
                 force.setDefaultTholeWidth(myval)
+
+        # Set multipole scale factors (mScales, pScales, dScales)
+        if len(self.mScales) > 0 or len(self.pScales) > 0 or len(self.dScales) > 0:
+            force.setMultipoleScaleFactors(self.mScales, self.pScales, self.dScales)
 
         if ('aEwald' in args):
             force.setAEwald(float(args['aEwald']))

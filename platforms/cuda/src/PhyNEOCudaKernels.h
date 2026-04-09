@@ -146,6 +146,9 @@ private:
     const System& system;
     std::vector<int3> covalentFlagValues;
     std::vector<int2> polarizationFlagValues;
+    std::vector<double> mScales;
+    std::vector<double> pScales;
+    std::vector<double> dScales;
     CudaArray* multipoleParticles;
     CudaArray* molecularDipoles;
     CudaArray* molecularQuadrupoles;
@@ -177,6 +180,8 @@ private:
     CudaArray* extrapolatedDipoleFieldGradient;
     CudaArray* polarizability;
     CudaArray* covalentFlags;
+    CudaArray* mScaleFactors;
+    CudaArray* pScaleFactors;
     CudaArray* pmeGrid;
     CudaArray* pmeBsplineModuliX;
     CudaArray* pmeBsplineModuliY;

@@ -110,7 +110,7 @@ CudaCalcPhyNEOForceKernel::CudaCalcPhyNEOForceKernel(std::string name, const Pla
         diisCoefficients(NULL), inducedDipoleErrors(NULL), prevDipoles(NULL),
         prevErrors(NULL), diisMatrix(NULL), polarizability(NULL), extrapolatedDipole(NULL),
         inducedDipoleFieldGradient(NULL), extrapolatedDipoleField(NULL), extrapolatedDipoleFieldGradient(NULL),
-        covalentFlags(NULL),
+        covalentFlags(NULL), mScaleFactors(NULL), pScaleFactors(NULL),
         pmeGrid(NULL), pmeBsplineModuliX(NULL), pmeBsplineModuliY(NULL), pmeBsplineModuliZ(NULL), pmeIgrid(NULL), pmePhi(NULL),
         pmePhid(NULL), pmePhip(NULL), pmePhidp(NULL), pmeCphi(NULL), lastPositions(NULL), sort(NULL) {
 }
@@ -177,6 +177,9 @@ CudaCalcPhyNEOForceKernel::~CudaCalcPhyNEOForceKernel() {
         delete polarizability;
     if (covalentFlags != NULL)
         delete covalentFlags;
+    if (mScaleFactors != NULL)
+        delete mScaleFactors;
+        delete pScaleFactors;
     if (pmeGrid != NULL)
         delete pmeGrid;
     if (pmeBsplineModuliX != NULL)
@@ -340,18 +343,20 @@ void CudaCalcPhyNEOForceKernel::initialize(const System& system, const PhyNEOFor
         allAtoms.insert(i);
         force.getCovalentMap(i, PhyNEOForce::Covalent12, atoms);
         allAtoms.insert(atoms.begin(), atoms.end());
-        force.getCovalentMap(i, PhyNEOForce::Covalent13, atoms);
-        allAtoms.insert(atoms.begin(), atoms.end());
-        for (int atom : allAtoms)
+        for (int atom : atoms)
             covalentFlagValues.push_back(make_int3(i, atom, 0));
-        force.getCovalentMap(i, PhyNEOForce::Covalent14, atoms);
+        force.getCovalentMap(i, PhyNEOForce::Covalent13, atoms);
         allAtoms.insert(atoms.begin(), atoms.end());
         for (int atom : atoms)
             covalentFlagValues.push_back(make_int3(i, atom, 1));
-        force.getCovalentMap(i, PhyNEOForce::Covalent15, atoms);
+        force.getCovalentMap(i, PhyNEOForce::Covalent14, atoms);
+        allAtoms.insert(atoms.begin(), atoms.end());
         for (int atom : atoms)
             covalentFlagValues.push_back(make_int3(i, atom, 2));
+        force.getCovalentMap(i, PhyNEOForce::Covalent15, atoms);
         allAtoms.insert(atoms.begin(), atoms.end());
+        for (int atom : atoms)
+            covalentFlagValues.push_back(make_int3(i, atom, 3));
         force.getCovalentMap(i, PhyNEOForce::PolarizationCovalent11, atoms);
         allAtoms.insert(atoms.begin(), atoms.end());
         exclusions[i].insert(exclusions[i].end(), allAtoms.begin(), allAtoms.end());
@@ -459,6 +464,8 @@ void CudaCalcPhyNEOForceKernel::initialize(const System& system, const PhyNEOFor
         defines["CUTOFF_SQUARED"] = cu.doubleToString(force.getCutoffDistance()*force.getCutoffDistance());
     }
     defines["SCALEFACTOR14"] = cu.doubleToString(force.get14ScaleFactor());
+    // Get the multipole scale factors for proper per-covalent-degree scaling
+    force.getMultipoleScaleFactors(mScales, pScales, dScales);
     int maxThreads = cu.getNonbondedUtilities().getForceThreadBlockSize();
     fixedFieldThreads = min(maxThreads, cu.computeThreadBlockSize(fixedThreadMemory));
     inducedFieldThreads = min(maxThreads, cu.computeThreadBlockSize(inducedThreadMemory));
@@ -665,7 +672,66 @@ void CudaCalcPhyNEOForceKernel::initializeScaleFactors() {
     hasInitializedScaleFactors = true;
     CudaNonbondedUtilities& nb = cu.getNonbondedUtilities();
 
+    // Build a lookup map from (atom1, atom2) to scale factor
+    // The covalentFlagValues stores (atom1, atom2, covalentDegree) where covalentDegree is:
+    //   0 = Covalent12 (1-2 interaction) -> use mScale[1]
+    //   1 = Covalent13 (1-3 interaction) -> use mScale[2]
+    //   2 = Covalent14 (1-4 interaction) -> use mScale[3]
+    //   3 = Covalent15 (1-5 interaction) -> use mScale[4]
+    map<pair<int, int>, double> scaleFactorMap;
+    for (int3 values : covalentFlagValues) {
+        int atom1 = values.x;
+        int atom2 = values.y;
+        int value = values.z;
+        int scaleIndex = value + 1;  // mScale[1-4] for value 0-3
+        if (scaleIndex >= 0 && scaleIndex < (int) mScales.size()) {
+            // Store scale factor for both (atom1, atom2) and (atom2, atom1)
+            // since the kernel may look up either direction
+            double scale = mScales[scaleIndex];
+            scaleFactorMap[make_pair(atom1, atom2)] = scale;
+            scaleFactorMap[make_pair(atom2, atom1)] = scale;
+        }
+    }
+
+    // Build pScaleFactorMap similar to mScaleFactorMap
+    map<pair<int, int>, double> pScaleFactorMap;
+    for (int3 values : covalentFlagValues) {
+        int atom1 = values.x;
+        int atom2 = values.y;
+        int value = values.z;
+        int scaleIndex = value + 1;  // pScale[1-4] for value 0-3
+        if (scaleIndex >= 0 && scaleIndex < (int) pScales.size()) {
+            double scale = pScales[scaleIndex];
+            pScaleFactorMap[make_pair(atom1, atom2)] = scale;
+            pScaleFactorMap[make_pair(atom2, atom1)] = scale;
+        }
+    }
+
+    // Build the mScaleFactors and pScaleFactors arrays indexed by [atom1 * numMultipoles + atom2]
+    int numAtoms = numMultipoles;
+    vector<float> mScaleFactorsVec(numAtoms * numAtoms, 1.0f);  // Default to 1.0 (no scaling)
+    vector<float> pScaleFactorsVec(numAtoms * numAtoms, 1.0f);  // Default to 1.0 (no scaling)
+    for (int atom1 = 0; atom1 < numAtoms; atom1++) {
+        for (int atom2 = 0; atom2 < numAtoms; atom2++) {
+            auto mIt = scaleFactorMap.find(make_pair(atom1, atom2));
+            if (mIt != scaleFactorMap.end()) {
+                mScaleFactorsVec[atom1 * numAtoms + atom2] = (float) mIt->second;
+            }
+            auto pIt = pScaleFactorMap.find(make_pair(atom1, atom2));
+            if (pIt != pScaleFactorMap.end()) {
+                pScaleFactorsVec[atom1 * numAtoms + atom2] = (float) pIt->second;
+            }
+        }
+    }
+    mScaleFactors = CudaArray::create<float>(cu, numAtoms * numAtoms, "mScaleFactors");
+    mScaleFactors->upload(mScaleFactorsVec);
+    pScaleFactors = CudaArray::create<float>(cu, numAtoms * numAtoms, "pScaleFactors");
+    pScaleFactors->upload(pScaleFactorsVec);
+
     // Figure out the covalent flag values to use for each atom pair.
+    // Note: The f1/f2 bit-encoding is kept for compatibility with existing kernel logic
+    // that uses covalentFlags for exclusion checking, but the actual scale factors
+    // are now obtained from the mScaleFactors array.
 
     vector<int2> exclusionTiles;
     nb.getExclusionTiles().download(exclusionTiles);
@@ -684,8 +750,10 @@ void CudaCalcPhyNEOForceKernel::initializeScaleFactors() {
         int offset1 = atom1-x*CudaContext::TileSize;
         int y = atom2/CudaContext::TileSize;
         int offset2 = atom2-y*CudaContext::TileSize;
-        int f1 = (value == 0 || value == 1 ? 1 : 0);
-        int f2 = (value == 0 || value == 2 ? 1 : 0);
+        // f1 is set for Covalent12 (value=0), Covalent13 (value=1), Covalent14 (value=2)
+        // f2 is set for Covalent12 (value=0), Covalent13 (value=1), Covalent15 (value=3)
+        int f1 = (value <= 2 ? 1 : 0);
+        int f2 = (value == 0 || value == 1 || value == 3 ? 1 : 0);
         if (x == y) {
             int index = exclusionTileMap[make_pair(x, y)]*CudaContext::TileSize;
             covalentFlagsVec[index+offset1].x |= f1<<offset2;
@@ -753,7 +821,7 @@ double CudaCalcPhyNEOForceKernel::execute(ContextImpl& context, bool includeForc
            &cu.getPosq().getDevicePointer(), &covalentFlags->getDevicePointer(),
            &nb.getExclusionTiles().getDevicePointer(), &startTileIndex, &numTileIndices,
            &sphericalDipoles->getDevicePointer(), &sphericalQuadrupoles->getDevicePointer(), &sphericalOctopoles->getDevicePointer(),
-           &inducedDipole->getDevicePointer(), &dampingAndThole->getDevicePointer()};
+           &inducedDipole->getDevicePointer(), &dampingAndThole->getDevicePointer(), &mScaleFactors->getDevicePointer(), &pScaleFactors->getDevicePointer()};
        cu.executeKernel(electrostaticsKernel, electrostaticsArgs, numForceThreadBlocks*electrostaticsThreads, electrostaticsThreads);
     }
     else {
@@ -872,7 +940,7 @@ double CudaCalcPhyNEOForceKernel::execute(ContextImpl& context, bool includeForc
             cu.getPeriodicBoxSizePointer(), cu.getInvPeriodicBoxSizePointer(), cu.getPeriodicBoxVecXPointer(), cu.getPeriodicBoxVecYPointer(), cu.getPeriodicBoxVecZPointer(),
             &maxTiles, &nb.getBlockCenters().getDevicePointer(), &nb.getInteractingAtoms().getDevicePointer(),
             &sphericalDipoles->getDevicePointer(), &sphericalQuadrupoles->getDevicePointer(), &sphericalOctopoles->getDevicePointer(),
-            &inducedDipole->getDevicePointer(), &dampingAndThole->getDevicePointer(), &pmeCphi->getDevicePointer()};
+            &inducedDipole->getDevicePointer(), &dampingAndThole->getDevicePointer(), &mScaleFactors->getDevicePointer(), &pScaleFactors->getDevicePointer()};
         cu.executeKernel(electrostaticsKernel, electrostaticsArgs, numForceThreadBlocks*electrostaticsThreads, electrostaticsThreads);
         void* pmeTransformInducedPotentialArgs[] = {&pmePhidp->getDevicePointer(), &pmeCphi->getDevicePointer(), recipBoxVectorPointer[0], recipBoxVectorPointer[1], recipBoxVectorPointer[2]};
         cu.executeKernel(pmeTransformPotentialKernel, pmeTransformInducedPotentialArgs, cu.getNumAtoms());

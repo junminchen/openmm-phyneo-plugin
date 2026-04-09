@@ -47,6 +47,23 @@ PhyNEOForce::PhyNEOForce() : nonbondedMethod(NoCutoff), polarizationType(Extrapo
     extrapolationCoefficients.push_back(0.017);
     extrapolationCoefficients.push_back(0.658);
     extrapolationCoefficients.push_back(0.474);
+    // Initialize scale factors: mScales[0-4] for 1-1 through 1-5 interactions
+    // Default: 1-2 and 1-3 are 0.0 (excluded), 1-4 and 1-5 are 1.0 (no scaling)
+    mScales.push_back(1.0);  // mScales[0] - 1-1 interaction (not typically used)
+    mScales.push_back(0.0);  // mScales[1] - 1-2 interaction
+    mScales.push_back(0.0);  // mScales[2] - 1-3 interaction
+    mScales.push_back(1.0);  // mScales[3] - 1-4 interaction (also set by set14ScaleFactor)
+    mScales.push_back(1.0);  // mScales[4] - 1-5 interaction
+    pScales.push_back(1.0);
+    pScales.push_back(0.0);
+    pScales.push_back(0.0);
+    pScales.push_back(1.0);
+    pScales.push_back(1.0);
+    dScales.push_back(1.0);
+    dScales.push_back(0.0);
+    dScales.push_back(0.0);
+    dScales.push_back(1.0);
+    dScales.push_back(1.0);
 }
 
 PhyNEOForce::NonbondedMethod PhyNEOForce::getNonbondedMethod() const {
@@ -157,6 +174,22 @@ double PhyNEOForce::get14ScaleFactor() const {
 
 void PhyNEOForce::set14ScaleFactor(double fac) {
     scaleFactor14 = fac;
+    // Also update the scale factors at index 3 (1-4 interaction)
+    if (mScales.size() > 3) mScales[3] = fac;
+    if (pScales.size() > 3) pScales[3] = fac;
+    if (dScales.size() > 3) dScales[3] = fac;
+}
+
+void PhyNEOForce::setMultipoleScaleFactors(const std::vector<double>& mScales, const std::vector<double>& pScales, const std::vector<double>& dScales) {
+    this->mScales = mScales;
+    this->pScales = pScales;
+    this->dScales = dScales;
+}
+
+void PhyNEOForce::getMultipoleScaleFactors(std::vector<double>& mScales, std::vector<double>& pScales, std::vector<double>& dScales) const {
+    mScales = this->mScales;
+    pScales = this->pScales;
+    dScales = this->dScales;
 }
 
 int PhyNEOForce::addMultipole(double charge, const std::vector<double>& molecularDipole, const std::vector<double>& molecularQuadrupole,

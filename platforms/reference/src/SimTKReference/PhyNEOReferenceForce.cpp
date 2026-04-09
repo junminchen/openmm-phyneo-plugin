@@ -86,13 +86,26 @@ void PhyNEOReferenceForce::initialize()
 
 void PhyNEOReferenceForce::set14ScaleFactor(double factor)
 {
-    _pScale[3] = _mScale[3] = factor;
+    _pScale[3] = _mScale[3] = _dScale[3] = factor;
 }
 
 double PhyNEOReferenceForce::get14ScaleFactor() const
 {
     assert(_pScale[3] == _mScale[3]);
     return _pScale[3];
+}
+
+void PhyNEOReferenceForce::setMultipoleScaleFactors(const std::vector<double>& mScales, const std::vector<double>& pScales, const std::vector<double>& dScales)
+{
+    for (int i = 0; i < 5 && i < (int)mScales.size(); i++) {
+        _mScale[i] = mScales[i];
+    }
+    for (int i = 0; i < 5 && i < (int)pScales.size(); i++) {
+        _pScale[i] = pScales[i];
+    }
+    for (int i = 0; i < 5 && i < (int)dScales.size(); i++) {
+        _dScale[i] = dScales[i];
+    }
 }
 
 PhyNEOReferenceForce::NonbondedMethod PhyNEOReferenceForce::getNonbondedMethod() const
@@ -210,7 +223,7 @@ void PhyNEOReferenceForce::setupScaleMaps(const vector< vector< vector<int> > >&
         _maxScaleIndex[ii] = 0;
         const vector< vector<int> >& covalentInfo = multipoleParticleCovalentInfo[ii];
 
-        // pScale & mScale
+        // pScale, mScale & dScale
 
         for (unsigned jj = 0; jj < PhyNEOForce::PolarizationCovalent11; jj++) {
             for (int covalentIndex : covalentInfo[jj]) {
@@ -218,6 +231,7 @@ void PhyNEOReferenceForce::setupScaleMaps(const vector< vector< vector<int> > >&
                     continue;
                 _scaleMaps[ii][M_SCALE][covalentIndex] = _mScale[jj+1];
                 _scaleMaps[ii][P_SCALE][covalentIndex] = _pScale[jj+1];
+                _scaleMaps[ii][D_SCALE][covalentIndex] = _dScale[jj+1];
                 _maxScaleIndex[ii]                     = _maxScaleIndex[ii] < covalentIndex ? covalentIndex : _maxScaleIndex[ii];
             }
         }
@@ -239,13 +253,15 @@ double PhyNEOReferenceForce::getMultipoleScaleFactor(unsigned int particleI, uns
 void PhyNEOReferenceForce::getDScaleAndPScale(unsigned int particleI, unsigned int particleJ, double& dScale, double& pScale) const
 {
     pScale = getMultipoleScaleFactor(particleI, particleJ, P_SCALE);
-    dScale = pScale;
+    dScale = getMultipoleScaleFactor(particleI, particleJ, D_SCALE);
 }
 
 void PhyNEOReferenceForce::getMultipoleScaleFactors(unsigned int particleI, unsigned int particleJ, vector<double>& scaleFactors) const
 {
+    scaleFactors.resize(LAST_SCALE_TYPE_INDEX);
     scaleFactors[P_SCALE] = getMultipoleScaleFactor(particleI, particleJ, P_SCALE);
     scaleFactors[M_SCALE] = getMultipoleScaleFactor(particleI, particleJ, M_SCALE);
+    scaleFactors[D_SCALE] = getMultipoleScaleFactor(particleI, particleJ, D_SCALE);
 }
 
 double PhyNEOReferenceForce::normalizeVec3(Vec3& vectorToNormalize) const

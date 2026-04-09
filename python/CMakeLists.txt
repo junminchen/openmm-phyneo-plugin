@@ -11,6 +11,8 @@ add_custom_command(
         -o "${WRAP_FILE}"
         "-I${OPENMM_DIR}/include"
         "-I${OPENMM_DIR}/include/swig"
+        "-I${CMAKE_SOURCE_DIR}/openmmapi/include"
+        "-I${CMAKE_SOURCE_DIR}/openmmapi/include/openmm"
         "${CMAKE_CURRENT_SOURCE_DIR}/phyneoplugin.i"
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/phyneoplugin.i"
     WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
