@@ -11,7 +11,8 @@ pdb = PDBFile('waterbox_31ang.pdb')
 
 #forcefield = ForceField('../parameters/tip3p.xml')
 #forcefield = ForceField('../parameters/swm4.xml')
-forcefield = ForceField('../parameters/swm6.xml')
+#forcefield = ForceField('../parameters/swm6.xml')
+forcefield = ForceField('mpidwater_lmax2.xml')
 #system = forcefield.createSystem(pdb.topology, nonbondedMethod=LJPME,nonbondedCutoff=8*angstrom, constraints=HBonds,defaultTholeWidth=8)
 system = forcefield.createSystem(pdb.topology, nonbondedMethod=LJPME,polarization="extrapolated",nonbondedCutoff=8*angstrom, constraints=HBonds,defaultTholeWidth=8)
 #system = forcefield.createSystem(pdb.topology, nonbondedMethod=LJPME, nonbondedCutoff=8*angstrom, constraints=HBonds)
@@ -28,9 +29,10 @@ try:
     deviceid = argv[1] if len(argv) > 1 else '0'
     myproperties = {'DeviceIndex': deviceid, 'Precision': 'mixed'}
 except:
-    print("CUDA NOT FOUND!!!!!!!!!!")
-    myplatform = None
+    print("Using Reference platform (CUDA not available)")
+    myplatform = Platform.getPlatformByName('Reference')
     deviceid = "N/A"
+    myproperties = {}
 
 if myplatform:
     simulation = Simulation(pdb.topology, system, integrator, myplatform, myproperties)

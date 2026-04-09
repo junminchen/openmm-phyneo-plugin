@@ -9,11 +9,12 @@ set -e  # Exit on error
 
 # Configuration
 CONDA_PREFIX=${CONDA_PREFIX:-$HOME/miniconda3}
-ENV_NAME=${ENV_NAME:-phyneo-env}
+ENV_NAME=${ENV_NAME:-phyneo}
 PLUGIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BUILD_TYPE=${BUILD_TYPE:-Release}
 OPENMM_VERSION=${OPENMM_VERSION:-8.4}
 BUILD_CUDA=${BUILD_CUDA:-ON}
+PYTHON_WRAPPER_COMPILE=${PYTHON_WRAPPER_COMPILE:-manual}  # manual or cmake
 
 # Colors for output
 RED='\033[0;31m'
@@ -105,7 +106,7 @@ create_environment() {
     fi
 
     log_info "Creating new environment: $ENV_NAME"
-    conda create -n "$ENV_NAME" python=3.10 -y
+    conda create -n "$ENV_NAME" python=3.11 -y
 
     # Activate environment
     eval "$(conda shell.bash hook)"
@@ -173,7 +174,88 @@ build_plugin() {
     log_info "Building..."
     make -j$(nproc)
 
+    # Build Python wrappers separately if needed (CMake PythonInstall can fail with CUDA headers)
+    if [ "$PYTHON_WRAPPER_COMPILE" = "manual" ]; then
+        build_python_wrappers_manual
+    fi
+
     log_info "Build complete!"
+}
+
+# Manually compile Python wrappers with correct CUDA include paths
+build_python_wrappers_manual() {
+    log_info "Building Python wrappers manually..."
+
+    eval "$(conda shell.bash hook)"
+    conda activate "$ENV_NAME"
+
+    cd "$PLUGIN_DIR/python"
+
+    local py_version=$(python -c "import sys; print(f'python{sys.version_info.major}.{sys.version_info.minor}')")
+    local py_include="$CONDA_PREFIX/include/$py_version"
+    local numpy_include="$CONDA_PREFIX/lib/python3.11/site-packages/numpy/_core/include"
+
+    # Find CUDA runtime include (from nvidia/cuda_runtime package)
+    local cuda_runtime_include=""
+    if [ -d "$CONDA_PREFIX/lib/python3.11/site-packages/nvidia/cuda_runtime/include" ]; then
+        cuda_runtime_include="$CONDA_PREFIX/lib/python3.11/site-packages/nvidia/cuda_runtime/include"
+    elif [ -d "$CONDA_PREFIX/include/cuda" ]; then
+        cuda_runtime_include="$CONDA_PREFIX/include/cuda"
+    fi
+
+    # Run SWIG if needed
+    if [ ! -f phyneoplugin_wrap.cxx ] || [ python/phyneoplugin.i -nt phyneoplugin_wrap.cxx ]; then
+        log_info "Running SWIG..."
+        swig -python -c++ \
+            -I"$CONDA_PREFIX/include" \
+            -I"$CONDA_PREFIX/include/openmm" \
+            -I"$CONDA_PREFIX/include/swig" \
+            python/phyneoplugin.i
+    fi
+
+    log_info "Compiling Python wrapper..."
+
+    # Build command with CUDA include paths to avoid system CUDA conflicts
+    local compile_cmd="g++ -shared -fPIC -O3 -DNDEBUG \
+        -I\"$py_include\" \
+        -I\"$CONDA_PREFIX/include\" \
+        -I\"$CONDA_PREFIX/include/openmm\" \
+        -I\"$CONDA_PREFIX/include/swig\" \
+        -I\"$numpy_include\" \
+        -DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION"
+
+    # Add CUDA runtime include if found (critical for avoiding system CUDA header conflicts)
+    if [ -n "$cuda_runtime_include" ]; then
+        compile_cmd="$compile_cmd -isystem \"$cuda_runtime_include\""
+    fi
+
+    compile_cmd="$compile_cmd \
+        phyneoplugin_wrap.cxx \
+        -o _phyneoplugin*.so \
+        -L\"$PLUGIN_DIR/build\" -lPhyNEOPlugin -lOpenMM \
+        -L\"$CONDA_PREFIX/lib\" -lpython3.11"
+
+    log_info "Compile command: $compile_cmd"
+
+    # Find the exact .so file name pattern and compile
+    cd "$PLUGIN_DIR/python"
+    eval "$compile_cmd" || {
+        log_warn "First compilation attempt failed, trying alternative..."
+        # Try without CUDA includes if there were conflicts
+        g++ -shared -fPIC -O3 -DNDEBUG \
+            -I"$py_include" \
+            -I"$CONDA_PREFIX/include" \
+            -I"$CONDA_PREFIX/include/openmm" \
+            -I"$CONDA_PREFIX/include/swig" \
+            -I"$numpy_include" \
+            -DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION \
+            phyneoplugin_wrap.cxx \
+            -o _phyneoplugin*.so \
+            -L"$PLUGIN_DIR/build" -lPhyNEOPlugin -lOpenMM \
+            -L"$CONDA_PREFIX/lib" -lpython3.11
+    }
+
+    log_info "Python wrapper build complete!"
 }
 
 # Install Python wrappers manually (avoids permission issues)
@@ -199,28 +281,32 @@ install_python_wrappers() {
         cp platforms/reference/libOpenMMPhyNEOReference.so "$CONDA_PREFIX/envs/$ENV_NAME/lib/plugins/"
     fi
 
+    # Find Python version in environment
+    local py_version=$(python -c "import sys; print(f'python{sys.version_info.major}.{sys.version_info.minor}')")
+    local py_site_packages="$CONDA_PREFIX/envs/$ENV_NAME/lib/$py_version/site-packages"
+
     # Find and copy Python module from install directory
     local py_install_dir=$(find . -path "*/install/lib" -type d 2>/dev/null | head -1)
     if [ -n "$py_install_dir" ] && [ -d "$py_install_dir/site-packages" ]; then
-        cp "$py_install_dir/site-packages/_phyneoplugin"*.so "$CONDA_PREFIX/envs/$ENV_NAME/lib/python3.10/site-packages/" 2>/dev/null || true
-        cp "$py_install_dir/site-packages/phyneoplugin.py "$CONDA_PREFIX/envs/$ENV_NAME/lib/python3.10/site-packages/" 2>/dev/null || true
+        cp "$py_install_dir/site-packages/_phyneoplugin"*.so "$py_site_packages/" 2>/dev/null || true
+        cp "$py_install_dir/site-packages/phyneoplugin.py" "$py_site_packages/" 2>/dev/null || true
     fi
 
-    # Fallback: find and copy Python module from build directory
-    local py_so=$(find . -name "_phyneoplugin*.so" 2>/dev/null | head -1)
-    local py_module=$(find . -name "phyneoplugin.py" 2>/dev/null | head -1)
+    # Fallback: find and copy Python module from python/ directory (manually built)
+    local py_so=$(find "$PLUGIN_DIR/python" -name "_phyneoplugin*.so" 2>/dev/null | head -1)
+    local py_module="$PLUGIN_DIR/python/phyneoplugin.py"
 
     if [ -n "$py_so" ]; then
-        cp "$py_so" "$CONDA_PREFIX/envs/$ENV_NAME/lib/python3.10/site-packages/"
+        cp "$py_so" "$py_site_packages/"
         log_info "Copied: $py_so"
     fi
 
-    if [ -n "$py_module" ]; then
-        cp "$py_module" "$CONDA_PREFIX/envs/$ENV_NAME/lib/python3.10/site-packages/"
+    if [ -f "$py_module" ]; then
+        cp "$py_module" "$py_site_packages/"
         log_info "Copied: $py_module"
     fi
 
-    log_info "Python wrappers installed!"
+    log_info "Python wrappers installed to $py_site_packages!"
 }
 
 # Verify installation
@@ -324,20 +410,21 @@ usage() {
     echo "Usage: $0 [OPTIONS]"
     echo ""
     echo "Options:"
-    echo "  --env-name NAME       Conda environment name (default: phyneo-env)"
+    echo "  --env-name NAME       Conda environment name (default: phyneo)"
     echo "  --openmm-version VER  OpenMM version to install (default: 8.4)"
     echo "  --build-type TYPE     CMake build type: Release or Debug (default: Release)"
     echo "  --cuda               Enable CUDA build (default: ON if CUDA available)"
     echo "  --no-cuda            Disable CUDA build"
-    echo "  --skip-create        Skip environment creation"
+    echo "  --skip-create        Skip environment creation (use existing)"
     echo "  --skip-cuda-check    Skip CUDA checks"
+    echo "  --python-wrapper-compile  How to compile Python wrappers: cmake or manual (default: manual)"
     echo "  --help               Show this help message"
     echo ""
     echo "Examples:"
     echo "  $0                                    # Default installation with CUDA"
     echo "  $0 --no-cuda                          # CPU-only build"
-    echo "  $0 --env-name myenv --openmm-version 8.4"
-    echo "  $0 --skip-create                      # Use existing environment"
+    echo "  $0 --skip-create                      # Use existing environment (phyneo)"
+    echo "  $0 --env-name myenv                   # Create/use environment named myenv"
 }
 
 # Parse arguments
@@ -374,6 +461,10 @@ while [[ $# -gt 0 ]]; do
             SKIP_CUDA_CHECK=true
             shift
             ;;
+        --python-wrapper-compile)
+            PYTHON_WRAPPER_COMPILE="$2"
+            shift 2
+            ;;
         --help)
             usage
             exit 0
@@ -409,6 +500,13 @@ main() {
 
     if [ "$SKIP_CREATE" = false ]; then
         create_environment
+    else
+        # Verify environment exists
+        if ! conda env list | grep -q "^$ENV_NAME "; then
+            log_error "Environment $ENV_NAME does not exist. Use --env-name to specify a different name or remove --skip-create"
+            exit 1
+        fi
+        log_info "Using existing environment: $ENV_NAME"
     fi
 
     build_plugin
