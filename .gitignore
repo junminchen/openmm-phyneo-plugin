@@ -7,3 +7,13 @@ MPID.files
 MPID.includes
 docs/site
 .worktrees/
+
+# Python build artifacts
+python/__pycache__/
+python/_phyneoplugin*.so
+python/phyneoplugin.py
+python/phyneoplugin_wrap.cxx
+
+# Simulation outputs
+examples/waterbox/restart.xml
+examples/waterbox/*.dcd
