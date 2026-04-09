@@ -129,10 +129,22 @@ create_environment() {
         conda install -y "gcc_impl_linux-64=${gcc_version}" "gxx_impl_linux-64=${gcc_version}" \
             "gcc_linux-64=${gcc_version}" "gxx_linux-64=${gcc_version}"
     else
-        log_warn "Could not detect OpenMM GCC version, using default GCC 11"
+        log_warn "Could not detect OpenMM GCC version, using default GCC 12.4.0"
         log_warn "If build fails with ABI errors, please report your platform"
-        conda install -y "gcc_impl_linux-64=11.2" "gxx_impl_linux-64=11.2" \
-            "gcc_linux-64=11.2" "gxx_linux-64=11.2"
+        conda install -y "gcc_impl_linux-64=12.4.0" "gxx_impl_linux-64=12.4.0" \
+            "gcc_linux-64=12.4.0" "gxx_linux-64=12.4.0"
+    fi
+
+    # Install CUDA development packages if building with CUDA
+    if [ "$BUILD_CUDA" = "ON" ]; then
+        log_info "Installing CUDA development packages..."
+        conda install -y -c conda-forge "cuda-nvcc-dev_linux-64" "cuda-cudart-dev_linux-64" || {
+            log_warn "Could not install cuda-nvcc-dev, trying alternative..."
+            conda install -y -c conda-forge "cuda-nvcc" "cuda-cudart" || true
+        }
+        # Install nvidia Python packages for CUDA headers (cufft.h, etc.)
+        # Use pip from conda environment to avoid system pip issues
+        "$conda_env_path/bin/pip" install --break-system-packages nvidia-cuda-nvcc-cu12 nvidia-cuda-runtime-cu12 nvidia-cufft-cu12 || true
     fi
 
     log_info "Environment ready: $ENV_NAME"
@@ -155,19 +167,31 @@ build_plugin() {
     cd build
 
     # Configure with CMake - use conda compilers for ABI compatibility
+    # Note: After conda activate, CONDA_PREFIX points to the environment
+    local conda_env_path="$CONDA_PREFIX"
+    local conda_base_prefix="$HOME/miniconda3"
+
     log_info "Configuring CMake..."
-    export CC="$CONDA_PREFIX/envs/$ENV_NAME/bin/x86_64-conda-linux-gnu-gcc"
-    export CXX="$CONDA_PREFIX/envs/$ENV_NAME/bin/x86_64-conda-linux-gnu-g++"
+    export CC="$conda_env_path/bin/x86_64-conda-linux-gnu-gcc"
+    export CXX="$conda_env_path/bin/x86_64-conda-linux-gnu-g++"
+
+    # CUDA paths are now passed directly to cmake (see cmake invocation below)
+    if [ "$BUILD_CUDA" = "ON" ]; then
+        log_info "CUDA will be configured with: $conda_env_path"
+    fi
 
     cmake \
         -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
-        -DCMAKE_INSTALL_PREFIX="$CONDA_PREFIX/envs/$ENV_NAME" \
-        -DOPENMM_DIR="$CONDA_PREFIX/envs/$ENV_NAME" \
+        -DCMAKE_INSTALL_PREFIX="$conda_env_path" \
+        -DOPENMM_DIR="$conda_env_path" \
         -DCMAKE_C_COMPILER="$CC" \
         -DCMAKE_CXX_COMPILER="$CXX" \
+        -DCMAKE_CXX_FLAGS="-I$conda_env_path/targets/x86_64-linux/include -I$conda_env_path/lib/python3.11/site-packages/nvidia/cufft/include -I$conda_env_path/lib/python3.11/site-packages/nvidia/nvjitlink/include" \
         -DPhyNEO_BUILD_CUDA_LIB=$BUILD_CUDA \
         -DPhyNEO_BUILD_PYTHON_WRAPPERS=ON \
-        -DPYTHON_EXECUTABLE="$CONDA_PREFIX/envs/$ENV_NAME/bin/python" \
+        -DPYTHON_EXECUTABLE="$conda_env_path/bin/python" \
+        -DCUDA_TOOLKIT_ROOT_DIR="$conda_env_path" \
+        -DCUDA_CUDART_LIBRARY="$conda_env_path/targets/x86_64-linux/lib/libcudart.so" \
         ..
 
     # Build
@@ -191,25 +215,29 @@ build_python_wrappers_manual() {
 
     cd "$PLUGIN_DIR/python"
 
+    # After activation, CONDA_PREFIX points to the environment
+    local conda_env_path="$CONDA_PREFIX"
+    local conda_base_prefix="$HOME/miniconda3"
+
     local py_version=$(python -c "import sys; print(f'python{sys.version_info.major}.{sys.version_info.minor}')")
-    local py_include="$CONDA_PREFIX/include/$py_version"
-    local numpy_include="$CONDA_PREFIX/lib/python3.11/site-packages/numpy/_core/include"
+    local py_include="$conda_env_path/include/$py_version"
+    local numpy_include="$conda_env_path/lib/python3.11/site-packages/numpy/_core/include"
 
     # Find CUDA runtime include (from nvidia/cuda_runtime package)
     local cuda_runtime_include=""
-    if [ -d "$CONDA_PREFIX/lib/python3.11/site-packages/nvidia/cuda_runtime/include" ]; then
-        cuda_runtime_include="$CONDA_PREFIX/lib/python3.11/site-packages/nvidia/cuda_runtime/include"
-    elif [ -d "$CONDA_PREFIX/include/cuda" ]; then
-        cuda_runtime_include="$CONDA_PREFIX/include/cuda"
+    if [ -d "$conda_env_path/lib/python3.11/site-packages/nvidia/cuda_runtime/include" ]; then
+        cuda_runtime_include="$conda_env_path/lib/python3.11/site-packages/nvidia/cuda_runtime/include"
+    elif [ -d "$conda_base_prefix/include/cuda" ]; then
+        cuda_runtime_include="$conda_base_prefix/include/cuda"
     fi
 
     # Run SWIG if needed
     if [ ! -f phyneoplugin_wrap.cxx ] || [ python/phyneoplugin.i -nt phyneoplugin_wrap.cxx ]; then
         log_info "Running SWIG..."
         swig -python -c++ \
-            -I"$CONDA_PREFIX/include" \
-            -I"$CONDA_PREFIX/include/openmm" \
-            -I"$CONDA_PREFIX/include/swig" \
+            -I"$conda_env_path/include" \
+            -I"$conda_env_path/include/openmm" \
+            -I"$conda_env_path/include/swig" \
             python/phyneoplugin.i
     fi
 
@@ -218,9 +246,9 @@ build_python_wrappers_manual() {
     # Build command with CUDA include paths to avoid system CUDA conflicts
     local compile_cmd="g++ -shared -fPIC -O3 -DNDEBUG \
         -I\"$py_include\" \
-        -I\"$CONDA_PREFIX/include\" \
-        -I\"$CONDA_PREFIX/include/openmm\" \
-        -I\"$CONDA_PREFIX/include/swig\" \
+        -I\"$conda_env_path/include\" \
+        -I\"$conda_env_path/include/openmm\" \
+        -I\"$conda_env_path/include/swig\" \
         -I\"$numpy_include\" \
         -DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION"
 
@@ -233,7 +261,7 @@ build_python_wrappers_manual() {
         phyneoplugin_wrap.cxx \
         -o _phyneoplugin*.so \
         -L\"$PLUGIN_DIR/build\" -lPhyNEOPlugin -lOpenMM \
-        -L\"$CONDA_PREFIX/lib\" -lpython3.11"
+        -L\"$conda_env_path/lib\" -lpython3.11"
 
     log_info "Compile command: $compile_cmd"
 
@@ -244,15 +272,15 @@ build_python_wrappers_manual() {
         # Try without CUDA includes if there were conflicts
         g++ -shared -fPIC -O3 -DNDEBUG \
             -I"$py_include" \
-            -I"$CONDA_PREFIX/include" \
-            -I"$CONDA_PREFIX/include/openmm" \
-            -I"$CONDA_PREFIX/include/swig" \
+            -I"$conda_env_path/include" \
+            -I"$conda_env_path/include/openmm" \
+            -I"$conda_env_path/include/swig" \
             -I"$numpy_include" \
             -DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION \
             phyneoplugin_wrap.cxx \
             -o _phyneoplugin*.so \
             -L"$PLUGIN_DIR/build" -lPhyNEOPlugin -lOpenMM \
-            -L"$CONDA_PREFIX/lib" -lpython3.11
+            -L"$conda_env_path/lib" -lpython3.11
     }
 
     log_info "Python wrapper build complete!"
@@ -267,23 +295,26 @@ install_python_wrappers() {
 
     cd "$PLUGIN_DIR/build"
 
+    # After activation, CONDA_PREFIX points to the environment
+    local conda_env_path="$CONDA_PREFIX"
+
     # Copy the built libraries
     log_info "Copying libraries..."
-    mkdir -p "$CONDA_PREFIX/envs/$ENV_NAME/lib/plugins"
+    mkdir -p "$conda_env_path/lib/plugins"
 
-    cp libPhyNEOPlugin.so "$CONDA_PREFIX/envs/$ENV_NAME/lib/"
+    cp libPhyNEOPlugin.so "$conda_env_path/lib/"
 
     if [ "$BUILD_CUDA" = "ON" ] && [ -f platforms/cuda/libPhyNEOPluginCUDA.so ]; then
-        cp platforms/cuda/libPhyNEOPluginCUDA.so "$CONDA_PREFIX/envs/$ENV_NAME/lib/plugins/"
+        cp platforms/cuda/libPhyNEOPluginCUDA.so "$conda_env_path/lib/plugins/"
     fi
 
     if [ -f platforms/reference/libOpenMMPhyNEOReference.so ]; then
-        cp platforms/reference/libOpenMMPhyNEOReference.so "$CONDA_PREFIX/envs/$ENV_NAME/lib/plugins/"
+        cp platforms/reference/libOpenMMPhyNEOReference.so "$conda_env_path/lib/plugins/"
     fi
 
     # Find Python version in environment
     local py_version=$(python -c "import sys; print(f'python{sys.version_info.major}.{sys.version_info.minor}')")
-    local py_site_packages="$CONDA_PREFIX/envs/$ENV_NAME/lib/$py_version/site-packages"
+    local py_site_packages="$conda_env_path/lib/$py_version/site-packages"
 
     # Find and copy Python module from install directory
     local py_install_dir=$(find . -path "*/install/lib" -type d 2>/dev/null | head -1)
@@ -316,18 +347,21 @@ verify_installation() {
     eval "$(conda shell.bash hook)"
     conda activate "$ENV_NAME"
 
+    # After activation, CONDA_PREFIX points to the environment
+    local conda_env_path="$CONDA_PREFIX"
+
     # Check libraries
-    if [ -f "$CONDA_PREFIX/envs/$ENV_NAME/lib/libPhyNEOPlugin.so" ]; then
+    if [ -f "$conda_env_path/lib/libPhyNEOPlugin.so" ]; then
         log_info "Found: libPhyNEOPlugin.so"
     else
         log_warn "Missing: libPhyNEOPlugin.so"
     fi
 
-    if [ "$BUILD_CUDA" = "ON" ] && [ -f "$CONDA_PREFIX/envs/$ENV_NAME/lib/plugins/libPhyNEOPluginCUDA.so" ]; then
+    if [ "$BUILD_CUDA" = "ON" ] && [ -f "$conda_env_path/lib/plugins/libPhyNEOPluginCUDA.so" ]; then
         log_info "Found: libPhyNEOPluginCUDA.so"
     fi
 
-    if [ -f "$CONDA_PREFIX/envs/$ENV_NAME/lib/plugins/libOpenMMPhyNEOReference.so" ]; then
+    if [ -f "$conda_env_path/lib/plugins/libOpenMMPhyNEOReference.so" ]; then
         log_info "Found: libOpenMMPhyNEOReference.so"
     fi
 
