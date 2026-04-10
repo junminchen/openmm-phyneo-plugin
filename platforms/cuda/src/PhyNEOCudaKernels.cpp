@@ -179,6 +179,7 @@ CudaCalcPhyNEOForceKernel::~CudaCalcPhyNEOForceKernel() {
         delete covalentFlags;
     if (mScaleFactors != NULL)
         delete mScaleFactors;
+    if (pScaleFactors != NULL)
         delete pScaleFactors;
     if (pmeGrid != NULL)
         delete pmeGrid;
@@ -799,7 +800,7 @@ double CudaCalcPhyNEOForceKernel::execute(ContextImpl& context, bool includeForc
         void* computeFixedFieldArgs[] = {&field->getDevicePointer(), &cu.getPosq().getDevicePointer(),
             &covalentFlags->getDevicePointer(), &nb.getExclusionTiles().getDevicePointer(), &startTileIndex, &numTileIndices,
             &labFrameDipoles->getDevicePointer(), &labFrameQuadrupoles->getDevicePointer(), &labFrameOctopoles->getDevicePointer(),
-            &dampingAndThole->getDevicePointer()};
+            &dampingAndThole->getDevicePointer(), &mScaleFactors->getDevicePointer(), &pScaleFactors->getDevicePointer()};
         cu.executeKernel(computeFixedFieldKernel, computeFixedFieldArgs, numForceThreadBlocks*fixedFieldThreads, fixedFieldThreads);
         void* recordInducedDipolesArgs[] = {&field->getDevicePointer(),
             &inducedDipole->getDevicePointer(), &labFramePolarizabilities->getDevicePointer()};
@@ -894,7 +895,8 @@ double CudaCalcPhyNEOForceKernel::execute(ContextImpl& context, bool includeForc
             &nb.getInteractingTiles().getDevicePointer(), &nb.getInteractionCount().getDevicePointer(), cu.getPeriodicBoxSizePointer(),
             cu.getInvPeriodicBoxSizePointer(), cu.getPeriodicBoxVecXPointer(), cu.getPeriodicBoxVecYPointer(), cu.getPeriodicBoxVecZPointer(),
             &maxTiles, &nb.getBlockCenters().getDevicePointer(), &nb.getInteractingAtoms().getDevicePointer(),
-            &labFrameDipoles->getDevicePointer(), &labFrameQuadrupoles->getDevicePointer(), &labFrameOctopoles->getDevicePointer(), &dampingAndThole->getDevicePointer()};
+            &labFrameDipoles->getDevicePointer(), &labFrameQuadrupoles->getDevicePointer(), &labFrameOctopoles->getDevicePointer(), &dampingAndThole->getDevicePointer(),
+            &mScaleFactors->getDevicePointer(), &pScaleFactors->getDevicePointer()};
         cu.executeKernel(computeFixedFieldKernel, computeFixedFieldArgs, numForceThreadBlocks*fixedFieldThreads, fixedFieldThreads);
         void* recordInducedDipolesArgs[] = {&field->getDevicePointer(), &inducedDipole->getDevicePointer(), &labFramePolarizabilities->getDevicePointer()};
         cu.executeKernel(recordInducedDipolesKernel, recordInducedDipolesArgs, cu.getNumAtoms());
@@ -1003,6 +1005,7 @@ void CudaCalcPhyNEOForceKernel::computeInducedField(void** recipBoxVectorPointer
         computeInducedFieldArgs.push_back(&nb.getInteractingAtoms().getDevicePointer());
     }
     computeInducedFieldArgs.push_back(&dampingAndThole->getDevicePointer());
+    computeInducedFieldArgs.push_back(&pScaleFactors->getDevicePointer());
     cu.clearBuffer(*inducedField);
     if (polarizationType == PhyNEOForce::Extrapolated) {
         cu.clearBuffer(*inducedDipoleFieldGradient);

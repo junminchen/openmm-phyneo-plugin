@@ -198,7 +198,7 @@ __device__ void computeOneInteraction(AtomData& atom1, AtomData& atom2, real3 de
  * Compute the mutual induced field.
  */
 extern "C" __global__ void computeInducedField(
-        unsigned long long* __restrict__ field, const real4* __restrict__ posq, const uint2* __restrict__ covalentFlags, const int2* __restrict__ exclusionTiles, 
+        unsigned long long* __restrict__ field, const real4* __restrict__ posq, const uint2* __restrict__ covalentFlags, const int2* __restrict__ exclusionTiles,
         const real* __restrict__ inducedDipole, unsigned int startTileIndex, unsigned int numTileIndices,
 #ifdef EXTRAPOLATED_POLARIZATION
         unsigned long long* __restrict__ fieldGradient,
@@ -207,7 +207,8 @@ extern "C" __global__ void computeInducedField(
         const int* __restrict__ tiles, const unsigned int* __restrict__ interactionCount, real4 periodicBoxSize, real4 invPeriodicBoxSize,
         real4 periodicBoxVecX, real4 periodicBoxVecY, real4 periodicBoxVecZ, unsigned int maxTiles, const real4* __restrict__ blockCenter, const unsigned int* __restrict__ interactingAtoms,
 #endif
-        const float2* __restrict__ dampingAndThole) {
+        const float2* __restrict__ dampingAndThole,
+        const float* __restrict__ pScaleFactors) {
     const unsigned int totalWarps = (blockDim.x*gridDim.x)/TILE_SIZE;
     const unsigned int warp = (blockIdx.x*blockDim.x+threadIdx.x)/TILE_SIZE;
     const unsigned int tgx = threadIdx.x & (TILE_SIZE-1);
@@ -241,7 +242,7 @@ extern "C" __global__ void computeInducedField(
 #endif
                 int atom2 = y*TILE_SIZE+j;
                 if (atom1 < NUM_ATOMS && atom2 < NUM_ATOMS){
-                    float p = computePScaleFactor(covalent, j);
+                    float p = pScaleFactors[atom1*NUM_ATOMS+atom2];
                     computeOneInteraction(data, localData[tbx+j], delta, p, atom1 == atom2);
                 }
             }
@@ -259,7 +260,7 @@ extern "C" __global__ void computeInducedField(
 #endif
                 int atom2 = y*TILE_SIZE+j;
                 if (atom1 < NUM_ATOMS && atom2 < NUM_ATOMS){
-                    float p = computePScaleFactor(covalent, tj);
+                    float p = pScaleFactors[atom1*NUM_ATOMS+atom2];
                     computeOneInteraction(data, localData[tbx+tj], delta, p, false);
                 }
                 tj = (tj + 1) & (TILE_SIZE - 1);
@@ -354,8 +355,10 @@ extern "C" __global__ void computeInducedField(
                 APPLY_PERIODIC_TO_DELTA(delta)
 #endif
                 int atom2 = atomIndices[tbx+tj];
-                if (atom1 < NUM_ATOMS && atom2 < NUM_ATOMS)
-                    computeOneInteraction(data, localData[tbx+tj], delta, 1, false);
+                if (atom1 < NUM_ATOMS && atom2 < NUM_ATOMS) {
+                    float p = pScaleFactors[atom1*NUM_ATOMS+atom2];
+                    computeOneInteraction(data, localData[tbx+tj], delta, p, false);
+                }
                 tj = (tj + 1) & (TILE_SIZE - 1);
             }
 

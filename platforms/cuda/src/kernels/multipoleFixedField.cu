@@ -278,7 +278,9 @@ extern "C" __global__ void computeFixedField(
         const unsigned int* __restrict__ interactingAtoms,
 #endif
         const real* __restrict__ labFrameDipole, const real* __restrict__ labFrameQuadrupole, const real* __restrict__ labFrameOctopole,
-        const float2* __restrict__ dampingAndThole) {
+        const float2* __restrict__ dampingAndThole,
+        const float* __restrict__ mScaleFactors,
+        const float* __restrict__ pScaleFactors) {
     const unsigned int totalWarps = (blockDim.x*gridDim.x)/TILE_SIZE;
     const unsigned int warp = (blockIdx.x*blockDim.x+threadIdx.x)/TILE_SIZE;
     const unsigned int tgx = threadIdx.x & (TILE_SIZE-1);
@@ -334,7 +336,7 @@ extern "C" __global__ void computeFixedField(
                 int atom2 = y*TILE_SIZE+j;
                 if (atom1 != atom2 && atom1 < NUM_ATOMS && atom2 < NUM_ATOMS) {
                     real3 fields[2];
-                    float p = computePScaleFactor(covalent, j);
+                    float p = pScaleFactors[atom1*NUM_ATOMS+atom2];
                     computeOneInteraction(data, localData[tbx+j], delta, p, fields);
                     data.field += fields[0];
                 }
@@ -356,7 +358,7 @@ extern "C" __global__ void computeFixedField(
                 int atom2 = y*TILE_SIZE+tj;
                 if (atom1 < NUM_ATOMS && atom2 < NUM_ATOMS) {
                     real3 fields[2];
-                    float p = computePScaleFactor(covalent, tj);
+                    float p = pScaleFactors[atom1*NUM_ATOMS+atom2];
                     computeOneInteraction(data, localData[tbx+tj], delta, p, fields);
                     data.field += fields[0];
                     localData[tbx+tj].field += fields[1];
@@ -460,7 +462,8 @@ extern "C" __global__ void computeFixedField(
                 int atom2 = atomIndices[tbx+tj];
                 if (atom1 < NUM_ATOMS && atom2 < NUM_ATOMS) {
                     real3 fields[2];
-                    computeOneInteraction(data, localData[tbx+tj], delta, 1, fields);
+                    float p = pScaleFactors[atom1*NUM_ATOMS+atom2];
+                    computeOneInteraction(data, localData[tbx+tj], delta, p, fields);
                     data.field += fields[0];
                     localData[tbx+tj].field += fields[1];
                 }

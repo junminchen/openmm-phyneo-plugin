@@ -145,9 +145,23 @@ log_info "Installing..."
 # Copy libraries
 mkdir -p "$CONDA_PREFIX/lib/plugins"
 cp "$PLUGIN_DIR/build/libPhyNEOPlugin.so" "$CONDA_PREFIX/lib/"
-cp "$PLUGIN_DIR/build/platforms/reference/libOpenMMPhyNEOReference.so" "$CONDA_PREFIX/lib/plugins/"
+
+# Copy Reference library (always built)
+if [ -f "$PLUGIN_DIR/build/platforms/reference/libOpenMMPhyNEOReference.so" ]; then
+    cp "$PLUGIN_DIR/build/platforms/reference/libOpenMMPhyNEOReference.so" "$CONDA_PREFIX/lib/plugins/"
+fi
+
+# Copy CUDA library if it was built successfully
 if [ -f "$PLUGIN_DIR/build/platforms/cuda/libPhyNEOPluginCUDA.so" ]; then
     cp "$PLUGIN_DIR/build/platforms/cuda/libPhyNEOPluginCUDA.so" "$CONDA_PREFIX/lib/plugins/"
+    log_info "CUDA library installed from build/platforms/cuda/"
+elif [ -f "$PLUGIN_DIR/build/libPhyNEOPluginCUDA.so" ]; then
+    # Fallback: copy from build root if cmake put it there
+    cp "$PLUGIN_DIR/build/libPhyNEOPluginCUDA.so" "$CONDA_PREFIX/lib/plugins/"
+    log_info "CUDA library installed from build/ (fallback)"
+else
+    log_warn "CUDA library not built - CUDA platform will not be available"
+    log_warn "This is expected if CUDA headers are not found"
 fi
 
 # Copy Python wrappers
