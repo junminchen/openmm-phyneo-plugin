@@ -179,6 +179,17 @@ if [ -d "$HOME/miniconda3/envs/mpid-openmm84/lib/python3.10/site-packages/openmm
 fi
 
 ######################################################################
+# Use working CUDA library from mpid-openmm84
+# The local build may produce a library incompatible with the CUDA driver
+# due to NVRTC version mismatch (conda-forge packages vs driver 570.211.01)
+######################################################################
+if [ -f "$HOME/miniconda3/envs/mpid-openmm84/lib/plugins/libPhyNEOPluginCUDA.so" ]; then
+    log_info "Using working CUDA library from mpid-openmm84..."
+    cp "$HOME/miniconda3/envs/mpid-openmm84/lib/plugins/libPhyNEOPluginCUDA.so" \
+       "$CONDA_PREFIX/lib/plugins/"
+fi
+
+######################################################################
 # Verify installation
 ######################################################################
 log_info "Verifying installation..."
