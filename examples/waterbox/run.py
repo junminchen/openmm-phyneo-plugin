@@ -23,6 +23,15 @@ system.addForce(MonteCarloBarostat(1*atmosphere, 300*kelvin, 25))
 for force in range(system.getNumForces()):
     print(system.getForce(force))
 
+for i in range(system.getNumForces()):
+    f = system.getForce(i)
+    if isinstance(f, phyneoplugin.PhyNEOForce):
+        f.set14ScaleFactor(0.)  # 设置 1-4 缩放因子
+        print(system.getForce(i))
+        print("Finihsed scale!")
+        break
+
+
 try:
     myplatform = Platform.getPlatformByName('CUDA')
     # Figure out which GPU to run on, i.e. did the user tell us?
