@@ -48,16 +48,6 @@ fi
 echo "Using -D_GLIBCXX_USE_CXX11_ABI=${GLIBCXX_ABI}"
 
 ######################################################################
-# Install CUDA development headers via pip
-######################################################################
-log_info "Installing CUDA development packages via pip (CUDA 12.6)..."
-python3 -m pip install --break-system-packages \
-    nvidia-cuda-nvcc-cu12==12.6.85 \
-    nvidia-cuda-runtime-cu12==12.6.77 \
-    nvidia-cufft-cu12 \
-    nvidia-nvjitlink-cu12==12.6.77 || true
-
-######################################################################
 # Build PhyNEO plugin
 ######################################################################
 log_info "Building PhyNEO plugin..."
@@ -65,37 +55,14 @@ log_info "Building PhyNEO plugin..."
 cd "$PLUGIN_DIR"
 rm -rf build && mkdir -p build && cd build
 
-# CUDA include paths from pip-installed nvidia packages
-NVIDIA_SITE_PKGS="$CONDA_PREFIX/lib/python3.10/site-packages"
-CUDA_NVCC_INCLUDE="$NVIDIA_SITE_PKGS/nvidia/cuda_nvcc/include"
-CUDA_RUNTIME_INCLUDE="$NVIDIA_SITE_PKGS/nvidia/cuda_runtime/include"
-CUFFT_INCLUDE="$NVIDIA_SITE_PKGS/nvidia/cufft/include"
-NVJITLINK_INCLUDE="$NVIDIA_SITE_PKGS/nvidia/nvjitlink/include"
-
-CXX_FLAGS="-D_GLIBCXX_USE_CXX11_ABI=${GLIBCXX_ABI}"
-CXX_FLAGS="$CXX_FLAGS -I$CONDA_PREFIX/targets/x86_64-linux/include"
-[ -d "$CUDA_NVCC_INCLUDE" ] && CXX_FLAGS="$CXX_FLAGS -I$CUDA_NVCC_INCLUDE"
-[ -d "$CUDA_RUNTIME_INCLUDE" ] && CXX_FLAGS="$CXX_FLAGS -I$CUDA_RUNTIME_INCLUDE"
-[ -d "$CUFFT_INCLUDE" ] && CXX_FLAGS="$CXX_FLAGS -I$CUFFT_INCLUDE"
-[ -d "$NVJITLINK_INCLUDE" ] && CXX_FLAGS="$CXX_FLAGS -I$NVJITLINK_INCLUDE"
-
-CUDA_TOOLKIT_INCLUDE="$CONDA_PREFIX/targets/x86_64-linux/include"
-[ -d "$CUDA_NVCC_INCLUDE" ] && CUDA_TOOLKIT_INCLUDE="$CUDA_TOOLKIT_INCLUDE;$CUDA_NVCC_INCLUDE"
-[ -d "$CUDA_RUNTIME_INCLUDE" ] && CUDA_TOOLKIT_INCLUDE="$CUDA_TOOLKIT_INCLUDE;$CUDA_RUNTIME_INCLUDE"
-[ -d "$CUFFT_INCLUDE" ] && CUDA_TOOLKIT_INCLUDE="$CUDA_TOOLKIT_INCLUDE;$CUFFT_INCLUDE"
-[ -d "$NVJITLINK_INCLUDE" ] && CUDA_TOOLKIT_INCLUDE="$CUDA_TOOLKIT_INCLUDE;$NVJITLINK_INCLUDE"
-
 cmake \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX="$CONDA_PREFIX" \
     -DOPENMM_DIR="$CONDA_PREFIX" \
     -DCMAKE_C_COMPILER="$CONDA_PREFIX/bin/x86_64-conda-linux-gnu-gcc" \
     -DCMAKE_CXX_COMPILER="$CONDA_PREFIX/bin/x86_64-conda-linux-gnu-g++" \
-    -DCMAKE_CXX_FLAGS:STRING="$CXX_FLAGS" \
-    -DCMAKE_LIBRARY_PATH="$CONDA_PREFIX/targets/x86_64-linux/lib;$CONDA_PREFIX/lib64;$NVIDIA_SITE_PKGS/nvidia/cuda_runtime/lib;$NVIDIA_SITE_PKGS/nvidia/cufft/lib;$NVIDIA_SITE_PKGS/nvidia/cuda_nvcc/lib" \
+    -DCMAKE_CXX_FLAGS="-D_GLIBCXX_USE_CXX11_ABI=${GLIBCXX_ABI}" \
     -DCUDA_TOOLKIT_ROOT_DIR="$CONDA_PREFIX/targets/x86_64-linux" \
-    -DCUDA_TOOLKIT_INCLUDE="$CUDA_TOOLKIT_INCLUDE" \
-    -DCUDA_LIBRARY="$NVIDIA_SITE_PKGS/nvidia/cuda_runtime/lib/libcudart.so.12" \
     -DPhyNEO_BUILD_CUDA_LIB=ON \
     -DPhyNEO_BUILD_PYTHON_WRAPPERS=ON \
     -DPYTHON_EXECUTABLE="$CONDA_PREFIX/bin/python" \
@@ -180,9 +147,9 @@ fi
 
 ######################################################################
 # Use working CUDA library from mpid-openmm84
-# The local build with CUDA 13.1 nvcc produces a library incompatible
-# with OpenMM 8.4 LJPME kernels. The CUDA 12.6-built library works
-# correctly with driver 590.48.01 (CUDA 13.1 support).
+# The local build may produce a library incompatible with OpenMM 8.4
+# LJPME kernels depending on CUDA/NVRTC version. The CUDA 12.6-built
+# library from mpid-openmm84 works correctly with driver 590.48.01.
 ######################################################################
 if [ -f "$HOME/miniconda3/envs/mpid-openmm84/lib/plugins/libPhyNEOPluginCUDA.so" ]; then
     log_info "Using working CUDA library from mpid-openmm84..."
