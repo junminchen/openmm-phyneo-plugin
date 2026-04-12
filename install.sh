@@ -180,8 +180,9 @@ fi
 
 ######################################################################
 # Use working CUDA library from mpid-openmm84
-# The local build may produce a library incompatible with the CUDA driver
-# due to NVRTC version mismatch (conda-forge packages vs driver 570.211.01)
+# The local build with CUDA 13.1 nvcc produces a library incompatible
+# with OpenMM 8.4 LJPME kernels. The CUDA 12.6-built library works
+# correctly with driver 590.48.01 (CUDA 13.1 support).
 ######################################################################
 if [ -f "$HOME/miniconda3/envs/mpid-openmm84/lib/plugins/libPhyNEOPluginCUDA.so" ]; then
     log_info "Using working CUDA library from mpid-openmm84..."
