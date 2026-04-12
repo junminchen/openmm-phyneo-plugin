@@ -146,14 +146,12 @@ if [ -d "$HOME/miniconda3/envs/mpid-openmm84/lib/python3.10/site-packages/openmm
 fi
 
 ######################################################################
-# Use working CUDA library from mpid-openmm84
-# The local build may produce a library incompatible with OpenMM 8.4
-# LJPME kernels depending on CUDA/NVRTC version. The CUDA 12.6-built
-# library from mpid-openmm84 works correctly with driver 590.48.01.
+# Use newly built CUDA library (if available)
+# Built with system CUDA 12.0 nvcc, compatible with driver 590+
 ######################################################################
-if [ -f "$HOME/miniconda3/envs/mpid-openmm84/lib/plugins/libPhyNEOPluginCUDA.so" ]; then
-    log_info "Using working CUDA library from mpid-openmm84..."
-    cp "$HOME/miniconda3/envs/mpid-openmm84/lib/plugins/libPhyNEOPluginCUDA.so" \
+if [ -f "$PLUGIN_DIR/build/platforms/cuda/libPhyNEOPluginCUDA.so" ]; then
+    log_info "Using newly built CUDA library..."
+    cp "$PLUGIN_DIR/build/platforms/cuda/libPhyNEOPluginCUDA.so" \
        "$CONDA_PREFIX/lib/plugins/"
 fi
 
