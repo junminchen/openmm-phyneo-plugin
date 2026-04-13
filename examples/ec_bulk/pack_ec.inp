@@ -1,0 +1,11 @@
+# Pack 200 EC molecules
+# EC box for MD simulation
+
+tolerance 2.0
+filetype pdb
+output /tmp/ec_bulk_200.pdb
+
+structure /home/am3-peichenzhong-group/Documents/project/PhyNEO/example/1_make_mpid_xml_wt_bond/EC.pdb
+  number 200
+  inside box 0. 0. 0. 80. 80. 80.
+end structure
