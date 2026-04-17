@@ -1459,6 +1459,42 @@ public:
      */
      void setPeriodicBoxSize(OpenMM::Vec3* vectors);
 
+    /**
+     * Calculate the force and energy on each particle, including forces
+     * from torques.
+     *
+     * @param particlePositions   the positions of the particles
+     * @param charges              the charges of the particles
+     * @param dipoles              the dipoles of the particles
+     * @param quadrupoles          the quadrupoles of the particles
+     * @param octopoles            the octopoles of the particles
+     * @param tholes              the thole widths of the particles
+     * @param dampingFactors      the damping factors of the particles
+     * @param polarity            the polarity values for each particle
+     * @param axisTypes           the axis types for each particle
+     * @param multipoleAtomZs     the Z indices for local axis definition
+     * @param multipoleAtomXs     the X indices for local axis definition
+     * @param multipoleAtomYs     the Y indices for local axis definition
+     * @param multipoleAtomCovalentInfo   the covalent information for scaling
+     * @param forces              the forces on each particle
+     *
+     * @return the total electrostatic energy of the system
+     */
+    double calculateForceAndEnergy(const std::vector<OpenMM::Vec3>& particlePositions,
+                                   const std::vector<double>& charges,
+                                   const std::vector<double>& dipoles,
+                                   const std::vector<double>& quadrupoles,
+                                   const std::vector<double>& octopoles,
+                                   const std::vector<double>& tholes,
+                                   const std::vector<double>& dampingFactors,
+                                   const std::vector<std::vector<double> >& polarity,
+                                   const std::vector<int>& axisTypes,
+                                   const std::vector<int>& multipoleAtomZs,
+                                   const std::vector<int>& multipoleAtomXs,
+                                   const std::vector<int>& multipoleAtomYs,
+                                   const std::vector<std::vector<std::vector<int> > >& multipoleAtomCovalentInfo,
+                                   std::vector<OpenMM::Vec3>& forces);
+
 private:
 
     static const int PhyNEO_PME_ORDER;

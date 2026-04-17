@@ -110,7 +110,7 @@ CudaCalcPhyNEOForceKernel::CudaCalcPhyNEOForceKernel(std::string name, const Pla
         diisCoefficients(NULL), inducedDipoleErrors(NULL), prevDipoles(NULL),
         prevErrors(NULL), diisMatrix(NULL), polarizability(NULL), extrapolatedDipole(NULL),
         inducedDipoleFieldGradient(NULL), extrapolatedDipoleField(NULL), extrapolatedDipoleFieldGradient(NULL),
-        covalentFlags(NULL), mScaleFactors(NULL), pScaleFactors(NULL),
+        covalentFlags(NULL), mScaleFactors(NULL), pScaleFactors(NULL), dScaleFactors(NULL),
         pmeGrid(NULL), pmeBsplineModuliX(NULL), pmeBsplineModuliY(NULL), pmeBsplineModuliZ(NULL), pmeIgrid(NULL), pmePhi(NULL),
         pmePhid(NULL), pmePhip(NULL), pmePhidp(NULL), pmeCphi(NULL), lastPositions(NULL), sort(NULL) {
 }
@@ -181,6 +181,8 @@ CudaCalcPhyNEOForceKernel::~CudaCalcPhyNEOForceKernel() {
         delete mScaleFactors;
     if (pScaleFactors != NULL)
         delete pScaleFactors;
+    if (dScaleFactors != NULL)
+        delete dScaleFactors;
     if (pmeGrid != NULL)
         delete pmeGrid;
     if (pmeBsplineModuliX != NULL)
@@ -694,24 +696,29 @@ void CudaCalcPhyNEOForceKernel::initializeScaleFactors() {
         }
     }
 
-    // Build pScaleFactorMap similar to mScaleFactorMap
+    // Build pScaleFactorMap and dScaleFactorMap similar to mScaleFactorMap
     map<pair<int, int>, double> pScaleFactorMap;
+    map<pair<int, int>, double> dScaleFactorMap;
     for (int3 values : covalentFlagValues) {
         int atom1 = values.x;
         int atom2 = values.y;
         int value = values.z;
         int scaleIndex = value + 1;  // pScale[1-4] for value 0-3
         if (scaleIndex >= 0 && scaleIndex < (int) pScales.size()) {
-            double scale = pScales[scaleIndex];
-            pScaleFactorMap[make_pair(atom1, atom2)] = scale;
-            pScaleFactorMap[make_pair(atom2, atom1)] = scale;
+            double pscale = pScales[scaleIndex];
+            double dscale = dScales[scaleIndex];
+            pScaleFactorMap[make_pair(atom1, atom2)] = pscale;
+            pScaleFactorMap[make_pair(atom2, atom1)] = pscale;
+            dScaleFactorMap[make_pair(atom1, atom2)] = dscale;
+            dScaleFactorMap[make_pair(atom2, atom1)] = dscale;
         }
     }
 
-    // Build the mScaleFactors and pScaleFactors arrays indexed by [atom1 * numMultipoles + atom2]
+    // Build the mScaleFactors, pScaleFactors, and dScaleFactors arrays indexed by [atom1 * numMultipoles + atom2]
     int numAtoms = numMultipoles;
     vector<float> mScaleFactorsVec(numAtoms * numAtoms, 1.0f);  // Default to 1.0 (no scaling)
     vector<float> pScaleFactorsVec(numAtoms * numAtoms, 1.0f);  // Default to 1.0 (no scaling)
+    vector<float> dScaleFactorsVec(numAtoms * numAtoms, 1.0f);  // Default to 1.0 (no scaling)
     for (int atom1 = 0; atom1 < numAtoms; atom1++) {
         for (int atom2 = 0; atom2 < numAtoms; atom2++) {
             auto mIt = scaleFactorMap.find(make_pair(atom1, atom2));
@@ -722,12 +729,18 @@ void CudaCalcPhyNEOForceKernel::initializeScaleFactors() {
             if (pIt != pScaleFactorMap.end()) {
                 pScaleFactorsVec[atom1 * numAtoms + atom2] = (float) pIt->second;
             }
+            auto dIt = dScaleFactorMap.find(make_pair(atom1, atom2));
+            if (dIt != dScaleFactorMap.end()) {
+                dScaleFactorsVec[atom1 * numAtoms + atom2] = (float) dIt->second;
+            }
         }
     }
     mScaleFactors = CudaArray::create<float>(cu, numAtoms * numAtoms, "mScaleFactors");
     mScaleFactors->upload(mScaleFactorsVec);
     pScaleFactors = CudaArray::create<float>(cu, numAtoms * numAtoms, "pScaleFactors");
     pScaleFactors->upload(pScaleFactorsVec);
+    dScaleFactors = CudaArray::create<float>(cu, numAtoms * numAtoms, "dScaleFactors");
+    dScaleFactors->upload(dScaleFactorsVec);
 
     // Figure out the covalent flag values to use for each atom pair.
     // Note: The f1/f2 bit-encoding is kept for compatibility with existing kernel logic
@@ -800,7 +813,8 @@ double CudaCalcPhyNEOForceKernel::execute(ContextImpl& context, bool includeForc
         void* computeFixedFieldArgs[] = {&field->getDevicePointer(), &cu.getPosq().getDevicePointer(),
             &covalentFlags->getDevicePointer(), &nb.getExclusionTiles().getDevicePointer(), &startTileIndex, &numTileIndices,
             &labFrameDipoles->getDevicePointer(), &labFrameQuadrupoles->getDevicePointer(), &labFrameOctopoles->getDevicePointer(),
-            &dampingAndThole->getDevicePointer(), &mScaleFactors->getDevicePointer(), &pScaleFactors->getDevicePointer()};
+            &dampingAndThole->getDevicePointer(), &mScaleFactors->getDevicePointer(), &pScaleFactors->getDevicePointer(),
+            &dScaleFactors->getDevicePointer()};
         cu.executeKernel(computeFixedFieldKernel, computeFixedFieldArgs, numForceThreadBlocks*fixedFieldThreads, fixedFieldThreads);
         void* recordInducedDipolesArgs[] = {&field->getDevicePointer(),
             &inducedDipole->getDevicePointer(), &labFramePolarizabilities->getDevicePointer()};
@@ -896,7 +910,7 @@ double CudaCalcPhyNEOForceKernel::execute(ContextImpl& context, bool includeForc
             cu.getInvPeriodicBoxSizePointer(), cu.getPeriodicBoxVecXPointer(), cu.getPeriodicBoxVecYPointer(), cu.getPeriodicBoxVecZPointer(),
             &maxTiles, &nb.getBlockCenters().getDevicePointer(), &nb.getInteractingAtoms().getDevicePointer(),
             &labFrameDipoles->getDevicePointer(), &labFrameQuadrupoles->getDevicePointer(), &labFrameOctopoles->getDevicePointer(), &dampingAndThole->getDevicePointer(),
-            &mScaleFactors->getDevicePointer(), &pScaleFactors->getDevicePointer()};
+            &mScaleFactors->getDevicePointer(), &pScaleFactors->getDevicePointer(), &dScaleFactors->getDevicePointer()};
         cu.executeKernel(computeFixedFieldKernel, computeFixedFieldArgs, numForceThreadBlocks*fixedFieldThreads, fixedFieldThreads);
         void* recordInducedDipolesArgs[] = {&field->getDevicePointer(), &inducedDipole->getDevicePointer(), &labFramePolarizabilities->getDevicePointer()};
         cu.executeKernel(recordInducedDipolesKernel, recordInducedDipolesArgs, cu.getNumAtoms());

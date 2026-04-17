@@ -280,7 +280,10 @@ extern "C" __global__ void computeFixedField(
         const real* __restrict__ labFrameDipole, const real* __restrict__ labFrameQuadrupole, const real* __restrict__ labFrameOctopole,
         const float2* __restrict__ dampingAndThole,
         const float* __restrict__ mScaleFactors,
-        const float* __restrict__ pScaleFactors) {
+        const float* __restrict__ pScaleFactors,
+        const float* __restrict__ dScaleFactors) {
+    // Note: dScaleFactors is used for permanent multipole field scaling (matching Reference behavior).
+    // pScaleFactors is used for damping/thole in induced dipole calculations.
     const unsigned int totalWarps = (blockDim.x*gridDim.x)/TILE_SIZE;
     const unsigned int warp = (blockIdx.x*blockDim.x+threadIdx.x)/TILE_SIZE;
     const unsigned int tgx = threadIdx.x & (TILE_SIZE-1);
@@ -336,8 +339,19 @@ extern "C" __global__ void computeFixedField(
                 int atom2 = y*TILE_SIZE+j;
                 if (atom1 != atom2 && atom1 < NUM_ATOMS && atom2 < NUM_ATOMS) {
                     real3 fields[2];
-                    float p = pScaleFactors[atom1*NUM_ATOMS+atom2];
-                    computeOneInteraction(data, localData[tbx+j], delta, p, fields);
+                    float pscale = pScaleFactors[atom1*NUM_ATOMS+atom2];
+                    float dscale = dScaleFactors[atom1*NUM_ATOMS+atom2];
+                    computeOneInteraction(data, localData[tbx+j], delta, pscale, fields);
+                    // Apply dScale for permanent multipole field (Reference uses dScale, not pScale)
+                    if (dscale != pscale) {
+                        float scale = (pscale != 0.0f) ? dscale/pscale : 0.0f;
+                        fields[0].x *= scale;
+                        fields[0].y *= scale;
+                        fields[0].z *= scale;
+                        fields[1].x *= scale;
+                        fields[1].y *= scale;
+                        fields[1].z *= scale;
+                    }
                     data.field += fields[0];
                 }
             }
@@ -358,8 +372,19 @@ extern "C" __global__ void computeFixedField(
                 int atom2 = y*TILE_SIZE+tj;
                 if (atom1 < NUM_ATOMS && atom2 < NUM_ATOMS) {
                     real3 fields[2];
-                    float p = pScaleFactors[atom1*NUM_ATOMS+atom2];
-                    computeOneInteraction(data, localData[tbx+tj], delta, p, fields);
+                    float pscale = pScaleFactors[atom1*NUM_ATOMS+atom2];
+                    float dscale = dScaleFactors[atom1*NUM_ATOMS+atom2];
+                    computeOneInteraction(data, localData[tbx+tj], delta, pscale, fields);
+                    // Apply dScale for permanent multipole field (Reference uses dScale, not pScale)
+                    if (dscale != pscale) {
+                        float scale = (pscale != 0.0f) ? dscale/pscale : 0.0f;
+                        fields[0].x *= scale;
+                        fields[0].y *= scale;
+                        fields[0].z *= scale;
+                        fields[1].x *= scale;
+                        fields[1].y *= scale;
+                        fields[1].z *= scale;
+                    }
                     data.field += fields[0];
                     localData[tbx+tj].field += fields[1];
                 }
@@ -462,8 +487,19 @@ extern "C" __global__ void computeFixedField(
                 int atom2 = atomIndices[tbx+tj];
                 if (atom1 < NUM_ATOMS && atom2 < NUM_ATOMS) {
                     real3 fields[2];
-                    float p = pScaleFactors[atom1*NUM_ATOMS+atom2];
-                    computeOneInteraction(data, localData[tbx+tj], delta, p, fields);
+                    float pscale = pScaleFactors[atom1*NUM_ATOMS+atom2];
+                    float dscale = dScaleFactors[atom1*NUM_ATOMS+atom2];
+                    computeOneInteraction(data, localData[tbx+tj], delta, pscale, fields);
+                    // Apply dScale for permanent multipole field (Reference uses dScale, not pScale)
+                    if (dscale != pscale) {
+                        float scale = (pscale != 0.0f) ? dscale/pscale : 0.0f;
+                        fields[0].x *= scale;
+                        fields[0].y *= scale;
+                        fields[0].z *= scale;
+                        fields[1].x *= scale;
+                        fields[1].y *= scale;
+                        fields[1].z *= scale;
+                    }
                     data.field += fields[0];
                     localData[tbx+tj].field += fields[1];
                 }

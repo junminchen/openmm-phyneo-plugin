@@ -5000,3 +5000,37 @@ double PhyNEOReferencePmeForce::calculateElectrostatic(const vector<MultipolePar
     }
     return energy;
 }
+
+double PhyNEOReferencePmeForce::calculateForceAndEnergy(const vector<Vec3>& particlePositions,
+                                                             const vector<double>& charges,
+                                                             const vector<double>& dipoles,
+                                                             const vector<double>& quadrupoles,
+                                                             const vector<double>& octopoles,
+                                                             const vector<double>& tholes,
+                                                             const vector<double>& dampingFactors,
+                                                             const vector<std::vector<double> >& polarity,
+                                                             const vector<int>& axisTypes,
+                                                             const vector<int>& multipoleAtomZs,
+                                                             const vector<int>& multipoleAtomXs,
+                                                             const vector<int>& multipoleAtomYs,
+                                                             const vector< vector< vector<int> > >& multipoleAtomCovalentInfo,
+                                                             vector<Vec3>& forces)
+{
+
+    // setup, including calculating induced dipoles
+    // calculate electrostatic ixns including torques
+    // map torques to forces
+
+    vector<MultipoleParticleData> particleData;
+    setup(particlePositions, charges, dipoles, quadrupoles, octopoles, tholes,
+           dampingFactors, polarity, axisTypes, multipoleAtomZs, multipoleAtomXs, multipoleAtomYs,
+           multipoleAtomCovalentInfo, particleData);
+
+    vector<Vec3> torques;
+    initializeVec3Vector(torques);
+    double energy = calculateElectrostatic(particleData, torques, forces);
+
+    mapTorqueToForce(particleData, multipoleAtomXs, multipoleAtomYs, multipoleAtomZs, axisTypes, torques, forces);
+
+    return energy;
+}

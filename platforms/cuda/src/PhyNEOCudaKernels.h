@@ -182,6 +182,7 @@ private:
     CudaArray* covalentFlags;
     CudaArray* mScaleFactors;
     CudaArray* pScaleFactors;
+    CudaArray* dScaleFactors;
     CudaArray* pmeGrid;
     CudaArray* pmeBsplineModuliX;
     CudaArray* pmeBsplineModuliY;
