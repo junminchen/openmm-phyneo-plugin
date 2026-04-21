@@ -343,8 +343,12 @@ extern "C" __global__ void computeFixedField(
                     float dscale = dScaleFactors[atom1*NUM_ATOMS+atom2];
                     computeOneInteraction(data, localData[tbx+j], delta, pscale, fields);
                     // Apply dScale for permanent multipole field (Reference uses dScale, not pScale)
-                    if (dscale != pscale) {
-                        float scale = (pscale != 0.0f) ? dscale/pscale : 0.0f;
+                    if (dscale == 0.0f) {
+                        // dScale=0 means permanent field contribution should be excluded
+                        fields[0] = make_real3(0);
+                        fields[1] = make_real3(0);
+                    } else if (pscale > 0.0f && dscale != pscale) {
+                        float scale = dscale/pscale;
                         fields[0].x *= scale;
                         fields[0].y *= scale;
                         fields[0].z *= scale;
@@ -376,8 +380,12 @@ extern "C" __global__ void computeFixedField(
                     float dscale = dScaleFactors[atom1*NUM_ATOMS+atom2];
                     computeOneInteraction(data, localData[tbx+tj], delta, pscale, fields);
                     // Apply dScale for permanent multipole field (Reference uses dScale, not pScale)
-                    if (dscale != pscale) {
-                        float scale = (pscale != 0.0f) ? dscale/pscale : 0.0f;
+                    if (dscale == 0.0f) {
+                        // dScale=0 means permanent field contribution should be excluded
+                        fields[0] = make_real3(0);
+                        fields[1] = make_real3(0);
+                    } else if (pscale > 0.0f && dscale != pscale) {
+                        float scale = dscale/pscale;
                         fields[0].x *= scale;
                         fields[0].y *= scale;
                         fields[0].z *= scale;
@@ -491,8 +499,12 @@ extern "C" __global__ void computeFixedField(
                     float dscale = dScaleFactors[atom1*NUM_ATOMS+atom2];
                     computeOneInteraction(data, localData[tbx+tj], delta, pscale, fields);
                     // Apply dScale for permanent multipole field (Reference uses dScale, not pScale)
-                    if (dscale != pscale) {
-                        float scale = (pscale != 0.0f) ? dscale/pscale : 0.0f;
+                    if (dscale == 0.0f) {
+                        // dScale=0 means permanent field contribution should be excluded
+                        fields[0] = make_real3(0);
+                        fields[1] = make_real3(0);
+                    } else if (pscale > 0.0f && dscale != pscale) {
+                        float scale = dscale/pscale;
                         fields[0].x *= scale;
                         fields[0].y *= scale;
                         fields[0].z *= scale;
