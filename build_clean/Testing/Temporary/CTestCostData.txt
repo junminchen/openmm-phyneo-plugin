@@ -1,6 +1,0 @@
-TestSerializePhyNEOForce 2 0.00102159
-TestReferencePhyNEOForce 2 2.14156
-TestCudaPhyNEOForceSingle 2 0.963163
-TestCudaPhyNEOForceMixed 2 0.939559
-TestCudaPhyNEOForceDouble 2 0.992766
----

@@ -1,9 +1,9 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 3.16)
+
 PROJECT(PhyNEOOpenMMPlugin)
 #---------------------------------------------------
 # OpenMM PhyNEO Plugin
 #----------------------------------------------------
-
-CMAKE_MINIMUM_REQUIRED(VERSION 3.16)
 
 # Prefer modern OpenMMConfig.cmake (OpenMM 8.x), keep OPENMM_DIR fallback for legacy installs.
 SET(OPENMM_DIR "" CACHE PATH "Where OpenMM is installed (legacy fallback)")
@@ -35,6 +35,9 @@ if(OpenMM_FOUND)
 else()
     if(NOT OPENMM_DIR)
         set(OPENMM_DIR "/usr/local/openmm")
+    endif()
+    if(NOT EXISTS "${OPENMM_DIR}/include/openmm/Force.h")
+        message(FATAL_ERROR "OpenMM headers not found under ${OPENMM_DIR}/include. Set OPENMM_DIR to an OpenMM SDK/install prefix.")
     endif()
     include_directories("${OPENMM_DIR}/include")
     link_directories("${OPENMM_DIR}/lib" "${OPENMM_DIR}/lib/plugins")

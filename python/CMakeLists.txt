@@ -22,10 +22,14 @@ add_custom_command(
 
 add_custom_target(PythonInstall DEPENDS "${WRAP_FILE}")
 set(PHYNEO_PLUGIN_HEADER_DIR "${CMAKE_SOURCE_DIR}/openmmapi/include")
-set(PHYNEO_PLUGIN_HEADER_DIR "${CMAKE_SOURCE_DIR}/openmmapi/include/openmm")
+set(PHYNEO_PLUGIN_OPENMM_HEADER_DIR "${CMAKE_SOURCE_DIR}/openmmapi/include/openmm")
 set(PHYNEO_PLUGIN_LIBRARY_DIR "${CMAKE_BINARY_DIR}")
+set(PHYNEO_CXX11_ABI "")
+if(CMAKE_CXX_FLAGS MATCHES "_GLIBCXX_USE_CXX11_ABI=([01])")
+    set(PHYNEO_CXX11_ABI "${CMAKE_MATCH_1}")
+endif()
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/setup.py ${CMAKE_CURRENT_BINARY_DIR}/setup.py)
-add_custom_command(TARGET PythonInstall
+add_custom_command(TARGET PythonInstall POST_BUILD
     COMMAND "${PYTHON_EXECUTABLE}" setup.py build
     COMMAND "${PYTHON_EXECUTABLE}" setup.py install --prefix "${CMAKE_INSTALL_PREFIX}"
     WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"

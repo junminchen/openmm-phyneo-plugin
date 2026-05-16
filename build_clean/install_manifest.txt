@@ -1,7 +1,0 @@
-/home/am3-peichenzhong-group/Documents/project/test_MPID_DMFF/init_mpid_plugin/OpenMMPhyNEOPlugin/install/lib/libPhyNEOPlugin.so
-/home/am3-peichenzhong-group/Documents/project/test_MPID_DMFF/init_mpid_plugin/OpenMMPhyNEOPlugin/install/include/openmm/PhyNEOForce.h
-/home/am3-peichenzhong-group/Documents/project/test_MPID_DMFF/init_mpid_plugin/OpenMMPhyNEOPlugin/install/include/openmm/phyneoKernels.h
-/home/am3-peichenzhong-group/Documents/project/test_MPID_DMFF/init_mpid_plugin/OpenMMPhyNEOPlugin/install/include/openmm/internal/PhyNEOForceImpl.h
-/home/am3-peichenzhong-group/Documents/project/test_MPID_DMFF/init_mpid_plugin/OpenMMPhyNEOPlugin/install/include/openmm/internal/windowsExportPhyNEO.h
-/home/am3-peichenzhong-group/Documents/project/test_MPID_DMFF/init_mpid_plugin/OpenMMPhyNEOPlugin/install/lib/plugins/libOpenMMPhyNEOReference.so
-/home/am3-peichenzhong-group/Documents/project/test_MPID_DMFF/init_mpid_plugin/OpenMMPhyNEOPlugin/install/lib/plugins/libPhyNEOPluginCUDA.so

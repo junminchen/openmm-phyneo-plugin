@@ -10,53 +10,84 @@ This plugin implements polarizable multipole electrostatics for OpenMM, supporti
 - **Scale factors**: Support for 12-16 interactions (mScale, pScale, dScale)
 - **CUDA acceleration**: GPU-optimized implementation
 
+## Repository Layout
+
+- `openmmapi/`: public OpenMM force API and implementation glue
+- `serialization/`: XML serialization support and tests
+- `platforms/reference/`: CPU reference implementation used for correctness
+- `platforms/cuda/`: CUDA platform implementation and kernels
+- `python/`: SWIG interface and Python wrapper build files
+- `examples/`: runnable systems, parameter files, and small smoke examples
+- `docs/source/`: documentation source files
+
 ## Installation
 
 ### Prerequisites
 
-- CUDA Toolkit (for GPU support)
-- CMake >= 3.12
-- SWIG >= 4.0
-- Python 3.8+
-- Conda (recommended for managing dependencies)
+- Linux or macOS with a working C++ compiler
+- Conda or Mambaforge for dependency management
+- OpenMM 8.x, CMake >= 3.16, SWIG, NumPy, and Python
+- CUDA Toolkit with `nvcc` only if building the CUDA platform
 
-### Quick Install
+### Quick Install into Conda
+
+The installer can create a conda environment, build the plugin, install the C++ libraries and Python wrapper, and run an import smoke test:
 
 ```bash
-# Clone the repository
 git clone https://github.com/junminchen/openmm-phyneo-plugin.git
 cd openmm-phyneo-plugin
 
-# Run the installation script
-./install.sh
+./install.sh --create-env --env-name phyneo --openmm-version 8.4 --cuda auto
+conda activate phyneo
+python -c "import phyneoplugin; print('PhyNEO ready')"
+```
 
-# Or with custom options
-./install.sh --env-name myenv --openmm-version 8.4
+Useful installer options:
+
+```bash
+./install.sh phyneo --cuda off              # build reference platform only
+./install.sh phyneo --cuda on --run-tests   # require CUDA and run CTest
+./install.sh phyneo --openmm-dir /opt/openmm # use a non-conda OpenMM SDK
+./install.sh --help                         # show all options
 ```
 
 ### Manual Installation
 
-```bash
-# Create conda environment with matching compilers
-conda create -n phyneo-env python=3.10 -y
-conda activate phyneo-env
-conda install -c conda-forge openmm=8.4
-conda install -y gcc_impl_linux-64=13.4.0 gxx_impl_linux-64=13.4.0 gcc_linux-64=13.4.0 gxx_linux-64=13.4.0
+If you already have an OpenMM conda environment, activate it and configure CMake directly:
 
-# Build
-mkdir build && cd build
-cmake .. \
+```bash
+conda create -n phyneo -c conda-forge python=3.10 openmm=8.4 cmake swig numpy make gcc_linux-64 gxx_linux-64
+conda activate phyneo
+
+cmake -S . -B build \
     -DCMAKE_BUILD_TYPE=Release \
     -DOPENMM_DIR=$CONDA_PREFIX \
+    -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX \
     -DCMAKE_C_COMPILER=$CONDA_PREFIX/bin/x86_64-conda-linux-gnu-gcc \
     -DCMAKE_CXX_COMPILER=$CONDA_PREFIX/bin/x86_64-conda-linux-gnu-g++ \
     -DPhyNEO_BUILD_CUDA_LIB=ON \
     -DPhyNEO_BUILD_PYTHON_WRAPPERS=ON \
     -DPYTHON_EXECUTABLE=$CONDA_PREFIX/bin/python
 
-make -j$(nproc)
-make PythonInstall
+cmake --build build -j$(nproc)
+cmake --install build
+cmake --build build --target PythonInstall
+ctest --test-dir build --output-on-failure
 ```
+
+Use `-DPhyNEO_BUILD_CUDA_LIB=OFF` for CPU/reference-only builds. If your OpenMM package uses a specific libstdc++ ABI, pass `-DCMAKE_CXX_FLAGS="-D_GLIBCXX_USE_CXX11_ABI=0"` or `=1` to match it.
+
+### Development Checks
+
+Before opening a pull request, run at least:
+
+```bash
+bash -n install.sh
+./install.sh --help
+ctest --test-dir build --output-on-failure
+```
+
+Run CUDA tests on a CUDA-capable system; they are registered as single, mixed, and double precision CTest cases.
 
 ## Force Field XML Formats
 

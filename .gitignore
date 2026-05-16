@@ -1,21 +1,73 @@
-build
-build_phyneo
-openmm_build/
-docs/superpowers/
-MPID.config
-MPID.creator
-MPID.creator.user
-MPID.files
-MPID.includes
-docs/site
-.worktrees/
+# Build directories and CMake output
+/build*/
+/cmake-build-*/
+/openmm_build/
+/build_phyneo/
+/install/
+CMakeCache.txt
+CMakeFiles/
+CTestTestfile.cmake
+Makefile
+cmake_install.cmake
+install_manifest.txt
+Testing/
 
-# Python build artifacts
-python/__pycache__/
-python/_phyneoplugin*.so
+# Compiled binaries and generated sources
+*.a
+*.dylib
+*.dll
+*.exe
+*.o
+*.obj
+*.so
+*.so.*
+*.d
+*.mod
+platforms/cuda/src/CudaPhyNEOKernelSources.cpp
+platforms/cuda/src/CudaPhyNEOKernelSources.h
+python/PhyNEOPluginWrapper.cpp
 python/phyneoplugin.py
 python/phyneoplugin_wrap.cxx
+python/_phyneoplugin*.so
 
-# Simulation outputs
-examples/waterbox/restart.xml
-examples/waterbox/*.dcd
+# Python artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+dist/
+
+# Documentation output
+/docs/site/
+/site/
+/docs/superpowers/
+
+# IDE and local project files
+.idea/
+.vscode/
+*.user
+/MPID.creator
+/MPID.creator.user
+/MPID.config
+/MPID.files
+/MPID.includes
+.worktrees/
+
+# Simulation and analysis outputs
+*.dcd
+*.nc
+*.xtc
+*.trr
+*.log
+restart.xml
+state.xml
+checkpoint.chk
+
+# Local environment files
+.env
+.env.*
+!.env.example
+conda-meta/
