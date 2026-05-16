@@ -47,7 +47,7 @@ inline __device__ void loadAtomData(AtomData& data, int atom, const real4* __res
 }
 
 #ifdef USE_EWALD
-__device__ void computeOneInteraction(AtomData& atom1, AtomData& atom2, real3 deltaR, float pScale, real3* fields) {
+__device__ void computeOneInteraction(AtomData& atom1, AtomData& atom2, real3 deltaR, float pScale, float dScale, real3* fields) {
     real r2 = dot(deltaR, deltaR);
     if (r2 <= CUTOFF_SQUARED) {
         // calculate the error function damping terms
@@ -83,8 +83,8 @@ __device__ void computeOneInteraction(AtomData& atom1, AtomData& atom2, real3 de
         real scale3 = 1 - expdamp*(1 + dfac + 0.5f*dfac*dfac);
         real scale5 = 1 - expdamp*(1 + dfac + 0.5f*dfac*dfac + dfac*dfac*dfac/6);
 
-        real psc3 = pScale*scale3;
-        real psc5 = pScale*scale5;
+        real psc3 = dScale*scale3;
+        real psc5 = dScale*scale5;
 
         real r3 = r*r2;
         real r5 = r3*r2;
@@ -99,7 +99,7 @@ __device__ void computeOneInteraction(AtomData& atom1, AtomData& atom2, real3 de
         alsq2n *= alsq2;
         real bn3 = (5*bn2+alsq2n*exp2a)/r2;
         real scale7 = 1 - expdamp*(1 + dfac + 0.5f*dfac*dfac + dfac*dfac*dfac/6 + dfac*dfac*dfac*dfac/30);
-        real psc7 = pScale*scale7;
+        real psc7 = dScale*scale7;
         real r7 = r5*r2;
         real prr7 = 15*(1-psc7)/r7;
 
@@ -123,7 +123,7 @@ __device__ void computeOneInteraction(AtomData& atom1, AtomData& atom2, real3 de
         alsq2n *= alsq2;
         real bn4 = (7*bn3+alsq2n*exp2a)/r2;
         real scale9 = 1 - expdamp*(1 + dfac + 0.5f*dfac*dfac + dfac*dfac*dfac/6 + 4*dfac*dfac*dfac*dfac/105 + dfac*dfac*dfac*dfac*dfac/210);
-        real psc9 = pScale*scale9;
+        real psc9 = dScale*scale9;
         real r9 = r7*r2;
         real prr9 = 105*(1-psc9)/r9;
 
@@ -170,7 +170,7 @@ __device__ void computeOneInteraction(AtomData& atom1, AtomData& atom2, real3 de
     }
 }
 #else
-__device__ void computeOneInteraction(AtomData& atom1, AtomData& atom2, real3 deltaR, float pScale, real3* fields) {
+__device__ void computeOneInteraction(AtomData& atom1, AtomData& atom2, real3 deltaR, float pScale, float dScale, real3* fields) {
     real rI = RSQRT(dot(deltaR, deltaR));
     real r = RECIP(rI);
     real r2I = rI*rI;
@@ -252,8 +252,8 @@ __device__ void computeOneInteraction(AtomData& atom1, AtomData& atom2, real3 de
     factor = rr3*atom1.posq.w + rr5*dir;
     real3 field2 = deltaR*factor - rr3*atom1.dipole;
 #endif
-    fields[0] = pScale*field1;
-    fields[1] = pScale*field2;
+    fields[0] = dScale*field1;
+    fields[1] = dScale*field2;
 }
 #endif
 
@@ -341,21 +341,7 @@ extern "C" __global__ void computeFixedField(
                     real3 fields[2];
                     float pscale = pScaleFactors[atom1*NUM_ATOMS+atom2];
                     float dscale = dScaleFactors[atom1*NUM_ATOMS+atom2];
-                    computeOneInteraction(data, localData[tbx+j], delta, pscale, fields);
-                    // Apply dScale for permanent multipole field (Reference uses dScale, not pScale)
-                    if (dscale == 0.0f) {
-                        // dScale=0 means permanent field contribution should be excluded
-                        fields[0] = make_real3(0);
-                        fields[1] = make_real3(0);
-                    } else if (pscale > 0.0f && dscale != pscale) {
-                        float scale = dscale/pscale;
-                        fields[0].x *= scale;
-                        fields[0].y *= scale;
-                        fields[0].z *= scale;
-                        fields[1].x *= scale;
-                        fields[1].y *= scale;
-                        fields[1].z *= scale;
-                    }
+                    computeOneInteraction(data, localData[tbx+j], delta, pscale, dscale, fields);
                     data.field += fields[0];
                 }
             }
@@ -378,21 +364,7 @@ extern "C" __global__ void computeFixedField(
                     real3 fields[2];
                     float pscale = pScaleFactors[atom1*NUM_ATOMS+atom2];
                     float dscale = dScaleFactors[atom1*NUM_ATOMS+atom2];
-                    computeOneInteraction(data, localData[tbx+tj], delta, pscale, fields);
-                    // Apply dScale for permanent multipole field (Reference uses dScale, not pScale)
-                    if (dscale == 0.0f) {
-                        // dScale=0 means permanent field contribution should be excluded
-                        fields[0] = make_real3(0);
-                        fields[1] = make_real3(0);
-                    } else if (pscale > 0.0f && dscale != pscale) {
-                        float scale = dscale/pscale;
-                        fields[0].x *= scale;
-                        fields[0].y *= scale;
-                        fields[0].z *= scale;
-                        fields[1].x *= scale;
-                        fields[1].y *= scale;
-                        fields[1].z *= scale;
-                    }
+                    computeOneInteraction(data, localData[tbx+tj], delta, pscale, dscale, fields);
                     data.field += fields[0];
                     localData[tbx+tj].field += fields[1];
                 }
@@ -497,21 +469,7 @@ extern "C" __global__ void computeFixedField(
                     real3 fields[2];
                     float pscale = pScaleFactors[atom1*NUM_ATOMS+atom2];
                     float dscale = dScaleFactors[atom1*NUM_ATOMS+atom2];
-                    computeOneInteraction(data, localData[tbx+tj], delta, pscale, fields);
-                    // Apply dScale for permanent multipole field (Reference uses dScale, not pScale)
-                    if (dscale == 0.0f) {
-                        // dScale=0 means permanent field contribution should be excluded
-                        fields[0] = make_real3(0);
-                        fields[1] = make_real3(0);
-                    } else if (pscale > 0.0f && dscale != pscale) {
-                        float scale = dscale/pscale;
-                        fields[0].x *= scale;
-                        fields[0].y *= scale;
-                        fields[0].z *= scale;
-                        fields[1].x *= scale;
-                        fields[1].y *= scale;
-                        fields[1].z *= scale;
-                    }
+                    computeOneInteraction(data, localData[tbx+tj], delta, pscale, dscale, fields);
                     data.field += fields[0];
                     localData[tbx+tj].field += fields[1];
                 }

@@ -92,10 +92,10 @@ def run_simulation(scale_name, mScale14, pScale14, dScale14):
         f = system.getForce(i)
         if isinstance(f, phyneoplugin.PhyNEOForce):
             # Create new scale arrays
-            # Default scales: mScale12=0, mScale13=0, mScale14=X, mScale15=1, mScale16=1
-            mScales = np.array([0.0, 0.0, mScale14, 1.0, 1.0, 1.0])
-            pScales = np.array([0.0, 0.0, pScale14, 1.0, 1.0, 1.0])
-            dScales = np.array([1.0, 1.0, dScale14, 1.0, 1.0, 1.0])
+            # Index 0 is unused; mScale14/pScale14/dScale14 live at index 3.
+            mScales = np.array([1.0, 0.0, 0.0, mScale14, 1.0, 1.0])
+            pScales = np.array([1.0, 0.0, 0.0, pScale14, 1.0, 1.0])
+            dScales = np.array([1.0, 0.0, 0.0, dScale14, 1.0, 1.0])
 
             f.setMultipoleScaleFactors(mScales, pScales, dScales)
             print(f"  Scales set: mScale14={mScale14}, pScale14={pScale14}, dScale14={dScale14}")

@@ -587,9 +587,12 @@ class PhyNEOGenerator(object):
         self.defaultTholeWidth = defaultTholeWidth
         self.typeMap = {}
         self.lmax = 2
-        self.mScales = [0.0, 0.0, 1.0, 1.0, 1.0]
-        self.pScales = [0.0, 0.0, 1.0, 1.0, 1.0]
-        self.dScales = [1.0, 1.0, 1.0, 1.0, 1.0]
+        # Index 0 is unused.  Indices 1-4 are 1-2 through 1-5
+        # covalent scale factors, matching the C++ kernel lookup.
+        self.mScales = [1.0, 0.0, 0.0, 1.0, 1.0]
+        self.pScales = [1.0, 0.0, 0.0, 1.0, 1.0]
+        self.dScales = [1.0, 0.0, 0.0, 1.0, 1.0]
+        self.hasExplicitScaleFactors = False
 
     #=============================================================================================
     # Set axis type
@@ -668,6 +671,17 @@ class PhyNEOGenerator(object):
                 raise ValueError('Found multiple PhyNEOForce tags with different defaultTholeWidth arguments')
 
         # set type map: [ kIndices, multipoles, AMOEBA/OpenMM axis type]
+
+        scaleAttrs = [f'{prefix}Scale{i}' for prefix in ('m', 'p', 'd') for i in range(12, 17)]
+        if any(attr in element.attrib for attr in scaleAttrs):
+            generator.mScales = [1.0]
+            generator.pScales = [1.0]
+            generator.dScales = [1.0]
+            for i in range(12, 17):
+                generator.mScales.append(float(element.get(f'mScale{i}', 1.0)))
+                generator.pScales.append(float(element.get(f'pScale{i}', 1.0)))
+                generator.dScales.append(float(element.get(f'dScale{i}', 1.0)))
+            generator.hasExplicitScaleFactors = True
 
         for atom in element.findall('Multipole') + element.findall('Atom'):
             types = forceField._findAtomTypes(atom.attrib, 1)
@@ -813,6 +827,7 @@ class PhyNEOGenerator(object):
         generator.mScales = mScales
         generator.pScales = pScales
         generator.dScales = dScales
+        generator.hasExplicitScaleFactors = True
 
         # Parse Atom child elements (DMFF format uses <Atom>, Amoeba uses <Multipole>)
         for atom in element.findall('Atom') + element.findall('Multipole'):
@@ -949,6 +964,7 @@ class PhyNEOGenerator(object):
         generator.mScales = mScales
         generator.pScales = pScales
         generator.dScales = dScales
+        generator.hasExplicitScaleFactors = True
 
     #=============================================================================================
 
@@ -981,17 +997,8 @@ class PhyNEOGenerator(object):
             else:
                 raise ValueError( "PhyNEOForce: invalide polarization type: " + polarizationType)
 
-        argval = float(args['coulomb14scale']) if 'coulomb14scale' in args else None
-        myval = float(self.scaleFactor14) if self.scaleFactor14 else None
-        if argval is not None:
-            if myval is not None:
-                if myval != argval:
-                     warnings.warn( "Conflicting coulomb14scale values found in forcefield file ({}) and createSystem args ({}).  "
-                                    "Using the value from createSystem's arguments".format(myval, argval))
-            force.set14ScaleFactor(argval)
-        else:
-            if myval is not None:
-                force.set14ScaleFactor(myval)
+        coulomb14Arg = float(args['coulomb14scale']) if 'coulomb14scale' in args else None
+        coulomb14Xml = float(self.scaleFactor14) if self.scaleFactor14 else None
 
         argval = float(args['defaultTholeWidth']) if 'defaultTholeWidth' in args else None
         myval = float(self.defaultTholeWidth) if self.defaultTholeWidth else None
@@ -1008,6 +1015,16 @@ class PhyNEOGenerator(object):
         # Set multipole scale factors (mScales, pScales, dScales)
         if len(self.mScales) > 0 or len(self.pScales) > 0 or len(self.dScales) > 0:
             force.setMultipoleScaleFactors(self.mScales, self.pScales, self.dScales)
+
+        if coulomb14Arg is not None:
+            if coulomb14Xml is not None:
+                if coulomb14Xml != coulomb14Arg:
+                     warnings.warn( "Conflicting coulomb14scale values found in forcefield file ({}) and createSystem args ({}).  "
+                                    "Using the value from createSystem's arguments".format(coulomb14Xml, coulomb14Arg))
+            force.set14ScaleFactor(coulomb14Arg)
+        else:
+            if coulomb14Xml is not None and not self.hasExplicitScaleFactors:
+                force.set14ScaleFactor(coulomb14Xml)
 
         if ('aEwald' in args):
             force.setAEwald(float(args['aEwald']))

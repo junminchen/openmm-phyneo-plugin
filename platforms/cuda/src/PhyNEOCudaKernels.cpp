@@ -956,7 +956,8 @@ double CudaCalcPhyNEOForceKernel::execute(ContextImpl& context, bool includeForc
             cu.getPeriodicBoxSizePointer(), cu.getInvPeriodicBoxSizePointer(), cu.getPeriodicBoxVecXPointer(), cu.getPeriodicBoxVecYPointer(), cu.getPeriodicBoxVecZPointer(),
             &maxTiles, &nb.getBlockCenters().getDevicePointer(), &nb.getInteractingAtoms().getDevicePointer(),
             &sphericalDipoles->getDevicePointer(), &sphericalQuadrupoles->getDevicePointer(), &sphericalOctopoles->getDevicePointer(),
-            &inducedDipole->getDevicePointer(), &dampingAndThole->getDevicePointer(), &mScaleFactors->getDevicePointer(), &pScaleFactors->getDevicePointer()};
+            &inducedDipole->getDevicePointer(), &dampingAndThole->getDevicePointer(), &pmeCphi->getDevicePointer(),
+            &mScaleFactors->getDevicePointer(), &pScaleFactors->getDevicePointer()};
         cu.executeKernel(electrostaticsKernel, electrostaticsArgs, numForceThreadBlocks*electrostaticsThreads, electrostaticsThreads);
         void* pmeTransformInducedPotentialArgs[] = {&pmePhidp->getDevicePointer(), &pmeCphi->getDevicePointer(), recipBoxVectorPointer[0], recipBoxVectorPointer[1], recipBoxVectorPointer[2]};
         cu.executeKernel(pmeTransformPotentialKernel, pmeTransformInducedPotentialArgs, cu.getNumAtoms());
@@ -1502,4 +1503,3 @@ void CudaCalcPhyNEOForceKernel::getPMEParameters(double& alpha, int& nx, int& ny
     ny = gridSizeY;
     nz = gridSizeZ;
 }
-

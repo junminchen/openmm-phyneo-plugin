@@ -29,9 +29,9 @@ def compute_energy_cuda(scale_name, mScale14, pScale14, dScale14):
     for i in range(system.getNumForces()):
         f = system.getForce(i)
         if isinstance(f, phyneoplugin.PhyNEOForce):
-            mScales = np.array([0.0, 0.0, mScale14, 1.0, 1.0, 1.0])
-            pScales = np.array([0.0, 0.0, pScale14, 1.0, 1.0, 1.0])
-            dScales = np.array([1.0, 1.0, dScale14, 1.0, 1.0, 1.0])
+            mScales = np.array([1.0, 0.0, 0.0, mScale14, 1.0, 1.0])
+            pScales = np.array([1.0, 0.0, 0.0, pScale14, 1.0, 1.0])
+            dScales = np.array([1.0, 0.0, 0.0, dScale14, 1.0, 1.0])
             f.setMultipoleScaleFactors(mScales, pScales, dScales)
             break
 

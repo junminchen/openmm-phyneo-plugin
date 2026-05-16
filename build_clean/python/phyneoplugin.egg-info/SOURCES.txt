@@ -1,0 +1,7 @@
+PhyNEOPluginWrapper.cpp
+phyneoplugin.py
+setup.py
+phyneoplugin.egg-info/PKG-INFO
+phyneoplugin.egg-info/SOURCES.txt
+phyneoplugin.egg-info/dependency_links.txt
+phyneoplugin.egg-info/top_level.txt
