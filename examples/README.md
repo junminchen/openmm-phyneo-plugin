@@ -23,3 +23,16 @@ arbitrarily chosen polarizability settings assigned to the heavy atoms. The
 `run_ethane.py` example runs a short trajectory of this system, while the
 `alchemy_example.py` file demonstrates how to make alchemical changes to the
 ethane molecule to allow it to disappear in the water box.
+
+ec_density
+----------------
+Ethylene carbonate density smoke/production example using the local
+`ec_init.pdb` and `ec_forcefield.xml` files.  The script adds the EC topology
+bonds required by the XML template, chooses CUDA/CPU/Reference through
+`--platform`, reports NPT density during the run, and prints final energy and
+density.
+
+```bash
+python examples/ec_density/run_ec.py
+python examples/ec_density/run_ec.py --steps 10 --report-interval 5 --platform CUDA
+```
