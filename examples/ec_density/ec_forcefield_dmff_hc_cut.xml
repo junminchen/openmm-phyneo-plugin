@@ -79,7 +79,7 @@
 
     <!-- Combined executable form of the Slater short-range terms from the DMFF parameter block. -->
     <CustomNonbondedForce bondCutoff="3"
-        energy="hardCoreK*step(hardCoreR-r)*((hardCoreR/r)^6-1)^2
+        energy="hardCoreScale*step(hardCoreR-r)*(Ehc-EhcR+12*EhcR*(r-hardCoreR)/hardCoreR)
         + A*K2*exp(-B*r) + (-138.93542)*exp(-B*r)*(1+B*r)*Q/r
         - (1-exp(-x)*(1+x+0.5*x^2+x^3/6+x^4/24+x^5/120+x^6/720)) * C6/(r^6)
         - (1-exp(-x)*(1+x+0.5*x^2+x^3/6+x^4/24+x^5/120+x^6/720+x^7/5040+x^8/40320)) * C8/(r^8)
@@ -93,13 +93,14 @@
         C8=sqrt(C81*C82);
         C10=sqrt(C101*C102);
         A=abs(Aex-Ael-Ain-Adh-Adi);
-        Aex=(Aexch1*Aexch2);
+        Ehc=(Aexch1*Aexch2)/(((sqrt(Bexp1*Bexp2)*r)/4.3)^12);
+        EhcR=(Aexch1*Aexch2)/(((sqrt(Bexp1*Bexp2)*hardCoreR)/4.3)^12);        Aex=(Aexch1*Aexch2);
         Ael=(Aelec1*Aelec2);
         Ain=(Aind1*Aind2);
         Adh=(Adhf1*Adhf2);
         Adi=(Adisp1*Adisp2)">
-        <GlobalParameter name="hardCoreK" defaultValue="10.0"/>
-        <GlobalParameter name="hardCoreR" defaultValue="0.24"/>
+        <GlobalParameter name="hardCoreScale" defaultValue="0.1" />
+        <GlobalParameter name="hardCoreR" defaultValue="0.24" />
         <PerParticleParameter name="Aexch"/>
         <PerParticleParameter name="Aelec"/>
         <PerParticleParameter name="Aind"/>

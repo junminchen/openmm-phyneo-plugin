@@ -32,7 +32,7 @@ EC_BONDS = (
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--pdb", type=Path, default=HERE / "ec_init.pdb")
+    parser.add_argument("--pdb", type=Path, default=HERE / "ec_liquid_216.pdb")
     parser.add_argument("--forcefield", type=Path, default=HERE / "ec_forcefield.xml")
     parser.add_argument("--steps", type=int, default=20000)
     parser.add_argument("--report-interval", type=int, default=500)
@@ -42,6 +42,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--timestep-fs", type=float, default=1.0)
     parser.add_argument("--cutoff-nm", type=float, default=1.0)
     parser.add_argument("--minimize-iterations", type=int, default=2000)
+    parser.add_argument("--barostat-frequency", type=int, default=25)
     parser.add_argument("--platform", default="auto", help="auto, CUDA, CPU, or Reference")
     parser.add_argument("--device-index", default="0")
     parser.add_argument("--precision", default="mixed", choices=("single", "mixed", "double"))
@@ -119,6 +120,16 @@ def check_finite_state(context: Context, label: str) -> State:
     return state
 
 
+def enable_custom_nonbonded_lrc(system: System) -> int:
+    enabled = 0
+    for index in range(system.getNumForces()):
+        force = system.getForce(index)
+        if isinstance(force, CustomNonbondedForce) and "lrcDispersionScale" in force.getEnergyFunction():
+            force.setUseLongRangeCorrection(True)
+            enabled += 1
+    return enabled
+
+
 def main() -> None:
     args = parse_args()
     pdb_path = resolve_existing(args.pdb)
@@ -130,11 +141,12 @@ def main() -> None:
 
     system = forcefield.createSystem(
         pdb.topology,
-        nonbondedMethod=CutoffPeriodic,
+        nonbondedMethod=PME,
         nonbondedCutoff=args.cutoff_nm * nanometer,
         constraints=HBonds,
     )
-    system.addForce(MonteCarloBarostat(args.pressure * bar, args.temperature * kelvin))
+    lrc_force_count = enable_custom_nonbonded_lrc(system)
+    system.addForce(MonteCarloBarostat(args.pressure * bar, args.temperature * kelvin, args.barostat_frequency))
 
     integrator = LangevinMiddleIntegrator(
         args.temperature * kelvin,
@@ -153,6 +165,7 @@ def main() -> None:
     print(f"Force field: {forcefield_path}")
     print(f"Atoms: {system.getNumParticles()}")
     print(f"Added topology bonds: {added_bonds}")
+    print(f"CustomNonbondedForce LRC enabled: {lrc_force_count}")
     print(f"Platform: {platform.getName()}")
     print(f"Steps: {args.steps}")
 

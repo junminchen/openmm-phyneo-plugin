@@ -1,0 +1,27 @@
+engine	term	energy_kj_mol
+dmff	ADMPPmeForce	-2619.088048277058
+dmff	HarmonicBondForce	ERROR: Indexer must have integer or boolean type, got indexer with type float64 at position 0, indexer value []
+dmff	HarmonicAngleForce	ERROR: Indexer must have integer or boolean type, got indexer with type float64 at position 0, indexer value []
+dmff	PeriodicTorsionForce	0.0
+dmff	ADMPDispPmeForce	-76.46033525453112
+dmff	SlaterExForce	54.86514671919744
+dmff	SlaterSrEsForce	-12.388232530572955
+dmff	SlaterSrPolForce	-2.307937114492021
+dmff	SlaterSrDispForce	-0.00016896485847348183
+dmff	SlaterDhfForce	-4.026418397952555
+dmff	QqTtDampingForce	-0.002208960886265482
+dmff	SlaterDampingForce	11.15776996453086
+openmm	0:PhyNEOForce	-2618.120932152564
+openmm	1:CustomBondForce	0.0
+openmm	2:HarmonicBondForce	256.3255329392261
+openmm	3:CustomAngleForce	0.0
+openmm	4:CustomTorsionForce	0.0
+openmm	5:CustomTorsionForce	0.0
+openmm	6:CustomTorsionForce	0.0
+openmm	7:PeriodicTorsionForce	268.43454569424154
+openmm	8:CustomNonbondedForce:slater_short	-28.290174478355375
+openmm	9:CustomNonbondedForce:pure_disp_lrc	-76.60928698480245
+openmm	10:CustomNonbondedForce:pure_disp_cancel	75.58812519389126
+openmm	11:CMMotionRemover	0.0
+openmm	12:HarmonicAngleForce	142.22574902552864
+openmm	total	-1980.4464407628345
