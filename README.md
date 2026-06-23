@@ -77,6 +77,17 @@ ctest --test-dir build --output-on-failure
 
 Use `-DPhyNEO_BUILD_CUDA_LIB=OFF` for CPU/reference-only builds. If your OpenMM package uses a specific libstdc++ ABI, pass `-DCMAKE_CXX_FLAGS="-D_GLIBCXX_USE_CXX11_ABI=0"` or `=1` to match it.
 
+> **Always rebuild the Python wrapper when `PhyNEOForce.h` changes.** The SWIG
+> wrapper (`_phyneoplugin*.so`) hard-codes `sizeof(PhyNEOForce)` from the header
+> it was generated against. If you change the class layout (e.g. add member
+> fields) and only rebuild the C++ library without re-running the
+> `PythonInstall` target, `new PhyNEOForce()` under-allocates and the
+> constructor writes past the allocation — corrupting the heap and aborting
+> intermittently with `malloc(): invalid size`. Rebuild everything together, or
+> just re-run `./install.sh` (or `cmake --build build --target PythonInstall`),
+> so the wrapper, the installed header, and `libPhyNEOPlugin.so` all come from
+> the same source.
+
 ### Development Checks
 
 Before opening a pull request, run at least:
