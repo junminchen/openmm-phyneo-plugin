@@ -258,7 +258,7 @@ extern "C" __global__ void computeInducedField(
 #ifdef USE_PERIODIC
                 APPLY_PERIODIC_TO_DELTA(delta)
 #endif
-                int atom2 = y*TILE_SIZE+j;
+                int atom2 = y*TILE_SIZE+tj;
                 if (atom1 < NUM_ATOMS && atom2 < NUM_ATOMS){
                     float p = pScaleFactors[atom1*NUM_ATOMS+atom2];
                     computeOneInteraction(data, localData[tbx+tj], delta, p, false);
